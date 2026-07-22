@@ -2,14 +2,19 @@ package com.unihub.exception;
 
 import com.unihub.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.Instant;
 import java.util.stream.Collectors;
@@ -20,6 +25,8 @@ import java.util.stream.Collectors;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(
@@ -147,9 +154,49 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
+    /**
+     * Spring's own web exceptions already carry the correct HTTP status through the
+     * {@link org.springframework.web.ErrorResponse} contract. The most common one here is
+     * {@link NoResourceFoundException}, thrown when a request hits an unmapped path (e.g.
+     * {@code GET /api/users} before that controller exists) — the catch-all below would otherwise
+     * flatten it to a misleading 500 instead of the real 404. The real status is preserved and the
+     * message stays a generic status phrase, so no internal detail leaks to the caller.
+     *
+     * <p>The parameter is typed to the shared {@code ErrorResponse} interface rather than a
+     * common superclass on purpose: {@code NoResourceFoundException} <em>implements</em>
+     * {@code ErrorResponse} but does <em>not</em> extend {@code ErrorResponseException}, so a
+     * handler typed to {@code ErrorResponseException} would fail to bind the no-resource case at
+     * runtime. Both concrete types are listed explicitly so the intent is clear.
+     */
+    @ExceptionHandler({NoResourceFoundException.class, ErrorResponseException.class})
+    public ResponseEntity<ErrorResponse> handleSpringWebException(
+            org.springframework.web.ErrorResponse ex, HttpServletRequest request) {
+        HttpStatusCode statusCode = ex.getStatusCode();
+        HttpStatus resolved = HttpStatus.resolve(statusCode.value());
+        String errorCode = resolved != null ? resolved.name() : "ERROR";
+        String message = resolved != null ? resolved.getReasonPhrase() : "Request could not be processed";
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                message,
+                statusCode.value(),
+                request.getRequestURI(),
+                Instant.now(),
+                errorCode);
+
+        return ResponseEntity.status(statusCode).body(errorResponse);
+    }
+
+    /**
+     * Last-resort catch-all for genuinely unexpected failures. The full stack trace is logged at
+     * ERROR level here — this is the only place a 500 originates, so without this log real server
+     * errors inside secured endpoints would be undiagnosable in production. The client still
+     * receives only the generic message: the exception detail is never placed in the response body.
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(
             Exception ex, HttpServletRequest request) {
+        log.error("Unhandled exception processing {} {}", request.getMethod(), request.getRequestURI(), ex);
+
         ErrorResponse errorResponse = new ErrorResponse(
                 "An unexpected error occurred",
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
