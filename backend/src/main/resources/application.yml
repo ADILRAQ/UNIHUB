@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: unihub-backend
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+server:
+  port: 8080
+
+app:
+  version: "@project.version@"

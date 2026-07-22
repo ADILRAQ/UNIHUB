@@ -1,0 +1,8 @@
+logging:
+  level:
+    root: WARN
+    com.unihub: INFO
+
+app:
+  cors:
+    allowed-origin: ${FRONTEND_URL}
