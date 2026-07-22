@@ -31,9 +31,14 @@ apiClient.interceptors.request.use((config) => {
  * Router's context (no `useNavigate`); a hard navigation also resets in-memory
  * app + query state, which is the desired outcome on a forced logout.
  *
- * - 401 (missing/invalid/expired token): clear the token and send the user to
- *   `/login`. Guarded so the login request's own 401 does not loop — the login
- *   page surfaces that error itself.
+ * - 401 caused by an actual token problem (missing/invalid/expired — the backend
+ *   sends `errorCode: 'UNAUTHENTICATED'`): clear the token and send the user to
+ *   `/login`.
+ * - 401 caused by WRONG CREDENTIALS on an auth endpoint (`errorCode:
+ *   'INVALID_CREDENTIALS'` — a bad password at login, or a mistyped current
+ *   password at change-password): NOT a session problem. The page surfaces the
+ *   error inline and the session is kept. Auto-logging out here would kick a user
+ *   back to login on every change-password typo.
  * - 403 with `errorCode === 'MUST_CHANGE_PASSWORD'`: the backend gates a flagged
  *   user out of every other endpoint; route them to the change-password screen.
  */
@@ -41,12 +46,14 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
-    const requestUrl: string = error.config?.url ?? '';
+    const errorCode: string | undefined = error.response?.data?.errorCode;
     const path = window.location.pathname;
 
-    const isLoginRequest = requestUrl.includes('/api/auth/login');
+    // Wrong-credentials 401s (login or change-password) are surfaced inline by the
+    // page and must never trigger a forced logout — only real token problems do.
+    const isBadCredentials = errorCode === 'INVALID_CREDENTIALS';
 
-    if (status === 401 && !isLoginRequest && path !== '/login') {
+    if (status === 401 && !isBadCredentials && path !== '/login') {
       clearToken();
       window.location.href = '/login';
     } else if (

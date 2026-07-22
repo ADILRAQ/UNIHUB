@@ -53,7 +53,8 @@ export interface JwtClaims {
   role: Role;
   mustChangePassword: boolean;
   exp: number;
-  iat: number;
+  /** Optional: present in tokens but not validated by `decodeToken`, so not guaranteed. */
+  iat?: number;
 }
 
 /**
