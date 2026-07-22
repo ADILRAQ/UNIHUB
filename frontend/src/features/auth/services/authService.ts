@@ -1,10 +1,10 @@
-import apiClient from '../../api/client';
-import type { AuthResponse, ChangePasswordRequest, LoginRequest } from './types';
+import apiClient from '../../../api/client';
+import type { AuthResponse, ChangePasswordRequest, LoginRequest } from '../types';
 
 /**
  * Thin service functions for the auth endpoints, following the same pattern as
- * `features/health/api.ts`. These are passed as the `serviceFn` to `usePostData`
- * in the page components — no ad-hoc fetching anywhere.
+ * `features/health/services/healthService.ts`. These are passed as the
+ * `serviceFn` to `usePostData` in the page logic hooks — no ad-hoc fetching.
  */
 
 export const login = (body: LoginRequest): Promise<AuthResponse> =>

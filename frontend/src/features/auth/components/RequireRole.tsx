@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from './AuthContext';
-import { homePathForRole } from './roleHome';
-import type { Role } from './types';
+import { useAuth } from '../AuthContext';
+import { homePathForRole } from '../roleHome';
+import type { Role } from '../types';
 
 interface RequireRoleProps {
   allowed: Role[];

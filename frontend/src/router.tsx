@@ -1,12 +1,12 @@
 import { createBrowserRouter, Outlet } from 'react-router-dom';
 import BaseLayout from './components/layout/BaseLayout';
 import { AuthProvider } from './features/auth/AuthContext';
-import RequireAuth from './features/auth/RequireAuth';
-import RequireRole from './features/auth/RequireRole';
-import LoginPage from './features/auth/LoginPage';
-import ChangePasswordPage from './features/auth/ChangePasswordPage';
-import DashboardPage from './features/dashboard/DashboardPage';
-import AdminPage from './features/admin/AdminPage';
+import RequireAuth from './features/auth/components/RequireAuth';
+import RequireRole from './features/auth/components/RequireRole';
+import LoginPage from './features/auth/pages/LoginPage';
+import ChangePasswordPage from './features/auth/pages/ChangePasswordPage';
+import DashboardPage from './features/dashboard/pages/DashboardPage';
+import AdminPage from './features/admin/pages/AdminPage';
 
 /**
  * Route tree.

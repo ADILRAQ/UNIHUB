@@ -39,13 +39,36 @@ fully dockerized, CI/CD with GitHub Actions → Render/Railway.
 - Secrets only via environment variables. Never log credentials or tokens.
 
 ### Frontend
-- React 18 + **TypeScript** + Vite. Feature folders: `src/features/<domain>/`.
-- One typed API client (axios, base URL from `VITE_API_URL`); JWT attached automatically
-  via request interceptor.
+- React 18 + **TypeScript** + Vite.
+- **Feature-folder architecture.** Each feature lives in `src/features/<domain>/` and is
+  organized into these sub-folders (create the ones a feature needs; not every feature has
+  every folder):
+  - `pages/` — the feature's page components (route targets). **Thin UI only.**
+  - `components/` — components used by this feature's pages.
+  - `services/` — functions that make this feature's API calls (call the shared client).
+  - `hooks/` — this feature's logic hooks (page logic, state, handlers, data wiring).
+  - `types/` — this feature's TypeScript types.
+  - Cross-cutting feature modules that don't fit the five folders (a React context provider,
+    a token-storage helper, a small domain constant) may sit at the feature root.
+- **Every page follows the logic-hook + UI split.** All of a page's logic — state,
+  handlers, mutations/queries, derived values, navigation — lives in a co-located hook
+  (`hooks/use<Page>.ts`). The page component calls that one hook and renders UI from the
+  props it returns; the page contains **no business logic**. Same split for non-page
+  components with real logic (a `use<Component>` hook + a presentational component).
+- **Shared, reused code lives at the frontend root, not duplicated per feature:**
+  `src/components/` (shared UI, e.g. layout), `src/hooks/` (shared hooks), `src/utils/`
+  (shared pure helpers), `src/api/` (the single client + cross-cutting API types).
+  **Reuse first:** before writing a component/hook/util/type, look for an existing one;
+  promote something to a shared folder the moment a second feature needs it. Do not
+  copy-paste logic between features.
+- One typed API client (axios, base URL from `VITE_API_URL`) in `src/api/client.ts`; JWT
+  attached automatically via request interceptor. Feature `services/` call this client —
+  never axios/fetch directly.
 - Data fetching via **TanStack Query** — never ad-hoc `useEffect`/`useState` fetching.
   Reusable generic hooks in `src/hooks/`: `useGetData` (wraps `useQuery`), `useGetPaginatedData`
   (wraps `useInfiniteQuery`), `usePostData` (wraps `useMutation`). All feature code composes
-  these instead of calling `useQuery`/`useMutation`/`useInfiniteQuery` directly.
+  these (inside its own logic hooks) instead of calling `useQuery`/`useMutation`/
+  `useInfiniteQuery` directly.
 - Role-based route guards; render only server-sanitized HTML.
 - ESLint + Prettier must pass (`npm run lint`).
 
