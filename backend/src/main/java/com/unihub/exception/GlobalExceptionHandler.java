@@ -29,9 +29,40 @@ public class GlobalExceptionHandler {
                 message.isBlank() ? "Validation failed" : message,
                 HttpStatus.BAD_REQUEST.value(),
                 request.getRequestURI(),
-                Instant.now());
+                Instant.now(),
+                "VALIDATION_ERROR");
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    /**
+     * Unknown email or wrong password — a single generic 401 for both so account
+     * existence cannot be probed.
+     */
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCredentials(
+            InvalidCredentialsException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.UNAUTHORIZED.value(),
+                request.getRequestURI(),
+                Instant.now(),
+                "INVALID_CREDENTIALS");
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
+    @ExceptionHandler(AccountDeactivatedException.class)
+    public ResponseEntity<ErrorResponse> handleAccountDeactivated(
+            AccountDeactivatedException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.UNAUTHORIZED.value(),
+                request.getRequestURI(),
+                Instant.now(),
+                "ACCOUNT_DEACTIVATED");
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)
@@ -41,7 +72,8 @@ public class GlobalExceptionHandler {
                 "An unexpected error occurred",
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 request.getRequestURI(),
-                Instant.now());
+                Instant.now(),
+                "INTERNAL_ERROR");
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }

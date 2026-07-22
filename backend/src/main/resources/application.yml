@@ -20,3 +20,13 @@ server:
 
 app:
   version: "@project.version@"
+  jwt:
+    # No default — a missing JWT_SECRET fails startup (same fail-fast as DB creds).
+    # Must be at least 32 chars (256 bits) for HMAC-SHA256.
+    secret: ${JWT_SECRET}
+    expiration-hours: ${JWT_EXPIRATION_HOURS:16}
+  admin:
+    # Blank defaults: if unset, AdminSeeder logs a warning and skips (won't crash boot).
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}
+    full-name: ${ADMIN_FULL_NAME:}
