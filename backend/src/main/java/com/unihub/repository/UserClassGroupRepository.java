@@ -13,4 +13,6 @@ public interface UserClassGroupRepository extends JpaRepository<UserClassGroup, 
     List<UserClassGroup> findByUser_IdAndUser_Role(Long userId, UserRole role);
 
     boolean existsByUser_IdAndClassGroup_Id(Long userId, Long classGroupId);
+
+    long countByClassGroup_Id(Long classGroupId);
 }
