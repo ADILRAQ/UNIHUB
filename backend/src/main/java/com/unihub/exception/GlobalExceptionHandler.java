@@ -4,10 +4,12 @@ import com.unihub.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 import java.util.stream.Collectors;
@@ -123,6 +125,26 @@ public class GlobalExceptionHandler {
                 "ACCESS_DENIED");
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
+    /**
+     * Malformed request bodies (unparseable JSON, or an unknown enum value that fails
+     * deserialization) and query/path params that can't be coerced to their target type
+     * (e.g. {@code ?role=WIZARD}) are <em>client</em> errors — return 400, not the 500 the
+     * catch-all below would otherwise produce. The message stays generic so internal parser
+     * details and type names aren't leaked to the caller.
+     */
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<ErrorResponse> handleMalformedRequest(
+            Exception ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "Malformed or invalid request",
+                HttpStatus.BAD_REQUEST.value(),
+                request.getRequestURI(),
+                Instant.now(),
+                "BAD_REQUEST");
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)
