@@ -1,6 +1,7 @@
 package com.unihub.config;
 
 import com.unihub.security.JwtAuthenticationConverter;
+import com.unihub.security.MustChangePasswordFilter;
 import com.unihub.security.RestAccessDeniedHandler;
 import com.unihub.security.RestAuthenticationEntryPoint;
 import java.nio.charset.StandardCharsets;
@@ -20,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -78,7 +80,8 @@ public class SecurityConfig {
             JwtDecoder jwtDecoder,
             JwtAuthenticationConverter jwtAuthenticationConverter,
             RestAuthenticationEntryPoint authenticationEntryPoint,
-            RestAccessDeniedHandler accessDeniedHandler) throws Exception {
+            RestAccessDeniedHandler accessDeniedHandler,
+            MustChangePasswordFilter mustChangePasswordFilter) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 // Stateless Bearer-token API with no cookie-based session, so there is no
@@ -100,7 +103,11 @@ public class SecurityConfig {
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter)))
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)
-                        .accessDeniedHandler(accessDeniedHandler));
+                        .accessDeniedHandler(accessDeniedHandler))
+                // Runs right after the Bearer token has been validated and the principal set,
+                // so the must-change-password gate reads a populated principal and fires
+                // before any controller/method-security is reached.
+                .addFilterAfter(mustChangePasswordFilter, BearerTokenAuthenticationFilter.class);
         return http.build();
     }
 }
