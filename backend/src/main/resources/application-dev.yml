@@ -1,0 +1,7 @@
+logging:
+  level:
+    com.unihub: DEBUG
+
+app:
+  cors:
+    allowed-origin: http://localhost:5173
