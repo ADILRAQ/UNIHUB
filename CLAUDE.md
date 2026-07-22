@@ -40,7 +40,12 @@ fully dockerized, CI/CD with GitHub Actions → Render/Railway.
 
 ### Frontend
 - React 18 + **TypeScript** + Vite. Feature folders: `src/features/<domain>/`.
-- One typed API client (base URL from `VITE_API_URL`); JWT attached automatically.
+- One typed API client (axios, base URL from `VITE_API_URL`); JWT attached automatically
+  via request interceptor.
+- Data fetching via **TanStack Query** — never ad-hoc `useEffect`/`useState` fetching.
+  Reusable generic hooks in `src/hooks/`: `useGetData` (wraps `useQuery`), `useGetPaginatedData`
+  (wraps `useInfiniteQuery`), `usePostData` (wraps `useMutation`). All feature code composes
+  these instead of calling `useQuery`/`useMutation`/`useInfiniteQuery` directly.
 - Role-based route guards; render only server-sanitized HTML.
 - ESLint + Prettier must pass (`npm run lint`).
 
