@@ -1,4 +1,4 @@
-import type { JwtClaims } from './types';
+import type { JwtClaims } from '../features/auth/types';
 
 /**
  * Decodes a JWT payload client-side (base64url of the middle segment) without

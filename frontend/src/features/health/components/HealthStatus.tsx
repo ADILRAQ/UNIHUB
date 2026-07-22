@@ -1,18 +1,13 @@
-import useGetData from '../../hooks/useGetData';
-import { getHealth } from './api';
-import type { HealthResponse } from '../../api/types';
+import useHealthStatus from '../hooks/useHealthStatus';
 
 /**
  * Displays live API health on the home page. Every async view in the app
  * must render loading / empty / error states — never a blank screen while
- * data is in flight or unavailable (CLAUDE.md "Hard rules").
+ * data is in flight or unavailable (CLAUDE.md "Hard rules"). All logic lives
+ * in `useHealthStatus`; this component only renders the three states.
  */
 const HealthStatus = () => {
-  const { data, isLoading, isError } = useGetData<HealthResponse, string, HealthResponse>({
-    queryKey: ['health'],
-    queryFn: getHealth,
-    transformFn: (health) => health,
-  });
+  const { data, isLoading, isError, apiUrl } = useHealthStatus();
 
   if (isLoading) {
     return (
@@ -26,8 +21,8 @@ const HealthStatus = () => {
     return (
       <div className="health-status health-status--error" role="alert">
         <strong>API unreachable.</strong> Could not reach the backend at{' '}
-        <code>{import.meta.env.VITE_API_URL}</code>. Start the backend with{' '}
-        <code>docker compose up</code> and reload.
+        <code>{apiUrl}</code>. Start the backend with <code>docker compose up</code> and
+        reload.
       </div>
     );
   }

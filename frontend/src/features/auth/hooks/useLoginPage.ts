@@ -2,11 +2,12 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isAxiosError } from 'axios';
-import usePostData from '../../hooks/usePostData';
-import { useAuth } from './AuthContext';
-import { login as loginRequest } from './api';
-import { homePathForRole } from './roleHome';
-import type { ApiErrorBody, AuthResponse, LoginRequest } from './types';
+import usePostData from '../../../hooks/usePostData';
+import { useAuth } from '../AuthContext';
+import { login as loginRequest } from '../services/authService';
+import { homePathForRole } from '../roleHome';
+import type { AuthResponse, LoginRequest } from '../types';
+import type { ApiErrorBody } from '../../../api/types';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -29,7 +30,24 @@ const messageForError = (error: unknown): string => {
   return 'Could not reach the server. Check your connection and try again.';
 };
 
-const LoginPage = () => {
+export interface UseLoginPage {
+  email: string;
+  password: string;
+  fieldError: string | null;
+  serverError: string | null;
+  isPending: boolean;
+  onEmailChange: (value: string) => void;
+  onPasswordChange: (value: string) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+}
+
+/**
+ * All logic for the login page: form state, client-side validation, the login
+ * mutation via the generic `usePostData`, error mapping, and success navigation
+ * (forced change-password when flagged, otherwise the role home). The page
+ * component renders purely from what this returns.
+ */
+const useLoginPage = (): UseLoginPage => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -51,7 +69,7 @@ const LoginPage = () => {
     onErrorFn: (error) => setServerError(messageForError(error)),
   });
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setServerError(null);
 
@@ -69,54 +87,16 @@ const LoginPage = () => {
     mutate({ email: trimmedEmail, password });
   };
 
-  return (
-    <main className="auth-screen">
-      <form className="auth-card" onSubmit={handleSubmit} noValidate>
-        <h1 className="auth-card__title">Sign in to UniHub</h1>
-
-        <label className="auth-field">
-          <span>Email</span>
-          <input
-            type="email"
-            name="email"
-            autoComplete="username"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            disabled={isPending}
-            required
-          />
-        </label>
-
-        <label className="auth-field">
-          <span>Password</span>
-          <input
-            type="password"
-            name="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            disabled={isPending}
-            required
-          />
-        </label>
-
-        {fieldError && (
-          <p className="auth-error" role="alert">
-            {fieldError}
-          </p>
-        )}
-        {serverError && (
-          <p className="auth-error" role="alert">
-            {serverError}
-          </p>
-        )}
-
-        <button type="submit" className="auth-button" disabled={isPending}>
-          {isPending ? 'Signing in...' : 'Sign in'}
-        </button>
-      </form>
-    </main>
-  );
+  return {
+    email,
+    password,
+    fieldError,
+    serverError,
+    isPending,
+    onEmailChange: setEmail,
+    onPasswordChange: setPassword,
+    onSubmit,
+  };
 };
 
-export default LoginPage;
+export default useLoginPage;

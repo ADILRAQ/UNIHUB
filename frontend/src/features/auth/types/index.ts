@@ -56,15 +56,3 @@ export interface JwtClaims {
   /** Optional: present in tokens but not validated by `decodeToken`, so not guaranteed. */
   iat?: number;
 }
-
-/**
- * Backend error body shape (matches `GlobalExceptionHandler`'s `ErrorResponse`).
- * `errorCode` lets the client branch without parsing human-readable text.
- */
-export interface ApiErrorBody {
-  message: string;
-  status: number;
-  path: string;
-  timestamp: string;
-  errorCode?: string;
-}
