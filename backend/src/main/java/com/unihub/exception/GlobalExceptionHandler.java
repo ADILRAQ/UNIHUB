@@ -7,9 +7,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.time.Instant;
 import java.util.stream.Collectors;
@@ -133,8 +136,13 @@ public class GlobalExceptionHandler {
      * (e.g. {@code ?role=WIZARD}) are <em>client</em> errors — return 400, not the 500 the
      * catch-all below would otherwise produce. The message stays generic so internal parser
      * details and type names aren't leaked to the caller.
+     *
+     * <p>Also covers a missing required query param or a missing multipart part (e.g. the
+     * CSV {@code file} in a bulk import request) — both are caller mistakes, so 400 rather
+     * than the catch-all 500.
      */
-    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class, MissingServletRequestPartException.class})
     public ResponseEntity<ErrorResponse> handleMalformedRequest(
             Exception ex, HttpServletRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
@@ -145,6 +153,24 @@ public class GlobalExceptionHandler {
                 "BAD_REQUEST");
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    /**
+     * An upload larger than the configured {@code spring.servlet.multipart} limits (e.g. a
+     * bulk-import CSV that is too big). Return a clean 413 rather than the catch-all 500 —
+     * the caller can act on it by splitting the file.
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSize(
+            MaxUploadSizeExceededException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "Uploaded file is too large",
+                HttpStatus.PAYLOAD_TOO_LARGE.value(),
+                request.getRequestURI(),
+                Instant.now(),
+                "PAYLOAD_TOO_LARGE");
+
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)
