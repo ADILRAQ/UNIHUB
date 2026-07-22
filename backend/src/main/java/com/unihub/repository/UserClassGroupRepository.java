@@ -30,4 +30,19 @@ public interface UserClassGroupRepository extends JpaRepository<UserClassGroup, 
             + "where ucg.user.id = :teacherId and ucg.user.role = :role")
     List<Long> findOwnedGroupIds(@Param("teacherId") Long teacherId,
                                  @Param("role") UserRole role);
+
+    /**
+     * Whether the given teacher owns a class group that the given user is a
+     * {@code STUDENT} member of — the "does this teacher manage this student" check behind
+     * the teacher-scoped password-reset {@code @PreAuthorize}. The role conditions are baked
+     * into the query so it answers a teacher↔student relationship specifically: a co-teacher
+     * or admin sharing the same group is not a match, and only a {@code TEACHER}-role owning
+     * membership counts as ownership.
+     */
+    @Query("select count(sm) > 0 from UserClassGroup tm, UserClassGroup sm "
+            + "where tm.user.id = :teacherId and tm.user.role = com.unihub.model.UserRole.TEACHER "
+            + "and sm.user.id = :studentId and sm.user.role = com.unihub.model.UserRole.STUDENT "
+            + "and tm.classGroup.id = sm.classGroup.id")
+    boolean teacherSharesGroupWithStudent(@Param("teacherId") Long teacherId,
+                                          @Param("studentId") Long studentId);
 }

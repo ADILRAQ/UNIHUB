@@ -1,6 +1,7 @@
 package com.unihub.service;
 
 import com.unihub.dto.PagedResponse;
+import com.unihub.dto.TempPasswordResponse;
 import com.unihub.dto.UserDetailDto;
 import com.unihub.dto.UserSummaryDto;
 import com.unihub.exception.BadRequestException;
@@ -13,10 +14,13 @@ import com.unihub.model.UserStatus;
 import com.unihub.repository.UserClassGroupRepository;
 import com.unihub.repository.UserRepository;
 import com.unihub.repository.spec.UserSpecifications;
+import com.unihub.security.TempPasswordGenerator;
+import com.unihub.security.TempPasswordPolicy;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,11 +34,17 @@ public class UserAdminService {
 
     private final UserRepository userRepository;
     private final UserClassGroupRepository userClassGroupRepository;
+    private final TempPasswordGenerator tempPasswordGenerator;
+    private final PasswordEncoder passwordEncoder;
 
     public UserAdminService(UserRepository userRepository,
-                            UserClassGroupRepository userClassGroupRepository) {
+                            UserClassGroupRepository userClassGroupRepository,
+                            TempPasswordGenerator tempPasswordGenerator,
+                            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userClassGroupRepository = userClassGroupRepository;
+        this.tempPasswordGenerator = tempPasswordGenerator;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -81,5 +91,26 @@ public class UserAdminService {
         user.setStatus(status);
         User saved = userRepository.save(user);
         return AdminMapper.toSummary(saved);
+    }
+
+    /**
+     * Regenerates a fresh temporary password for the target user, re-arming the forced-change
+     * gate and a new {@value TempPasswordPolicy#VALIDITY_DAYS}-day expiry window. Authorization
+     * (admin, or a teacher who manages the target student) is enforced at the controller via
+     * {@code @PreAuthorize}. The plaintext password is returned once for the admin to hand off
+     * and is never logged or persisted in the clear — only its BCrypt hash is stored.
+     */
+    @Transactional
+    public TempPasswordResponse resetPassword(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User " + id + " not found"));
+
+        String tempPassword = tempPasswordGenerator.generate();
+        user.setPasswordHash(passwordEncoder.encode(tempPassword));
+        user.setMustChangePassword(true);
+        user.setTempPasswordExpiresAt(TempPasswordPolicy.expiryFromNow());
+        userRepository.save(user);
+
+        return new TempPasswordResponse(user.getEmail(), tempPassword);
     }
 }
