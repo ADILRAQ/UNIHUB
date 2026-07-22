@@ -19,14 +19,15 @@ public interface UserClassGroupRepository extends JpaRepository<UserClassGroup, 
     long countByClassGroup_Id(Long classGroupId);
 
     /**
-     * The names of the class groups a teacher owns (their {@code TEACHER}-role membership
-     * rows) — that teacher's import-rights grant. A projection query is used deliberately:
-     * the caller (CSV import) runs outside an open persistence session, so navigating the
-     * lazy {@code classGroup} association off the entity would fail; selecting the name
-     * directly sidesteps lazy loading entirely.
+     * The ids of the class groups a teacher owns (their {@code TEACHER}-role membership
+     * rows) — that teacher's import-rights grant, used by CSV import to scope which groups
+     * they may import into. A projection query is used deliberately: the caller runs outside
+     * an open persistence session, so navigating the lazy {@code classGroup} association off
+     * the entity would fail; selecting the id directly sidesteps lazy loading. Ids (not
+     * names) are returned so scoping keys on group identity, immune to case-variant names.
      */
-    @Query("select ucg.classGroup.name from UserClassGroup ucg "
+    @Query("select ucg.classGroup.id from UserClassGroup ucg "
             + "where ucg.user.id = :teacherId and ucg.user.role = :role")
-    List<String> findOwnedGroupNames(@Param("teacherId") Long teacherId,
-                                     @Param("role") UserRole role);
+    List<Long> findOwnedGroupIds(@Param("teacherId") Long teacherId,
+                                 @Param("role") UserRole role);
 }

@@ -11,6 +11,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.time.Instant;
@@ -152,6 +153,24 @@ public class GlobalExceptionHandler {
                 "BAD_REQUEST");
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    /**
+     * An upload larger than the configured {@code spring.servlet.multipart} limits (e.g. a
+     * bulk-import CSV that is too big). Return a clean 413 rather than the catch-all 500 —
+     * the caller can act on it by splitting the file.
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSize(
+            MaxUploadSizeExceededException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "Uploaded file is too large",
+                HttpStatus.PAYLOAD_TOO_LARGE.value(),
+                request.getRequestURI(),
+                Instant.now(),
+                "PAYLOAD_TOO_LARGE");
+
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)

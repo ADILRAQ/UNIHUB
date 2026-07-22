@@ -60,7 +60,7 @@ public class AdminSeeder implements ApplicationRunner {
             return;
         }
 
-        if (userRepository.existsByEmail(adminEmail)) {
+        if (userRepository.existsByEmailIgnoreCase(adminEmail)) {
             log.info("Admin seed skipped: an account already exists for {} (password left untouched).",
                     adminEmail);
             return;

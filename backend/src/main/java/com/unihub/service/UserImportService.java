@@ -23,7 +23,6 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -83,13 +82,14 @@ public class UserImportService {
         boolean isTeacher = UserRole.TEACHER.name().equals(caller.role());
 
         // Whole-request 403: a teacher who owns no groups has no possible valid target row.
-        Set<String> teacherOwnedGroups = null;
+        // Scoping keys on class-group IDs (not names): the permission decision is made
+        // against the same resolved group that will actually be written, so a case-variant
+        // group name (e.g. "math" vs an owned "Math") can never dodge the check.
+        Set<Long> teacherOwnedGroupIds = null;
         if (isTeacher) {
-            teacherOwnedGroups = userClassGroupRepository
-                    .findOwnedGroupNames(caller.userId(), UserRole.TEACHER).stream()
-                    .map(UserImportService::normalizeGroup)
-                    .collect(Collectors.toCollection(HashSet::new));
-            if (teacherOwnedGroups.isEmpty()) {
+            teacherOwnedGroupIds = new HashSet<>(
+                    userClassGroupRepository.findOwnedGroupIds(caller.userId(), UserRole.TEACHER));
+            if (teacherOwnedGroupIds.isEmpty()) {
                 throw new AccessDeniedException(
                         "You are not assigned to any class group and cannot import users.");
             }
@@ -104,14 +104,14 @@ public class UserImportService {
         Set<String> seenEmails = new HashSet<>();
 
         for (CSVRecord record : records) {
-            processRow(record, caller, isTeacher, teacherOwnedGroups, seenEmails, created, errors);
+            processRow(record, isTeacher, teacherOwnedGroupIds, seenEmails, created, errors);
         }
 
         return new ImportResultResponse(created.size(), errors.size(), created, errors);
     }
 
-    private void processRow(CSVRecord record, AuthenticatedUser caller, boolean isTeacher,
-                            Set<String> teacherOwnedGroups, Set<String> seenEmails,
+    private void processRow(CSVRecord record, boolean isTeacher,
+                            Set<Long> teacherOwnedGroupIds, Set<String> seenEmails,
                             List<CreatedUserDto> created, List<ImportErrorDto> errors) {
         long line = record.getRecordNumber();
         String name = get(record, "name");
@@ -148,41 +148,47 @@ public class UserImportService {
             return;
         }
 
-        // 2. Permission scoping (teacher only; admin may import any role into any group).
-        if (isTeacher) {
-            if (role != UserRole.STUDENT) {
-                errors.add(new ImportErrorDto(line, email, "teachers can only import students"));
-                return;
-            }
-            if (!teacherOwnedGroups.contains(normalizeGroup(groupName))) {
-                errors.add(new ImportErrorDto(line, email,
-                        "not permitted to import into '" + groupName + "'"));
-                return;
-            }
+        // 2. Teacher role restriction (teachers may only create students). Group-independent,
+        //    so it is checked before group resolution.
+        if (isTeacher && role != UserRole.STUDENT) {
+            errors.add(new ImportErrorDto(line, email, "teachers can only import students"));
+            return;
         }
 
-        // 3. Group existence — never auto-create (pre-existing groups are required).
+        // 3. Group existence — resolve FIRST, never auto-create (pre-existing groups required).
         Optional<ClassGroup> group = classGroupRepository.findByName(groupName);
         if (group.isEmpty()) {
             errors.add(new ImportErrorDto(line, email, "unknown class group '" + groupName + "'"));
             return;
         }
+        ClassGroup resolvedGroup = group.get();
 
-        // 4. Duplicate check: against this batch and against the database.
+        // 4. Teacher group scoping — checked against the RESOLVED group's id, so the
+        //    permission decision and the group actually written are the same group (a
+        //    case-variant name cannot resolve to a group the teacher doesn't own).
+        if (isTeacher && !teacherOwnedGroupIds.contains(resolvedGroup.getId())) {
+            errors.add(new ImportErrorDto(line, email,
+                    "not permitted to import into '" + groupName + "'"));
+            return;
+        }
+
+        // 5. Duplicate check: against this batch and against the database. Both are
+        //    case-insensitive because the email unique index is case-sensitive, so a
+        //    case variant of an existing address must still be rejected as a duplicate.
         String emailKey = email.toLowerCase(Locale.ROOT);
         if (!seenEmails.add(emailKey)) {
             errors.add(new ImportErrorDto(line, email, "duplicate email"));
             return;
         }
-        if (userRepository.existsByEmail(email)) {
+        if (userRepository.existsByEmailIgnoreCase(email)) {
             errors.add(new ImportErrorDto(line, email, "duplicate email"));
             return;
         }
 
-        // 5. Create (own transaction). Temp password appears once, in the response only.
+        // 6. Create (own transaction). Temp password appears once, in the response only.
         String tempPassword = tempPasswordGenerator.generate();
         try {
-            persistenceService.createAccount(email, name, role, group.get(), tempPassword);
+            persistenceService.createAccount(email, name, role, resolvedGroup, tempPassword);
         } catch (DataIntegrityViolationException ex) {
             // Lost a race on the unique-email constraint after the pre-check — report as a
             // per-row duplicate rather than failing the whole import.
@@ -191,7 +197,7 @@ public class UserImportService {
             return;
         }
 
-        created.add(new CreatedUserDto(email, name, role.name(), group.get().getName(), tempPassword));
+        created.add(new CreatedUserDto(email, name, role.name(), resolvedGroup.getName(), tempPassword));
     }
 
     private List<CSVRecord> parseRecords(MultipartFile file) {
@@ -230,10 +236,6 @@ public class UserImportService {
         } catch (IllegalArgumentException ex) {
             return null;
         }
-    }
-
-    private static String normalizeGroup(String name) {
-        return name == null ? "" : name.trim().toLowerCase(Locale.ROOT);
     }
 
     private static boolean isBlank(String s) {
