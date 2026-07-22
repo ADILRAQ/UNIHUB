@@ -51,7 +51,7 @@ public class AuthService {
         // run a BCrypt comparison against a dummy hash so both paths take equal time — a
         // byte-identical response body isn't enough on its own; response timing would leak
         // account existence otherwise.
-        User user = userRepository.findByEmail(email).orElse(null);
+        User user = userRepository.findByEmailIgnoreCase(email).orElse(null);
         String hashToCheck = user != null ? user.getPasswordHash() : dummyHash;
         boolean passwordMatches = passwordEncoder.matches(rawPassword, hashToCheck);
         if (user == null || !passwordMatches) {

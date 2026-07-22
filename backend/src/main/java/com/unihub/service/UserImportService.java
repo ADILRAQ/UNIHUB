@@ -173,8 +173,9 @@ public class UserImportService {
         }
 
         // 5. Duplicate check: against this batch and against the database. Both are
-        //    case-insensitive because the email unique index is case-sensitive, so a
-        //    case variant of an existing address must still be rejected as a duplicate.
+        //    case-insensitive so a case variant of an existing address is rejected with a
+        //    friendly per-row error rather than surfacing as a raw DB unique-violation. The
+        //    users_email_lower_key index (V5) is the authoritative case-insensitive backstop.
         String emailKey = email.toLowerCase(Locale.ROOT);
         if (!seenEmails.add(emailKey)) {
             errors.add(new ImportErrorDto(line, email, "duplicate email"));
@@ -190,7 +191,7 @@ public class UserImportService {
         try {
             persistenceService.createAccount(email, name, role, resolvedGroup, tempPassword);
         } catch (DataIntegrityViolationException ex) {
-            // Lost a race on the unique-email constraint after the pre-check — report as a
+            // Lost a race on the unique-email index after the pre-check — report as a
             // per-row duplicate rather than failing the whole import.
             seenEmails.remove(emailKey);
             errors.add(new ImportErrorDto(line, email, "duplicate email"));
