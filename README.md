@@ -56,6 +56,12 @@ upload/storage stories.
    cp .env.example .env
    ```
 
+   `POSTGRES_*` and `MINIO_*` are freely adjustable here. `VITE_API_URL` is **not**
+   currently wired into the `frontend` container — `docker-compose.yml` hardcodes it to
+   `http://localhost:8080` — so editing it in the root `.env` has no effect on the
+   Docker path. It only takes effect via `frontend/.env` when running the frontend
+   outside Docker (see the non-Docker alternative below).
+
 3. Start the stack (add `--build` the first time, or whenever a Dockerfile changes):
 
    ```bash
