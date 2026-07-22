@@ -2,9 +2,9 @@ import axios from 'axios';
 import { clearToken, getToken } from '../features/auth/tokenStorage';
 
 /**
- * Single typed HTTP client for the whole app. Every feature-level API module
- * (e.g. `features/health/api.ts`) must go through this instance instead of
- * calling axios/fetch directly.
+ * Single typed HTTP client for the whole app. Every feature service module
+ * (e.g. `features/health/services/healthService.ts`) must go through this
+ * instance instead of calling axios/fetch directly.
  */
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL,

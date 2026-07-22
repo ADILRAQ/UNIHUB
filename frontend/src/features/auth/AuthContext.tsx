@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useMemo, useState } from 'react
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { clearToken, getToken, setToken } from './tokenStorage';
-import { decodeToken, isExpired } from '../../utils/jwt';
+import { decodeToken, isExpired } from './jwt';
 import type { AuthResponse, AuthUser } from './types';
 
 /**
