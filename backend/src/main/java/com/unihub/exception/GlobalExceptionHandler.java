@@ -71,6 +71,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
+    /**
+     * A forced temporary password whose expiry has lapsed — a hard login block. Only reached
+     * after a successful password match, so it is safe to be specific and point the caller to
+     * an administrator.
+     */
+    @ExceptionHandler(TempPasswordExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleTempPasswordExpired(
+            TempPasswordExpiredException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.UNAUTHORIZED.value(),
+                request.getRequestURI(),
+                Instant.now(),
+                "TEMP_PASSWORD_EXPIRED");
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(
             ResourceNotFoundException ex, HttpServletRequest request) {

@@ -7,7 +7,7 @@ import com.unihub.model.UserRole;
 import com.unihub.model.UserStatus;
 import com.unihub.repository.UserClassGroupRepository;
 import com.unihub.repository.UserRepository;
-import java.time.Instant;
+import com.unihub.security.TempPasswordPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -32,8 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class UserImportPersistenceService {
-
-    private static final int TEMP_PASSWORD_VALIDITY_DAYS = 7;
 
     private final UserRepository userRepository;
     private final UserClassGroupRepository userClassGroupRepository;
@@ -63,8 +61,7 @@ public class UserImportPersistenceService {
         user.setRole(role);
         user.setStatus(UserStatus.ACTIVE);
         user.setMustChangePassword(true);
-        user.setTempPasswordExpiresAt(
-                Instant.now().plusSeconds(TEMP_PASSWORD_VALIDITY_DAYS * 24L * 60L * 60L));
+        user.setTempPasswordExpiresAt(TempPasswordPolicy.expiryFromNow());
         user.setPasswordHash(passwordEncoder.encode(plaintextTempPassword));
 
         User saved = userRepository.save(user);
