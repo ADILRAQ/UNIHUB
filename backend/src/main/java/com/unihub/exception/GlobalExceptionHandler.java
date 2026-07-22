@@ -7,9 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.time.Instant;
 import java.util.stream.Collectors;
@@ -133,8 +135,13 @@ public class GlobalExceptionHandler {
      * (e.g. {@code ?role=WIZARD}) are <em>client</em> errors — return 400, not the 500 the
      * catch-all below would otherwise produce. The message stays generic so internal parser
      * details and type names aren't leaked to the caller.
+     *
+     * <p>Also covers a missing required query param or a missing multipart part (e.g. the
+     * CSV {@code file} in a bulk import request) — both are caller mistakes, so 400 rather
+     * than the catch-all 500.
      */
-    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class, MissingServletRequestPartException.class})
     public ResponseEntity<ErrorResponse> handleMalformedRequest(
             Exception ex, HttpServletRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
