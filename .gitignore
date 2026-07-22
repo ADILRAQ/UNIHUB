@@ -1,0 +1,27 @@
+# ---- Java / Maven (backend/) ----
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# ---- Node (frontend/) ----
+node_modules/
+dist/
+.vite/
+*.local
+
+# ---- IDE ----
+.idea/
+*.iml
+.vscode/*
+
+# ---- OS ----
+.DS_Store
+
+# ---- Env files (secrets) ----
+.env
+.env.*.local
+!.env.example
+
+# ---- Project-local Claude settings (per-user, not shared) ----
+.claude/settings.local.json
