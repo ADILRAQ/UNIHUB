@@ -2,6 +2,7 @@ package com.unihub.repository;
 
 import com.unihub.model.Announcement;
 import java.util.Collection;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -87,4 +88,31 @@ public interface AnnouncementRepository extends JpaRepository<Announcement, Long
 
     @Query("SELECT COUNT(c) FROM AnnouncementComment c WHERE c.announcement.id = :announcementId")
     int countCommentsByAnnouncementId(@Param("announcementId") Long announcementId);
+
+    // -------------------------------------------------------------------------
+    // Unread-count helpers: projection queries returning IDs only (UNIH-25)
+    // -------------------------------------------------------------------------
+
+    /**
+     * All announcement IDs — used by admins (who can see everything) for the
+     * unread-count computation.
+     */
+    @Query("SELECT a.id FROM Announcement a")
+    List<Long> findAllIds();
+
+    /**
+     * IDs of announcements that are either department-wide ({@code classGroup IS NULL})
+     * or targeted at one of the caller's groups — the visibility scope for students
+     * and teachers who belong to at least one group.
+     */
+    @Query("SELECT a.id FROM Announcement a "
+            + "WHERE a.classGroup IS NULL OR a.classGroup.id IN :groupIds")
+    List<Long> findVisibleIdsByGroupIds(@Param("groupIds") Collection<Long> groupIds);
+
+    /**
+     * IDs of department-wide announcements only — used when the caller belongs to
+     * no class group (visibility reduces to dept-wide only in that case).
+     */
+    @Query("SELECT a.id FROM Announcement a WHERE a.classGroup IS NULL")
+    List<Long> findDeptWideIds();
 }
