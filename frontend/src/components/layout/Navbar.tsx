@@ -15,13 +15,21 @@ const Navbar = () => {
       <Link to="/" className="navbar__title">
         UniHub
       </Link>
-      {user?.role === 'ADMIN' && (
-        <nav className="navbar__nav" aria-label="Admin navigation">
+      <nav className="navbar__nav" aria-label="Main navigation">
+        <Link to="/schedule" className="navbar__link">
+          Calendar
+        </Link>
+        {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
+          <Link to="/timetable" className="navbar__link">
+            Timetable
+          </Link>
+        )}
+        {user?.role === 'ADMIN' && (
           <Link to="/admin" className="navbar__link">
             Admin console
           </Link>
-        </nav>
-      )}
+        )}
+      </nav>
       {user && (
         <div className="navbar__user">
           <span className="navbar__identity">

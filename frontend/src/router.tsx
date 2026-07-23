@@ -7,6 +7,8 @@ import LoginPage from './features/auth/pages/LoginPage';
 import ChangePasswordPage from './features/auth/pages/ChangePasswordPage';
 import DashboardPage from './features/dashboard/pages/DashboardPage';
 import AdminPage from './features/admin/pages/AdminPage';
+import CalendarPage from './features/schedule/pages/CalendarPage';
+import TimetablePage from './features/schedule/pages/TimetablePage';
 
 /**
  * Route tree.
@@ -34,9 +36,14 @@ const router = createBrowserRouter([
             element: <BaseLayout />,
             children: [
               { index: true, element: <DashboardPage /> },
+              { path: 'schedule', element: <CalendarPage /> },
               {
                 element: <RequireRole allowed={['ADMIN']} />,
                 children: [{ path: 'admin', element: <AdminPage /> }],
+              },
+              {
+                element: <RequireRole allowed={['TEACHER', 'ADMIN']} />,
+                children: [{ path: 'timetable', element: <TimetablePage /> }],
               },
             ],
           },
