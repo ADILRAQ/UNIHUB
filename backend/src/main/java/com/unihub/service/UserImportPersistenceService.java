@@ -47,9 +47,15 @@ public class UserImportPersistenceService {
 
     /**
      * Creates an ACTIVE account with a forced first-login password change and a 7-day temp
-     * password window, then links it to its class group. The plaintext temp password is
-     * BCrypt-hashed here and never stored in the clear.
+     * password window, then (when a group is given) links it to that class group. The
+     * plaintext temp password is BCrypt-hashed here and never stored in the clear.
      *
+     * <p>CSV bulk import always passes a resolved group, so a membership row is always written
+     * on that path. The single-user admin create may pass {@code null} — an ADMIN provisioning
+     * a user who has no cohort yet — in which case only the {@code User} row is written and no
+     * membership is created.
+     *
+     * @param classGroup the group to enroll the user into, or {@code null} for no membership
      * @param plaintextTempPassword the caller-generated temp password (hashed, not stored raw)
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -65,6 +71,8 @@ public class UserImportPersistenceService {
         user.setPasswordHash(passwordEncoder.encode(plaintextTempPassword));
 
         User saved = userRepository.save(user);
-        userClassGroupRepository.save(new UserClassGroup(saved, classGroup));
+        if (classGroup != null) {
+            userClassGroupRepository.save(new UserClassGroup(saved, classGroup));
+        }
     }
 }

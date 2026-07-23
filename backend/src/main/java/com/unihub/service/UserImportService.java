@@ -4,14 +4,12 @@ import com.unihub.dto.CreatedUserDto;
 import com.unihub.dto.ImportErrorDto;
 import com.unihub.dto.ImportResultResponse;
 import com.unihub.exception.BadRequestException;
+import com.unihub.exception.ConflictException;
 import com.unihub.model.ClassGroup;
-import com.unihub.model.UserClassGroup;
 import com.unihub.model.UserRole;
 import com.unihub.repository.ClassGroupRepository;
 import com.unihub.repository.UserClassGroupRepository;
-import com.unihub.repository.UserRepository;
 import com.unihub.security.AuthenticatedUser;
-import com.unihub.security.TempPasswordGenerator;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -26,7 +24,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -57,21 +54,15 @@ public class UserImportService {
             Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
     private final ClassGroupRepository classGroupRepository;
-    private final UserRepository userRepository;
     private final UserClassGroupRepository userClassGroupRepository;
-    private final UserImportPersistenceService persistenceService;
-    private final TempPasswordGenerator tempPasswordGenerator;
+    private final UserProvisioningService provisioningService;
 
     public UserImportService(ClassGroupRepository classGroupRepository,
-                             UserRepository userRepository,
                              UserClassGroupRepository userClassGroupRepository,
-                             UserImportPersistenceService persistenceService,
-                             TempPasswordGenerator tempPasswordGenerator) {
+                             UserProvisioningService provisioningService) {
         this.classGroupRepository = classGroupRepository;
-        this.userRepository = userRepository;
         this.userClassGroupRepository = userClassGroupRepository;
-        this.persistenceService = persistenceService;
-        this.tempPasswordGenerator = tempPasswordGenerator;
+        this.provisioningService = provisioningService;
     }
 
     public ImportResultResponse importUsers(MultipartFile file, AuthenticatedUser caller) {
@@ -172,33 +163,26 @@ public class UserImportService {
             return;
         }
 
-        // 5. Duplicate check: against this batch and against the database. Both are
-        //    case-insensitive so a case variant of an existing address is rejected with a
-        //    friendly per-row error rather than surfacing as a raw DB unique-violation. The
-        //    users_email_lower_key index (V5) is the authoritative case-insensitive backstop.
+        // 5. In-batch duplicate guard (case-insensitive) so two rows with the same email can't
+        //    both be created within a single import. The DB-level duplicate check lives in the
+        //    shared provisioning step below (and the users_email_lower_key index (V5) is the
+        //    authoritative case-insensitive backstop).
         String emailKey = email.toLowerCase(Locale.ROOT);
         if (!seenEmails.add(emailKey)) {
             errors.add(new ImportErrorDto(line, email, "duplicate email"));
             return;
         }
-        if (userRepository.existsByEmailIgnoreCase(email)) {
-            errors.add(new ImportErrorDto(line, email, "duplicate email"));
-            return;
-        }
 
-        // 6. Create (own transaction). Temp password appears once, in the response only.
-        String tempPassword = tempPasswordGenerator.generate();
+        // 6. Create via the shared single-user provisioning primitive (own transaction, temp
+        //    password appears once, in the response only). A duplicate — whether caught by the
+        //    pre-check or a lost race on the unique index — surfaces as a ConflictException,
+        //    which we turn into a per-row error so one bad row never fails the whole import.
         try {
-            persistenceService.createAccount(email, name, role, resolvedGroup, tempPassword);
-        } catch (DataIntegrityViolationException ex) {
-            // Lost a race on the unique-email index after the pre-check — report as a
-            // per-row duplicate rather than failing the whole import.
+            created.add(provisioningService.provision(email, name, role, resolvedGroup));
+        } catch (ConflictException ex) {
             seenEmails.remove(emailKey);
             errors.add(new ImportErrorDto(line, email, "duplicate email"));
-            return;
         }
-
-        created.add(new CreatedUserDto(email, name, role.name(), resolvedGroup.getName(), tempPassword));
     }
 
     private List<CSVRecord> parseRecords(MultipartFile file) {

@@ -1,5 +1,7 @@
 package com.unihub.controller;
 
+import com.unihub.dto.CreateUserRequest;
+import com.unihub.dto.CreatedUserDto;
 import com.unihub.dto.PagedResponse;
 import com.unihub.dto.TempPasswordResponse;
 import com.unihub.dto.UpdateUserStatusRequest;
@@ -9,17 +11,21 @@ import com.unihub.model.UserRole;
 import com.unihub.model.UserStatus;
 import com.unihub.security.AuthenticatedUser;
 import com.unihub.service.UserAdminService;
+import com.unihub.service.UserProvisioningService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -33,9 +39,28 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserAdminController {
 
     private final UserAdminService userAdminService;
+    private final UserProvisioningService userProvisioningService;
 
-    public UserAdminController(UserAdminService userAdminService) {
+    public UserAdminController(UserAdminService userAdminService,
+                              UserProvisioningService userProvisioningService) {
         this.userAdminService = userAdminService;
+        this.userProvisioningService = userProvisioningService;
+    }
+
+    /**
+     * Creates a single account with a server-generated temporary password (the single-user
+     * counterpart to CSV bulk import), returned once in the response. Overrides the class-level
+     * ADMIN-only rule to also admit TEACHERs: an ADMIN may create a STUDENT or TEACHER in any
+     * (or no) group, while a TEACHER may create only a STUDENT into a group they own — the
+     * finer scoping is enforced in {@link UserProvisioningService#createSingleUser}, since it is
+     * data logic rather than a coarse URL boundary (mirroring the CSV import).
+     */
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public CreatedUserDto createUser(@Valid @RequestBody CreateUserRequest request,
+                                     @AuthenticationPrincipal AuthenticatedUser caller) {
+        return userProvisioningService.createSingleUser(request, caller);
     }
 
     @GetMapping
