@@ -19,6 +19,14 @@ public interface UserClassGroupRepository extends JpaRepository<UserClassGroup, 
     long countByClassGroup_Id(Long classGroupId);
 
     /**
+     * The ids of every class group a user belongs to — the student's group scope for the
+     * schedule/course reads. A projection query so it can be called without navigating the
+     * lazy {@code classGroup} association off each membership entity.
+     */
+    @Query("select ucg.classGroup.id from UserClassGroup ucg where ucg.user.id = :userId")
+    List<Long> findGroupIdsByUserId(@Param("userId") Long userId);
+
+    /**
      * The ids of the class groups a teacher owns (their {@code TEACHER}-role membership
      * rows) — that teacher's import-rights grant, used by CSV import to scope which groups
      * they may import into. A projection query is used deliberately: the caller runs outside
