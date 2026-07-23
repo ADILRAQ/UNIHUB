@@ -1,13 +1,39 @@
-export type UseAdminPage = Record<string, never>;
+import { useState } from 'react';
+
+/** The admin console's sections, used as tab keys. */
+export type AdminTab = 'users' | 'add-user' | 'import' | 'class-groups';
+
+export interface AdminTabDef {
+  key: AdminTab;
+  label: string;
+}
+
+export const ADMIN_TABS: AdminTabDef[] = [
+  { key: 'users', label: 'Users' },
+  { key: 'add-user', label: 'Add user' },
+  { key: 'import', label: 'Bulk import' },
+  { key: 'class-groups', label: 'Class groups' },
+];
+
+export interface UseAdminPage {
+  tabs: AdminTabDef[];
+  activeTab: AdminTab;
+  onSelectTab: (tab: AdminTab) => void;
+}
 
 /**
- * Logic for the admin landing page. There is none yet — the page is a
- * `RequireRole`-gated placeholder until the admin management screens land in a
- * later epic — but the hook exists so the page follows the same logic-hook/UI
- * split as every other page and has a home for that logic when it arrives.
+ * Logic for the admin console page: owns the active-tab state for the simple
+ * sub-nav. Each section fetches and mutates its own data through its own logic
+ * hook, so this page hook stays limited to navigation between sections.
  */
 const useAdminPage = (): UseAdminPage => {
-  return {};
+  const [activeTab, setActiveTab] = useState<AdminTab>('users');
+
+  return {
+    tabs: ADMIN_TABS,
+    activeTab,
+    onSelectTab: setActiveTab,
+  };
 };
 
 export default useAdminPage;
