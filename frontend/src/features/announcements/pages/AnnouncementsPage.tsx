@@ -3,12 +3,14 @@
  * All logic is delegated to useFeed; this component is thin UI only.
  */
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../auth/AuthContext';
 import useFeed from '../hooks/useFeed';
 import AnnouncementCard from '../components/AnnouncementCard';
 import FeedFilters from '../components/FeedFilters';
 
 const AnnouncementsPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const {
     announcements,
     totalPages,
@@ -21,9 +23,22 @@ const AnnouncementsPage = () => {
     onFilterChange,
   } = useFeed();
 
+  const canCompose = user?.role === 'TEACHER' || user?.role === 'ADMIN';
+
   return (
     <div className="ann-feed">
-      <h2 className="ann-feed__heading">Announcements</h2>
+      <div className="ann-feed__header">
+        <h2 className="ann-feed__heading">Announcements</h2>
+        {canCompose && (
+          <button
+            type="button"
+            className="ann-btn ann-btn--primary"
+            onClick={() => navigate('/announcements/new')}
+          >
+            + New announcement
+          </button>
+        )}
+      </div>
 
       <FeedFilters filters={filters} onFilterChange={onFilterChange} />
 
