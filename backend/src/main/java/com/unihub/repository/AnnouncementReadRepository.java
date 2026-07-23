@@ -5,6 +5,7 @@ import com.unihub.model.AnnouncementReadId;
 import java.util.Collection;
 import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -30,4 +31,25 @@ public interface AnnouncementReadRepository
             + "WHERE ar.id.userId = :userId AND ar.id.announcementId IN :announcementIds")
     Set<Long> findReadAnnouncementIds(@Param("userId") Long userId,
                                       @Param("announcementIds") Collection<Long> announcementIds);
+
+    /**
+     * Returns {@code true} when the user has already read the given announcement.
+     * Equivalent to {@code existsById(new AnnouncementReadId(announcementId, userId))}
+     * but avoids constructing the composite key at the call-site.
+     */
+    @Query("SELECT CASE WHEN COUNT(ar) > 0 THEN true ELSE false END "
+            + "FROM AnnouncementRead ar "
+            + "WHERE ar.announcement.id = :announcementId AND ar.user.id = :userId")
+    boolean existsByAnnouncementIdAndUserId(@Param("announcementId") Long announcementId,
+                                            @Param("userId") Long userId);
+
+    /**
+     * Removes the read receipt for the given (announcement, user) pair.
+     * Idempotent: no error if the row does not exist.
+     */
+    @Modifying
+    @Query("DELETE FROM AnnouncementRead ar "
+            + "WHERE ar.announcement.id = :announcementId AND ar.user.id = :userId")
+    void deleteByAnnouncementIdAndUserId(@Param("announcementId") Long announcementId,
+                                         @Param("userId") Long userId);
 }

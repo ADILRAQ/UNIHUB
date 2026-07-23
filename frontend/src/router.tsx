@@ -7,6 +7,9 @@ import LoginPage from './features/auth/pages/LoginPage';
 import ChangePasswordPage from './features/auth/pages/ChangePasswordPage';
 import DashboardPage from './features/dashboard/pages/DashboardPage';
 import AdminPage from './features/admin/pages/AdminPage';
+import AnnouncementsPage from './features/announcements/pages/AnnouncementsPage';
+import AnnouncementDetailPage from './features/announcements/pages/AnnouncementDetailPage';
+import ComposerPage from './features/announcements/pages/ComposerPage';
 
 /**
  * Route tree.
@@ -34,6 +37,15 @@ const router = createBrowserRouter([
             element: <BaseLayout />,
             children: [
               { index: true, element: <DashboardPage /> },
+              { path: 'announcements', element: <AnnouncementsPage /> },
+              { path: 'announcements/:id', element: <AnnouncementDetailPage /> },
+              {
+                element: <RequireRole allowed={['TEACHER', 'ADMIN']} />,
+                children: [
+                  { path: 'announcements/new', element: <ComposerPage /> },
+                  { path: 'announcements/:id/edit', element: <ComposerPage /> },
+                ],
+              },
               {
                 element: <RequireRole allowed={['ADMIN']} />,
                 children: [{ path: 'admin', element: <AdminPage /> }],

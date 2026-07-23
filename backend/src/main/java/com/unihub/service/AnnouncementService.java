@@ -270,6 +270,27 @@ public class AnnouncementService {
     }
 
     // -------------------------------------------------------------------------
+    // Shared helpers used by sibling services (UNIH-25)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns the announcement identified by {@code id} after verifying the caller
+     * can see it. Throws 404 if the announcement does not exist; 403 if it exists
+     * but is not within the caller's visibility scope.
+     *
+     * <p>Intended for use by {@link CommentService} and {@link ReadTrackingService}
+     * so visibility logic stays in one place.
+     */
+    @Transactional(readOnly = true)
+    public Announcement requireVisibleAnnouncement(Long id, AuthenticatedUser caller) {
+        Announcement announcement = requireAnnouncement(id);
+        if (!isVisible(announcement, caller)) {
+            throw new AccessDeniedException("You do not have access to this announcement.");
+        }
+        return announcement;
+    }
+
+    // -------------------------------------------------------------------------
     // Private helpers
     // -------------------------------------------------------------------------
 
