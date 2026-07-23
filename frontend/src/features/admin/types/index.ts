@@ -1,6 +1,7 @@
 /** Admin-feature-local types. Cross-cutting shapes stay in `api/types.ts`. */
 
 import type { Role } from '../../auth/types';
+export type { PagedResponse } from '../../../api/types';
 
 /** A user account's activation state. */
 export type UserStatus = 'ACTIVE' | 'INACTIVE';
@@ -70,15 +71,6 @@ export interface UserDetailDto {
   createdAt: string;
   updatedAt: string;
   classGroups: ClassGroupRef[];
-}
-
-/** Generic Spring `Page` projection used by the backend list endpoints. */
-export interface PagedResponse<T> {
-  content: T[];
-  page: number;
-  size: number;
-  totalElements: number;
-  totalPages: number;
 }
 
 /** Filters + paging for `GET /api/users`. Empty strings mean "no filter". */

@@ -12,3 +12,20 @@ export interface ApiErrorBody {
   timestamp: string;
   errorCode?: string;
 }
+
+/**
+ * Generic Spring `Page` projection used by list endpoints.
+ * Mirrors the backend `PagedResponse<T>` record field-for-field.
+ *
+ * - `page`          — zero-based current page index (backend field name)
+ * - `size`          — requested page size
+ * - `totalElements` — total matching rows across all pages
+ * - `totalPages`    — total number of pages
+ */
+export interface PagedResponse<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
