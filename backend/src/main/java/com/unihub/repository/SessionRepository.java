@@ -11,6 +11,9 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
 
     List<Session> findByCourse_IdAndSessionDateBetween(Long courseId, LocalDate start, LocalDate end);
 
+    /** All sessions ever generated from a template — the reconciliation input for regeneration (UNIH-29). */
+    List<Session> findByTemplate_Id(Long templateId);
+
     /** Idempotency check for template regeneration (UNIH-29); backed by uq_sessions_template_date. */
     boolean existsByTemplate_IdAndSessionDate(Long templateId, LocalDate sessionDate);
 }
