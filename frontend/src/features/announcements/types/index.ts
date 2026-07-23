@@ -32,3 +32,21 @@ export interface AnnouncementFilters {
   urgent?: boolean;
   unread?: boolean;
 }
+
+export interface CreateAnnouncementRequest {
+  title: string;
+  body: string; // raw HTML from TipTap
+  classGroupId: number | null; // null = department-wide
+  pinned: boolean;
+  urgent: boolean;
+}
+
+export interface UpdateAnnouncementRequest {
+  title?: string;
+  body?: string; // raw HTML from TipTap
+}
+
+export interface ClassGroupOption {
+  id: number;
+  name: string;
+}

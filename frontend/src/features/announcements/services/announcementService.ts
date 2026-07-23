@@ -4,7 +4,12 @@
  */
 import apiClient from '../../../api/client';
 import type { PagedResponse } from '../../../api/types';
-import type { AnnouncementDto, AnnouncementFilters } from '../types';
+import type {
+  AnnouncementDto,
+  AnnouncementFilters,
+  CreateAnnouncementRequest,
+  UpdateAnnouncementRequest,
+} from '../types';
 
 export interface GetPageParams {
   page: number;
@@ -47,3 +52,44 @@ export const getUnreadCount = (): Promise<{ count: number }> =>
   apiClient
     .get<{ count: number }>('/api/announcements/unread-count')
     .then((r) => r.data);
+
+/** POST /api/announcements */
+export const createAnnouncement = (
+  data: CreateAnnouncementRequest,
+): Promise<AnnouncementDto> =>
+  apiClient
+    .post<AnnouncementDto>('/api/announcements', data)
+    .then((r) => r.data);
+
+/** PATCH /api/announcements/{id} */
+export const updateAnnouncement = (
+  id: number,
+  data: UpdateAnnouncementRequest,
+): Promise<AnnouncementDto> =>
+  apiClient
+    .patch<AnnouncementDto>(`/api/announcements/${id}`, data)
+    .then((r) => r.data);
+
+/** PATCH /api/announcements/{id}/pin */
+export const pinAnnouncement = (
+  id: number,
+  pinned: boolean,
+): Promise<AnnouncementDto> =>
+  apiClient
+    .patch<AnnouncementDto>(`/api/announcements/${id}/pin`, { pinned })
+    .then((r) => r.data);
+
+/** PATCH /api/announcements/{id}/urgent */
+export const setUrgent = (
+  id: number,
+  urgent: boolean,
+): Promise<AnnouncementDto> =>
+  apiClient
+    .patch<AnnouncementDto>(`/api/announcements/${id}/urgent`, { urgent })
+    .then((r) => r.data);
+
+/** DELETE /api/announcements/{id} */
+export const deleteAnnouncement = (id: number): Promise<void> =>
+  apiClient
+    .delete<void>(`/api/announcements/${id}`)
+    .then(() => undefined);
