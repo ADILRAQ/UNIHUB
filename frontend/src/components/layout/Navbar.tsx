@@ -31,6 +31,9 @@ const Navbar = () => {
             <span className="ann-unread-badge">{unreadCount}</span>
           )}
         </Link>
+        <Link to="/courses" className="navbar__link">
+          Courses
+        </Link>
         <Link to="/schedule" className="navbar__link">
           Calendar
         </Link>
