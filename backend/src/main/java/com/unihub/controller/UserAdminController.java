@@ -29,13 +29,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Admin user-administration endpoints. Every method is ADMIN-only (class-level
- * {@code @PreAuthorize}); a caller with another role gets a 403 via the security
- * access-denied handler. Business logic lives in {@link UserAdminService}.
+ * User-administration endpoints. Every method requires ADMIN or TEACHER (class-level
+ * {@code @PreAuthorize}), with extra service-layer guards for the two operations where
+ * a TEACHER may not target an ADMIN account (status update and password reset). Business
+ * logic lives in {@link UserAdminService}.
  */
 @RestController
 @RequestMapping("/api/users")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
 public class UserAdminController {
 
     private final UserAdminService userAdminService;
@@ -49,11 +50,9 @@ public class UserAdminController {
 
     /**
      * Creates a single account with a server-generated temporary password (the single-user
-     * counterpart to CSV bulk import), returned once in the response. Overrides the class-level
-     * ADMIN-only rule to also admit TEACHERs: an ADMIN may create a STUDENT or TEACHER in any
-     * (or no) group, while a TEACHER may create only a STUDENT into a group they own — the
-     * finer scoping is enforced in {@link UserProvisioningService#createSingleUser}, since it is
-     * data logic rather than a coarse URL boundary (mirroring the CSV import).
+     * counterpart to CSV bulk import), returned once in the response. ADMIN or TEACHER;
+     * creating an ADMIN account is rejected (400) — enforced in
+     * {@link UserProvisioningService#createSingleUser}.
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -83,17 +82,17 @@ public class UserAdminController {
             @PathVariable Long id,
             @Valid @RequestBody UpdateUserStatusRequest request,
             @AuthenticationPrincipal AuthenticatedUser caller) {
-        return userAdminService.updateStatus(id, request.status(), caller.userId());
+        return userAdminService.updateStatus(id, request.status(), caller.userId(), caller.role());
     }
 
     /**
-     * Regenerates a temporary password for a user, shown once in the response. Overrides the
-     * class-level ADMIN-only rule: an ADMIN may reset anyone, while a TEACHER may reset only a
-     * STUDENT they share a class group with (checked by {@code @classGroupAccess.managesStudent}).
+     * Regenerates a temporary password for a user, shown once in the response. ADMIN or TEACHER;
+     * the service rejects a TEACHER caller who targets an ADMIN account (403).
      */
     @PatchMapping("/{id}/reset-password")
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('TEACHER') and @classGroupAccess.managesStudent(authentication, #id))")
-    public TempPasswordResponse resetPassword(@PathVariable Long id) {
-        return userAdminService.resetPassword(id);
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public TempPasswordResponse resetPassword(@PathVariable Long id,
+                                              @AuthenticationPrincipal AuthenticatedUser caller) {
+        return userAdminService.resetPassword(id, caller.role());
     }
 }

@@ -20,6 +20,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,19 +76,26 @@ public class UserAdminService {
     }
 
     /**
-     * Sets a user's account status. Guards against an admin deactivating their own account
-     * (which would immediately lock them out), rejecting that with a 400.
+     * Sets a user's account status. Guards against deactivating one's own account (400) and
+     * against a TEACHER caller targeting an ADMIN account (403).
      *
-     * @param callerId the authenticated admin's own user id
+     * @param callerId   the authenticated caller's own user id
+     * @param callerRole the authenticated caller's role string (e.g. {@code "ADMIN"})
      */
     @Transactional
-    public UserSummaryDto updateStatus(Long id, UserStatus status, Long callerId) {
+    public UserSummaryDto updateStatus(Long id, UserStatus status, Long callerId,
+                                       String callerRole) {
         if (id.equals(callerId) && status == UserStatus.INACTIVE) {
             throw new BadRequestException("You cannot deactivate your own account.");
         }
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User " + id + " not found"));
+
+        if ("TEACHER".equals(callerRole) && user.getRole() == UserRole.ADMIN) {
+            throw new AccessDeniedException("Teachers cannot modify admin accounts.");
+        }
+
         user.setStatus(status);
         User saved = userRepository.save(user);
         return AdminMapper.toSummary(saved);
@@ -95,15 +103,21 @@ public class UserAdminService {
 
     /**
      * Regenerates a fresh temporary password for the target user, re-arming the forced-change
-     * gate and a new {@value TempPasswordPolicy#VALIDITY_DAYS}-day expiry window. Authorization
-     * (admin, or a teacher who manages the target student) is enforced at the controller via
-     * {@code @PreAuthorize}. The plaintext password is returned once for the admin to hand off
-     * and is never logged or persisted in the clear — only its BCrypt hash is stored.
+     * gate and a new {@value TempPasswordPolicy#VALIDITY_DAYS}-day expiry window. A TEACHER
+     * caller may not reset an ADMIN account's password (403). The plaintext password is returned
+     * once for the caller to hand off and is never logged or persisted in the clear — only its
+     * BCrypt hash is stored.
+     *
+     * @param callerRole the authenticated caller's role string (e.g. {@code "ADMIN"})
      */
     @Transactional
-    public TempPasswordResponse resetPassword(Long id) {
+    public TempPasswordResponse resetPassword(Long id, String callerRole) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User " + id + " not found"));
+
+        if ("TEACHER".equals(callerRole) && user.getRole() == UserRole.ADMIN) {
+            throw new AccessDeniedException("Teachers cannot reset admin account passwords.");
+        }
 
         String tempPassword = tempPasswordGenerator.generate();
         user.setPasswordHash(passwordEncoder.encode(tempPassword));

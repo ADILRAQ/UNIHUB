@@ -30,7 +30,7 @@ public class SessionController {
     }
 
     @PatchMapping("/{id}/cancel")
-    @PreAuthorize("hasRole('ADMIN') or @courseAccess.ownsSession(authentication, #id)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public SessionDto cancelSession(@PathVariable Long id,
                                     @RequestBody(required = false) CancelSessionRequest request) {
         String note = request != null ? request.note() : null;
@@ -38,7 +38,7 @@ public class SessionController {
     }
 
     @PatchMapping("/{id}/reschedule")
-    @PreAuthorize("hasRole('ADMIN') or @courseAccess.ownsSession(authentication, #id)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public SessionDto rescheduleSession(@PathVariable Long id,
                                         @Valid @RequestBody RescheduleSessionRequest request) {
         return sessionService.rescheduleSession(id, request);

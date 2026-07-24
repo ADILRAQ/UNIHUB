@@ -18,13 +18,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Admin class-group management: CRUD plus teacher assignment. Every method is ADMIN-only
- * (class-level {@code @PreAuthorize}); a non-admin caller gets a 403. Business logic lives
- * in {@link ClassGroupService}.
+ * Class-group management: CRUD plus teacher assignment. Every method requires ADMIN or TEACHER
+ * (class-level {@code @PreAuthorize}); callers with another role get a 403. Business logic
+ * lives in {@link ClassGroupService}.
  */
 @RestController
 @RequestMapping("/api/class-groups")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
 public class ClassGroupController {
 
     private final ClassGroupService classGroupService;

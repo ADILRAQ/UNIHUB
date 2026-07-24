@@ -22,10 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Course administration and reads. Course metadata (create/update/delete, teacher & group
- * assignment) is ADMIN-only — enforced at the controller boundary; teachers manage the
- * <em>timetable</em> of courses assigned to them, not the courses themselves. List/get reads
- * are scoped to the caller here: admins see everything, teachers their own courses, students
- * the courses of the class groups they belong to.
+ * assignment) is available to ADMIN and TEACHER — enforced at the controller boundary. List/get
+ * reads are scoped to the caller here: admins and teachers see everything, students see the
+ * courses of the class groups they belong to.
  */
 @Service
 public class CourseService {
@@ -51,8 +50,7 @@ public class CourseService {
     @Transactional(readOnly = true)
     public List<CourseDto> listCourses(AuthenticatedUser caller) {
         List<Course> courses = switch (caller.role()) {
-            case ROLE_ADMIN -> courseRepository.findAll();
-            case ROLE_TEACHER -> courseRepository.findByTeacher_Id(caller.userId());
+            case ROLE_ADMIN, ROLE_TEACHER -> courseRepository.findAll();
             default -> {
                 List<Long> groupIds = userClassGroupRepository.findGroupIdsByUserId(caller.userId());
                 yield groupIds.isEmpty() ? List.of() : courseRepository.findByClassGroup_IdIn(groupIds);
@@ -78,16 +76,26 @@ public class CourseService {
 
     private boolean isVisibleTo(Course course, AuthenticatedUser caller) {
         return switch (caller.role()) {
-            case ROLE_ADMIN -> true;
-            case ROLE_TEACHER -> course.getTeacher().getId().equals(caller.userId());
+            case ROLE_ADMIN, ROLE_TEACHER -> true;
             default -> userClassGroupRepository.existsByUser_IdAndClassGroup_Id(
                     caller.userId(), course.getClassGroup().getId());
         };
     }
 
     @Transactional
-    public CourseDto createCourse(CreateCourseRequest request) {
-        User teacher = requireTeacher(request.teacherId());
+    public CourseDto createCourse(CreateCourseRequest request, AuthenticatedUser caller) {
+        Long resolvedTeacherId;
+        if (ROLE_TEACHER.equals(caller.role())) {
+            // Teacher creates a course: they become the assigned teacher automatically.
+            resolvedTeacherId = caller.userId();
+        } else {
+            // Admin must supply a teacherId explicitly.
+            if (request.teacherId() == null) {
+                throw new BadRequestException("teacherId is required.");
+            }
+            resolvedTeacherId = request.teacherId();
+        }
+        User teacher = requireTeacher(resolvedTeacherId);
         ClassGroup group = requireGroup(request.classGroupId());
 
         Course course = new Course();

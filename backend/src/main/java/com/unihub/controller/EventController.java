@@ -56,7 +56,7 @@ public class EventController {
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or @courseAccess.ownsEvent(authentication, #id)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public EventDto updateEvent(@PathVariable Long id,
                                 @Valid @RequestBody UpdateEventRequest request) {
         return eventService.updateEvent(id, request);
@@ -64,7 +64,7 @@ public class EventController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('ADMIN') or @courseAccess.ownsEvent(authentication, #id)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public void deleteEvent(@PathVariable Long id) {
         eventService.deleteEvent(id);
     }

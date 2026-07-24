@@ -35,6 +35,7 @@ public class CommentService {
     private static final int PAGE_SIZE = 20;
     private static final Sort OLDEST_FIRST = Sort.by(Sort.Order.asc("createdAt"));
     private static final String ROLE_ADMIN = "ADMIN";
+    private static final String ROLE_TEACHER = "TEACHER";
 
     private final AnnouncementCommentRepository commentRepository;
     private final UserRepository userRepository;
@@ -132,7 +133,7 @@ public class CommentService {
         boolean isCommentAuthor = comment.getAuthor().getId().equals(caller.userId());
         boolean isAnnouncementAuthor = comment.getAnnouncement().getAuthor().getId()
                 .equals(caller.userId());
-        boolean isAdmin = ROLE_ADMIN.equals(caller.role());
+        boolean isAdmin = ROLE_ADMIN.equals(caller.role()) || ROLE_TEACHER.equals(caller.role());
 
         if (!isCommentAuthor && !isAnnouncementAuthor && !isAdmin) {
             throw new AccessDeniedException("You are not allowed to delete this comment.");

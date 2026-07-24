@@ -207,10 +207,10 @@ public class AnnouncementController {
     }
 
     /**
-     * Sets the pinned flag. ADMIN only.
+     * Sets the pinned flag. ADMIN or TEACHER.
      */
     @PatchMapping("/{id}/pin")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public AnnouncementDto pin(@PathVariable Long id,
                                 @RequestBody PinRequest request,
                                 @AuthenticationPrincipal AuthenticatedUser caller) {

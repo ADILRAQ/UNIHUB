@@ -33,11 +33,10 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * <p>Visibility rules:
  * <ul>
- *   <li><b>ADMIN</b> — sees every announcement; may create dept-wide or for any group.</li>
- *   <li><b>TEACHER</b> — same read scope as a student (own groups + dept-wide); may create
- *       only for groups they belong to; dept-wide creation is admin-only.</li>
+ *   <li><b>ADMIN / TEACHER</b> — see every announcement; may create dept-wide or for any
+ *       group; may pin and update urgency on any announcement.</li>
  *   <li><b>STUDENT</b> — reads announcements for their own groups plus dept-wide; cannot
- *       create, update, or delete.</li>
+ *       create, update, delete, or pin.</li>
  * </ul>
  *
  * <p>HTML input is sanitized by {@link HtmlSanitizer} before every CREATE or UPDATE so
@@ -147,23 +146,12 @@ public class AnnouncementService {
     // -------------------------------------------------------------------------
 
     /**
-     * Creates a new announcement. Students are rejected (403). Teachers may only post for
-     * groups they belong to; posting dept-wide is admin-only.
+     * Creates a new announcement. Students are rejected (403). ADMIN and TEACHER may post
+     * dept-wide (no {@code classGroupId}) or for any specific group.
      */
     @Transactional
     public AnnouncementDto create(CreateAnnouncementRequest request, AuthenticatedUser caller) {
-        if (ROLE_TEACHER.equals(caller.role())) {
-            // Teacher: must target a specific group they belong to.
-            if (request.classGroupId() == null) {
-                throw new AccessDeniedException("Teachers cannot create department-wide announcements.");
-            }
-            if (!userClassGroupRepository.existsByUser_IdAndClassGroup_Id(
-                    caller.userId(), request.classGroupId())) {
-                throw new AccessDeniedException(
-                        "You are not a member of group " + request.classGroupId() + ".");
-            }
-        } else if (!ROLE_ADMIN.equals(caller.role())) {
-            // Students and any other role.
+        if (!ROLE_ADMIN.equals(caller.role()) && !ROLE_TEACHER.equals(caller.role())) {
             throw new AccessDeniedException("Only teachers and admins can create announcements.");
         }
 
@@ -232,12 +220,12 @@ public class AnnouncementService {
     }
 
     /**
-     * Sets the {@code pinned} flag. Admin-only.
+     * Sets the {@code pinned} flag. ADMIN or TEACHER.
      */
     @Transactional
     public AnnouncementDto pin(Long id, boolean pinned, AuthenticatedUser caller) {
-        if (!ROLE_ADMIN.equals(caller.role())) {
-            throw new AccessDeniedException("Only admins can pin announcements.");
+        if (!ROLE_ADMIN.equals(caller.role()) && !ROLE_TEACHER.equals(caller.role())) {
+            throw new AccessDeniedException("Only teachers and admins can pin announcements.");
         }
         Announcement announcement = requireAnnouncement(id);
         announcement.setPinned(pinned);
@@ -300,7 +288,7 @@ public class AnnouncementService {
      */
     private Page<Announcement> loadFeedPage(AuthenticatedUser caller, Long filterGroupId,
                                              boolean urgentOnly, Pageable pageable) {
-        if (ROLE_ADMIN.equals(caller.role())) {
+        if (ROLE_ADMIN.equals(caller.role()) || ROLE_TEACHER.equals(caller.role())) {
             if (filterGroupId != null) {
                 return urgentOnly
                         ? announcementRepository.findUrgentFeedForGroup(filterGroupId, pageable)
@@ -311,7 +299,7 @@ public class AnnouncementService {
                     : announcementRepository.findAll(pageable);
         }
 
-        // STUDENT or TEACHER: scoped to their own groups + dept-wide.
+        // STUDENT: scoped to their own groups + dept-wide.
         List<Long> groupIds = userClassGroupRepository.findGroupIdsByUserId(caller.userId());
 
         if (filterGroupId != null) {
@@ -335,7 +323,7 @@ public class AnnouncementService {
     }
 
     private boolean isVisible(Announcement announcement, AuthenticatedUser caller) {
-        if (ROLE_ADMIN.equals(caller.role())) {
+        if (ROLE_ADMIN.equals(caller.role()) || ROLE_TEACHER.equals(caller.role())) {
             return true;
         }
         if (announcement.getClassGroup() == null) {
@@ -348,7 +336,7 @@ public class AnnouncementService {
 
     private void requireAuthorOrAdmin(Announcement announcement, AuthenticatedUser caller) {
         boolean isAuthor = announcement.getAuthor().getId().equals(caller.userId());
-        if (!isAuthor && !ROLE_ADMIN.equals(caller.role())) {
+        if (!isAuthor && !ROLE_ADMIN.equals(caller.role()) && !ROLE_TEACHER.equals(caller.role())) {
             throw new AccessDeniedException(
                     "Only the author or an admin can modify this announcement.");
         }

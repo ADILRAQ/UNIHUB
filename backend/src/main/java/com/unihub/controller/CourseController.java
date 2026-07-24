@@ -21,11 +21,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Courses API. Reads are open to any authenticated caller and scoped in the service (admin:
- * all; teacher: own; student: their groups'). Course metadata writes — create, update
- * (including teacher/group reassignment), delete — are ADMIN-only: teachers manage the
- * timetable of their assigned courses, not the courses themselves. Business logic lives in
- * {@link CourseService}.
+ * Courses API. Reads are open to any authenticated caller and scoped in the service (admin/teacher:
+ * all; student: their groups'). Course metadata writes — create, update (including teacher/group
+ * reassignment), delete — require ADMIN or TEACHER. When a TEACHER creates a course, the service
+ * automatically assigns them as the teacher. Business logic lives in {@link CourseService}.
  */
 @RestController
 @RequestMapping("/api/courses")
@@ -50,13 +49,14 @@ public class CourseController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('ADMIN')")
-    public CourseDto createCourse(@Valid @RequestBody CreateCourseRequest request) {
-        return courseService.createCourse(request);
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public CourseDto createCourse(@Valid @RequestBody CreateCourseRequest request,
+                                  @AuthenticationPrincipal AuthenticatedUser caller) {
+        return courseService.createCourse(request, caller);
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public CourseDto updateCourse(@PathVariable Long id,
                                   @Valid @RequestBody UpdateCourseRequest request) {
         return courseService.updateCourse(id, request);
@@ -64,7 +64,7 @@ public class CourseController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public void deleteCourse(@PathVariable Long id) {
         courseService.deleteCourse(id);
     }
