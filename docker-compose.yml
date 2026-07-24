@@ -49,12 +49,21 @@ services:
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: unihub
       # HMAC-SHA256 JWT signing secret — must be at least 32 chars or the app won't boot.
       JWT_SECRET: ${JWT_SECRET}
-      # Seed admin account (created on first boot if absent; skipped if any is blank).
+      # Seed accounts (created on first boot if absent; skipped if any field is blank).
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       ADMIN_FULL_NAME: ${ADMIN_FULL_NAME}
+      TEACHER_EMAIL: ${TEACHER_EMAIL}
+      TEACHER_PASSWORD: ${TEACHER_PASSWORD}
+      TEACHER_FULL_NAME: ${TEACHER_FULL_NAME}
+      STUDENT_EMAIL: ${STUDENT_EMAIL}
+      STUDENT_PASSWORD: ${STUDENT_PASSWORD}
+      STUDENT_FULL_NAME: ${STUDENT_FULL_NAME}
     ports:
       - "8080:8080"
     depends_on:
