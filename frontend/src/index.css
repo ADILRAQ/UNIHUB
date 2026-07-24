@@ -2087,3 +2087,293 @@ input.res-module__title {
   display: flex;
   gap: 0.5rem;
 }
+
+/* ── Payments feature (pay-*) ──────────────────────────────────────────── */
+
+.pay-page {
+  max-width: 960px;
+}
+
+.pay-page__title {
+  margin: 0 0 1.25rem;
+  font-size: 1.4rem;
+}
+
+/* Student: installment cards */
+.pay-installments {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.pay-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid #d0d7de;
+  border-radius: 10px;
+}
+
+.pay-card__label {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.pay-card__amount {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.pay-card__due {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #57606a;
+}
+
+.pay-card__days {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #57606a;
+}
+
+/* Status badges */
+.pay-badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.pay-badge--locked {
+  background: #eef1f4;
+  color: #57606a;
+}
+
+.pay-badge--unpaid {
+  background: #fff3e0;
+  color: #b35000;
+}
+
+.pay-badge--submitted {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.pay-badge--paid {
+  background: #e6f6ec;
+  color: #1a7f37;
+}
+
+.pay-badge--rejected {
+  background: #fdeeee;
+  color: #b3261e;
+}
+
+/* Overdue indicator */
+.pay-overdue-flag {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #b3261e;
+}
+
+/* Rejection reason */
+.pay-rejection-reason {
+  margin: 0;
+  padding: 0.5rem 0.65rem;
+  border-radius: 6px;
+  background: #fdeeee;
+  color: #b3261e;
+  font-size: 0.85rem;
+}
+
+/* Upload area */
+.pay-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.pay-upload__btn {
+  padding: 0.4rem 0.85rem;
+  border: 1px solid #1f6feb;
+  border-radius: 6px;
+  background: #1f6feb;
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.pay-upload__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pay-upload--loading .pay-upload__btn {
+  opacity: 0.7;
+}
+
+.pay-upload__feedback {
+  font-size: 0.82rem;
+  color: #57606a;
+}
+
+/* Admin tabs */
+.pay-admin-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #d0d7de;
+  margin-bottom: 1.25rem;
+}
+
+.pay-admin-tab {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #57606a;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pay-admin-tab--active {
+  color: #1f6feb;
+  border-bottom-color: #1f6feb;
+}
+
+/* Tables */
+.pay-table-wrap {
+  overflow-x: auto;
+}
+
+.pay-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.pay-table th,
+.pay-table td {
+  padding: 0.5rem 0.65rem;
+  border-bottom: 1px solid #eaecef;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.pay-table th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #57606a;
+}
+
+/* Buttons */
+.pay-btn {
+  padding: 0.4rem 0.85rem;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pay-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.pay-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.pay-btn--sm {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.78rem;
+}
+
+.pay-btn--approve {
+  border-color: #1a7f37;
+  background: #1a7f37;
+  color: #ffffff;
+}
+
+.pay-btn--approve:hover:not(:disabled) {
+  background: #166430;
+}
+
+.pay-btn--reject {
+  border-color: #cf222e;
+  background: #cf222e;
+  color: #ffffff;
+}
+
+.pay-btn--reject:hover:not(:disabled) {
+  background: #b01d24;
+}
+
+/* Reject inline reason */
+.pay-reject-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.65rem;
+  background: #fff8f0;
+  flex-wrap: wrap;
+}
+
+.pay-reject-inline input {
+  padding: 0.35rem 0.55rem;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  background: transparent;
+  color: inherit;
+  flex: 1;
+  min-width: 180px;
+}
+
+/* Year plan form */
+.pay-plan-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: 680px;
+}
+
+.pay-plan-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.pay-plan-row input {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  background: transparent;
+  color: inherit;
+  flex: 1;
+  min-width: 120px;
+}
+
+/* Empty state */
+.pay-empty {
+  margin: 0.5rem 0;
+  color: #57606a;
+  font-size: 0.95rem;
+}
