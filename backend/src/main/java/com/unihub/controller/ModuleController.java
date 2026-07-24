@@ -46,6 +46,7 @@ public class ModuleController {
     }
 
     @GetMapping("/api/courses/{courseId}/modules")
+    @PreAuthorize("isAuthenticated()")
     public List<ModuleDto> getModules(@PathVariable Long courseId,
                                        @AuthenticationPrincipal AuthenticatedUser caller) {
         return moduleService.getModulesByCourse(courseId, caller.userId(), caller.role());

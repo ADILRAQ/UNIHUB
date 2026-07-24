@@ -394,7 +394,8 @@ public class PaymentService {
 
     private InstallmentDto toInstallmentDto(StudentInstallment si) {
         boolean overdue = si.getPeriod().getDueDate().isBefore(LocalDate.now())
-                && si.getStatus() != InstallmentStatus.PAID;
+                && (si.getStatus() == InstallmentStatus.UNPAID
+                        || si.getStatus() == InstallmentStatus.REJECTED);
         return new InstallmentDto(
                 si.getId(),
                 si.getPeriod().getId(),

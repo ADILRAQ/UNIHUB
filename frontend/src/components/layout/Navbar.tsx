@@ -37,6 +37,9 @@ const Navbar = () => {
         <Link to="/schedule" className="navbar__link">
           Calendar
         </Link>
+        <Link to="/payments" className="navbar__link">
+          Payments
+        </Link>
         {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
           <Link to="/timetable" className="navbar__link">
             Timetable
