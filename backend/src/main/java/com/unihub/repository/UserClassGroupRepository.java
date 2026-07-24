@@ -40,6 +40,15 @@ public interface UserClassGroupRepository extends JpaRepository<UserClassGroup, 
                                  @Param("role") UserRole role);
 
     /**
+     * All student users (role = STUDENT) enrolled in the given class group.
+     * Used by the submission roster view to list all expected submitters.
+     */
+    @Query("select ucg from UserClassGroup ucg "
+            + "where ucg.classGroup.id = :classGroupId "
+            + "and ucg.user.role = com.unihub.model.UserRole.STUDENT")
+    List<UserClassGroup> findStudentsByClassGroupId(@Param("classGroupId") Long classGroupId);
+
+    /**
      * Whether the given teacher owns a class group that the given user is a
      * {@code STUDENT} member of — the "does this teacher manage this student" check behind
      * the teacher-scoped password-reset {@code @PreAuthorize}. The role conditions are baked
