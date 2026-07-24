@@ -13,6 +13,7 @@ import com.unihub.model.UserRole;
 import com.unihub.repository.ClassGroupRepository;
 import com.unihub.repository.UserClassGroupRepository;
 import com.unihub.repository.UserRepository;
+import com.unihub.security.AuthenticatedUser;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -40,8 +41,20 @@ public class ClassGroupService {
     }
 
     @Transactional(readOnly = true)
-    public List<ClassGroupDto> listGroups() {
-        return classGroupRepository.findAll().stream()
+    public List<ClassGroupDto> listGroups(AuthenticatedUser caller) {
+        List<ClassGroup> groups;
+        if ("ADMIN".equals(caller.role())) {
+            groups = classGroupRepository.findAll();
+        } else {
+            // TEACHER: only the groups they are assigned to as a TEACHER
+            List<Long> groupIds = userClassGroupRepository.findOwnedGroupIds(
+                    caller.userId(), UserRole.TEACHER);
+            if (groupIds.isEmpty()) {
+                return List.of();
+            }
+            groups = classGroupRepository.findAllById(groupIds);
+        }
+        return groups.stream()
                 .sorted(Comparator.comparing(ClassGroup::getName, String.CASE_INSENSITIVE_ORDER))
                 .map(g -> AdminMapper.toClassGroupDto(
                         g, userClassGroupRepository.countByClassGroup_Id(g.getId())))

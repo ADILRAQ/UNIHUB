@@ -2,11 +2,13 @@ package com.unihub.controller;
 
 import com.unihub.dto.ClassGroupDto;
 import com.unihub.dto.ClassGroupRequest;
+import com.unihub.security.AuthenticatedUser;
 import com.unihub.service.ClassGroupService;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,13 +20,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Admin class-group management: CRUD plus teacher assignment. Every method is ADMIN-only
- * (class-level {@code @PreAuthorize}); a non-admin caller gets a 403. Business logic lives
- * in {@link ClassGroupService}.
+ * Class-group management. List is open to ADMIN and TEACHER (teacher sees only their own
+ * groups); write operations (create, rename, delete, teacher assignment) remain ADMIN-only.
+ * Business logic lives in {@link ClassGroupService}.
  */
 @RestController
 @RequestMapping("/api/class-groups")
-@PreAuthorize("hasRole('ADMIN')")
 public class ClassGroupController {
 
     private final ClassGroupService classGroupService;
@@ -34,17 +35,20 @@ public class ClassGroupController {
     }
 
     @GetMapping
-    public List<ClassGroupDto> listGroups() {
-        return classGroupService.listGroups();
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public List<ClassGroupDto> listGroups(@AuthenticationPrincipal AuthenticatedUser caller) {
+        return classGroupService.listGroups(caller);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public ClassGroupDto createGroup(@Valid @RequestBody ClassGroupRequest request) {
         return classGroupService.createGroup(request.name());
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ClassGroupDto renameGroup(@PathVariable Long id,
                                      @Valid @RequestBody ClassGroupRequest request) {
         return classGroupService.renameGroup(id, request.name());
@@ -52,18 +56,21 @@ public class ClassGroupController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteGroup(@PathVariable Long id) {
         classGroupService.deleteGroup(id);
     }
 
     @PostMapping("/{id}/teachers/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void assignTeacher(@PathVariable Long id, @PathVariable Long userId) {
         classGroupService.assignTeacher(id, userId);
     }
 
     @DeleteMapping("/{id}/teachers/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void revokeTeacher(@PathVariable Long id, @PathVariable Long userId) {
         classGroupService.revokeTeacher(id, userId);
     }

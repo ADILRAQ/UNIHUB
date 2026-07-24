@@ -64,13 +64,15 @@ public class UserAdminController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public PagedResponse<UserSummaryDto> listUsers(
             @RequestParam(required = false) UserRole role,
             @RequestParam(required = false) UserStatus status,
             @RequestParam(required = false) Long classGroupId,
             @RequestParam(required = false) String search,
-            @PageableDefault(size = 20) Pageable pageable) {
-        return userAdminService.listUsers(role, status, classGroupId, search, pageable);
+            @PageableDefault(size = 20) Pageable pageable,
+            @AuthenticationPrincipal AuthenticatedUser caller) {
+        return userAdminService.listUsers(role, status, classGroupId, search, pageable, caller);
     }
 
     @GetMapping("/{id}")

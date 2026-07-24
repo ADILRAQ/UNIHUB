@@ -50,9 +50,10 @@ public class CourseController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('ADMIN')")
-    public CourseDto createCourse(@Valid @RequestBody CreateCourseRequest request) {
-        return courseService.createCourse(request);
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public CourseDto createCourse(@AuthenticationPrincipal AuthenticatedUser caller,
+                                  @Valid @RequestBody CreateCourseRequest request) {
+        return courseService.createCourse(request, caller);
     }
 
     @PatchMapping("/{id}")

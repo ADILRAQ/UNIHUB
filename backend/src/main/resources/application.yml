@@ -41,3 +41,13 @@ app:
     email: ${ADMIN_EMAIL:}
     password: ${ADMIN_PASSWORD:}
     full-name: ${ADMIN_FULL_NAME:}
+  teacher:
+    email: ${TEACHER_EMAIL:}
+    password: ${TEACHER_PASSWORD:}
+    full-name: ${TEACHER_FULL_NAME:}
+  student:
+    email: ${STUDENT_EMAIL:}
+    password: ${STUDENT_PASSWORD:}
+    full-name: ${STUDENT_FULL_NAME:}
+  seed:
+    class-group: ${SEED_CLASS_GROUP:L3 Info A}
