@@ -57,10 +57,11 @@ export interface Course {
   createdAt: string;
 }
 
-/** Request body for `POST /api/courses` (ADMIN only). */
+/** Request body for `POST /api/courses` (ADMIN and TEACHER). For teacher callers
+ *  the backend assigns themselves; `teacherId` may be omitted. */
 export interface CreateCourseRequest {
   name: string;
-  teacherId: number;
+  teacherId?: number;
   classGroupId: number;
   meetLink?: string;
 }

@@ -16,7 +16,7 @@ const useDashboardPage = (): UseDashboardPage => {
 
   return {
     user,
-    isAdmin: user?.role === 'ADMIN',
+    isAdmin: user?.role === 'ADMIN' || user?.role === 'TEACHER',
   };
 };
 

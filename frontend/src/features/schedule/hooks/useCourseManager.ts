@@ -33,8 +33,10 @@ export interface UseCourseManager {
   courses: Course[];
   isLoading: boolean;
   isError: boolean;
-  /** Only admins may create/edit/delete courses (server-enforced too). */
+  /** Admins and teachers may create/edit/delete courses (server-enforced too). */
   canManage: boolean;
+  /** Whether the course form should show the teacher dropdown (hidden for teachers). */
+  showTeacherField: boolean;
   selectedCourseId: number | null;
   selectedCourse: Course | null;
   onSelectCourse: (id: number) => void;
@@ -64,7 +66,8 @@ export interface UseCourseManager {
 const useCourseManager = (): UseCourseManager => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const canManage = user?.role === 'ADMIN';
+  const isTeacher = user?.role === 'TEACHER';
+  const canManage = user?.role === 'ADMIN' || isTeacher;
 
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -135,7 +138,7 @@ const useCourseManager = (): UseCourseManager => {
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
-    if (!form.name.trim() || !form.teacherId || !form.classGroupId) {
+    if (!form.name.trim() || (!isTeacher && !form.teacherId) || !form.classGroupId) {
       setError('Name, teacher and class group are required.');
       return;
     }
@@ -143,7 +146,8 @@ const useCourseManager = (): UseCourseManager => {
     if (form.id === null) {
       createMutation.mutate({
         name: form.name.trim(),
-        teacherId: Number(form.teacherId),
+        // Teachers are auto-assigned server-side; omit teacherId for teacher callers.
+        ...(isTeacher ? {} : { teacherId: Number(form.teacherId) }),
         classGroupId: Number(form.classGroupId),
         meetLink: meetLink || undefined,
       });
@@ -164,6 +168,7 @@ const useCourseManager = (): UseCourseManager => {
     isLoading,
     isError,
     canManage,
+    showTeacherField: !isTeacher,
     selectedCourseId,
     selectedCourse,
     onSelectCourse: setSelectedCourseId,
@@ -174,7 +179,8 @@ const useCourseManager = (): UseCourseManager => {
     classGroups: classGroups ?? [],
     onOpenCreate: () => {
       setError(null);
-      setForm(EMPTY_FORM);
+      // Pre-fill the teacher's own ID so the backend can use it server-side.
+      setForm(isTeacher ? { ...EMPTY_FORM, teacherId: String(user?.userId ?? '') } : EMPTY_FORM);
       setFormOpen(true);
     },
     onOpenEdit: (course) => {

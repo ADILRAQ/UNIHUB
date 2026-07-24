@@ -45,10 +45,11 @@ const getTeacherGroups = (): Promise<ClassGroupOption[]> =>
 
 /**
  * Returns the list of class groups that the caller may target when posting
- * an announcement. Dispatches to the correct endpoint based on role.
+ * an announcement. Admins and teachers both use GET /api/class-groups (the
+ * backend now allows teachers on that endpoint).
  */
 export const getPostableGroups = (role: string): Promise<ClassGroupOption[]> => {
-  if (role === 'ADMIN') {
+  if (role === 'ADMIN' || role === 'TEACHER') {
     return getAdminGroups();
   }
   return getTeacherGroups();

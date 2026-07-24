@@ -34,7 +34,7 @@ const AnnouncementDetail = ({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const isAdmin = currentUserRole === 'ADMIN';
+  const isAdmin = currentUserRole === 'ADMIN' || currentUserRole === 'TEACHER';
   const isAuthor = announcement.authorId === currentUserId;
   const canEdit = isAdmin || isAuthor;
   const canToggle = isAdmin || (currentUserRole === 'TEACHER' && isAuthor);

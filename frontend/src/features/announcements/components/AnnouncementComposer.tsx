@@ -43,14 +43,13 @@ const AnnouncementComposer = ({ initialAnnouncement }: AnnouncementComposerProps
   const role = user?.role ?? '';
   const userId = user?.userId ?? 0;
 
-  // A teacher with exactly one group has it auto-selected; hide the dropdown.
-  const showGroupSelector =
-    role === 'ADMIN' || (role === 'TEACHER' && availableGroups.length > 1);
+  // Teachers now see all groups via the all-groups endpoint; always show the selector.
+  const showGroupSelector = role === 'ADMIN' || role === 'TEACHER';
 
   const canDelete =
     isEditing &&
     initialAnnouncement &&
-    (role === 'ADMIN' || initialAnnouncement.authorId === userId);
+    ((role === 'ADMIN' || role === 'TEACHER') || initialAnnouncement.authorId === userId);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -99,7 +98,7 @@ const AnnouncementComposer = ({ initialAnnouncement }: AnnouncementComposerProps
               }}
               disabled={isSaving}
             >
-              {role === 'ADMIN' && (
+              {(role === 'ADMIN' || role === 'TEACHER') && (
                 <option value="">Department-wide</option>
               )}
               {availableGroups.map((g) => (

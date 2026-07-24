@@ -109,7 +109,9 @@ const useComments = ({
   };
 
   const canDelete = (comment: CommentDto): boolean =>
-    currentUserId === comment.authorId || currentUserRole === 'ADMIN';
+    currentUserId === comment.authorId ||
+    currentUserRole === 'ADMIN' ||
+    currentUserRole === 'TEACHER';
 
   return {
     comments: data?.content ?? [],

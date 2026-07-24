@@ -94,6 +94,7 @@ const TimetablePage = () => {
           onSubmit={cm.onSubmit}
           isSaving={cm.isSaving}
           error={cm.error}
+          showTeacherField={cm.showTeacherField}
         />
       )}
     </section>

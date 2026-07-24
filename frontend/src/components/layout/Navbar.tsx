@@ -39,7 +39,7 @@ const Navbar = () => {
             Timetable
           </Link>
         )}
-        {user?.role === 'ADMIN' && (
+        {(user?.role === 'ADMIN' || user?.role === 'TEACHER') && (
           <Link to="/admin" className="navbar__link">
             Admin console
           </Link>

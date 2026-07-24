@@ -2,13 +2,22 @@ import type { UseCourseManager } from '../hooks/useCourseManager';
 
 type CourseFormProps = Pick<
   UseCourseManager,
-  'isEditing' | 'form' | 'teachers' | 'classGroups' | 'onCloseForm' | 'onFormChange' | 'onSubmit' | 'isSaving' | 'error'
+  | 'isEditing'
+  | 'form'
+  | 'teachers'
+  | 'classGroups'
+  | 'onCloseForm'
+  | 'onFormChange'
+  | 'onSubmit'
+  | 'isSaving'
+  | 'error'
+  | 'showTeacherField'
 >;
 
 /**
- * Modal course create/edit form (admin only). Pure UI — all state and mutations
- * live in `useCourseManager`. Teacher and class-group dropdowns come from the
- * ADMIN-only option reads.
+ * Modal course create/edit form (admin + teacher). Pure UI — all state and mutations
+ * live in `useCourseManager`. The teacher dropdown is hidden when `showTeacherField`
+ * is false (i.e. the caller is a teacher who is auto-assigned server-side).
  */
 const CourseForm = ({
   isEditing,
@@ -20,6 +29,7 @@ const CourseForm = ({
   onSubmit,
   isSaving,
   error,
+  showTeacherField,
 }: CourseFormProps) => (
   <div className="sched-modal" role="dialog" aria-modal="true" aria-label="Course">
     <div className="sched-modal__card">
@@ -40,22 +50,24 @@ const CourseForm = ({
             required
           />
         </label>
-        <label className="sched-field">
-          <span>Teacher</span>
-          <select
-            value={form.teacherId}
-            onChange={(e) => onFormChange({ teacherId: e.target.value })}
-            disabled={isSaving}
-            required
-          >
-            <option value="">Select a teacher…</option>
-            {teachers.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.fullName}
-              </option>
-            ))}
-          </select>
-        </label>
+        {showTeacherField && (
+          <label className="sched-field">
+            <span>Teacher</span>
+            <select
+              value={form.teacherId}
+              onChange={(e) => onFormChange({ teacherId: e.target.value })}
+              disabled={isSaving}
+              required
+            >
+              <option value="">Select a teacher…</option>
+              {teachers.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.fullName}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <label className="sched-field">
           <span>Class group</span>
           <select

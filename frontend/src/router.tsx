@@ -50,7 +50,7 @@ const router = createBrowserRouter([
                 ],
               },
               {
-                element: <RequireRole allowed={['ADMIN']} />,
+                element: <RequireRole allowed={['ADMIN', 'TEACHER']} />,
                 children: [{ path: 'admin', element: <AdminPage /> }],
               },
               {

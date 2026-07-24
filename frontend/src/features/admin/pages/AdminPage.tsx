@@ -5,10 +5,11 @@ import ImportSection from '../components/ImportSection';
 import ClassGroupsSection from '../components/ClassGroupsSection';
 
 /**
- * Admin management console (ADMIN-only, guarded by `RequireRole` in the router).
+ * Admin management console (ADMIN + TEACHER, guarded by `RequireRole` in the router).
  * A simple tab layout switches between the user list, single-user create, CSV
  * bulk import, and class-group management sections. All logic lives in the
  * section hooks; this page only owns tab navigation via `useAdminPage`.
+ * Note: server-side guards prevent teachers from touching admin accounts.
  */
 const AdminPage = () => {
   const { tabs, activeTab, onSelectTab } = useAdminPage();
