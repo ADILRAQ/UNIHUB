@@ -67,6 +67,7 @@ public class AssignmentController {
     }
 
     @GetMapping("/api/courses/{courseId}/assignments")
+    @PreAuthorize("isAuthenticated()")
     public List<AssignmentDto> getAssignments(@PathVariable Long courseId,
                                                @AuthenticationPrincipal AuthenticatedUser caller) {
         return assignmentService.getAssignmentsForCourse(courseId, caller.userId(), caller.role());

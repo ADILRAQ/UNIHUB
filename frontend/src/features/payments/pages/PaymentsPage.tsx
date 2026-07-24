@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useAuth } from '../../auth/AuthContext';
 import useStudentPayments from '../hooks/useStudentPayments';
 import useAdminPayments from '../hooks/useAdminPayments';
@@ -279,8 +279,8 @@ const QueueTab = ({
         </thead>
         <tbody>
           {queue.map((item) => (
-            <>
-              <tr key={item.installmentId}>
+            <React.Fragment key={item.installmentId}>
+              <tr>
                 <td>{item.studentName}</td>
                 <td>{item.classGroupName}</td>
                 <td>{item.label}</td>
@@ -295,7 +295,7 @@ const QueueTab = ({
                       onClick={() =>
                         onDownloadProof(
                           item.installmentId,
-                          `proof-${item.studentName}-${item.label}.pdf`,
+                          `proof-${item.studentName}-${item.label}`,
                         )
                       }
                     >
@@ -358,7 +358,7 @@ const QueueTab = ({
                   </td>
                 </tr>
               )}
-            </>
+            </React.Fragment>
           ))}
         </tbody>
       </table>
@@ -463,7 +463,7 @@ const EMPTY_ROW = (): { label: string; amount: string; dueDate: string } => ({
 interface PlanTabProps {
   yearPlans: Record<string, ReturnType<typeof useAdminPayments>['yearPlans'][string]>;
   isLoading: boolean;
-  onCreatePlan: (periods: CreatePeriodEntry[]) => void;
+  onCreatePlan: (data: { academicYear: string; periods: CreatePeriodEntry[] }) => void;
   isCreating: boolean;
   planError: string | null;
 }
@@ -521,7 +521,7 @@ const PlanTab = ({
       periodOrder: i + 1,
     }));
 
-    onCreatePlan(periods);
+    onCreatePlan({ academicYear: academicYear.trim(), periods });
   };
 
   return (

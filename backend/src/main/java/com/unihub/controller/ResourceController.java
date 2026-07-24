@@ -50,12 +50,14 @@ public class ResourceController {
     }
 
     @GetMapping("/api/modules/{moduleId}/resources")
+    @PreAuthorize("isAuthenticated()")
     public List<ResourceDto> listResources(@PathVariable Long moduleId,
                                             @AuthenticationPrincipal AuthenticatedUser caller) {
         return resourceService.getResourcesByModule(moduleId, caller.userId(), caller.role());
     }
 
     @GetMapping("/api/resources/{resourceId}/download")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<StreamingResponseBody> downloadResource(
             @PathVariable Long resourceId,
             @AuthenticationPrincipal AuthenticatedUser caller) {
@@ -90,6 +92,7 @@ public class ResourceController {
     }
 
     @GetMapping("/api/resources/search")
+    @PreAuthorize("isAuthenticated()")
     public List<ResourceSearchResult> searchResources(
             @RequestParam(required = false) String q,
             @AuthenticationPrincipal AuthenticatedUser caller) {

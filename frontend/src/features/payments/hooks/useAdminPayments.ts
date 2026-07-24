@@ -48,7 +48,7 @@ interface UseAdminPaymentsReturn {
   /* Year plans */
   yearPlans: Record<string, PaymentPeriodDto[]>;
   isLoadingPlans: boolean;
-  createYearPlan: (periods: CreatePeriodEntry[]) => void;
+  createYearPlan: (data: { academicYear: string; periods: CreatePeriodEntry[] }) => void;
   isCreatingPlan: boolean;
   planError: string | null;
 }
@@ -136,11 +136,11 @@ const useAdminPayments = (): UseAdminPaymentsReturn => {
 
   const { mutate: createPlanMutate, isPending: isCreatingPlan } = usePostData<
     string,
-    CreatePeriodEntry[],
+    { academicYear: string; periods: CreatePeriodEntry[] },
     void
   >({
     keys: ['payments', 'create-plan'],
-    serviceFn: (periods) => paymentService.createYearPlan(periods),
+    serviceFn: (data) => paymentService.createYearPlan(data),
     onSuccessFn: () => {
       setPlanError(null);
       void queryClient.invalidateQueries({ queryKey: [...PLANS_KEY] });

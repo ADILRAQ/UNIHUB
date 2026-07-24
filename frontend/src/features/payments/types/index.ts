@@ -43,8 +43,8 @@ export interface ProofQueueItemDto {
 export interface OverdueStudentDto {
   studentId: number;
   studentName: string;
-  classGroupId: number;
-  classGroupName: string;
+  classGroupId: number | null;
+  classGroupName: string | null;
   overdueInstallments: InstallmentDto[];
 }
 

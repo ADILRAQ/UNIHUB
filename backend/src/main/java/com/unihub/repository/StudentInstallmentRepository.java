@@ -25,6 +25,9 @@ public interface StudentInstallmentRepository extends JpaRepository<StudentInsta
      */
     @Query("SELECT si FROM StudentInstallment si "
             + "WHERE si.period.dueDate < CURRENT_DATE "
-            + "AND si.status <> com.unihub.model.InstallmentStatus.PAID")
+            + "AND si.status IN ("
+            + "  com.unihub.model.InstallmentStatus.UNPAID,"
+            + "  com.unihub.model.InstallmentStatus.REJECTED"
+            + ")")
     List<StudentInstallment> findOverdue();
 }

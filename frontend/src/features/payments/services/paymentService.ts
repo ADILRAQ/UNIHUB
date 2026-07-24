@@ -23,23 +23,32 @@ export const getYearPlans = (): Promise<Record<string, PaymentPeriodDto[]>> =>
     .get<Record<string, PaymentPeriodDto[]>>('/api/payments/periods')
     .then((r) => r.data);
 
-export const createYearPlan = (periods: CreatePeriodEntry[]): Promise<void> =>
-  apiClient.post('/api/payments/periods', { periods }).then(() => undefined);
+export const createYearPlan = (data: {
+  academicYear: string;
+  periods: CreatePeriodEntry[];
+}): Promise<void> =>
+  apiClient.post('/api/payments/periods', data).then(() => undefined);
 
 export const getQueue = (): Promise<ProofQueueItemDto[]> =>
   apiClient.get<ProofQueueItemDto[]>('/api/payments/queue').then((r) => r.data);
 
 export const downloadProof = async (
   installmentId: number,
-  filename: string,
+  basename: string,
 ): Promise<void> => {
   const response = await apiClient.get(`/api/payments/${installmentId}/proof`, {
     responseType: 'blob',
   });
+  const contentType: string = (response.headers['content-type'] as string) ?? '';
+  const ext = contentType.includes('jpeg') || contentType.includes('jpg')
+    ? '.jpg'
+    : contentType.includes('png')
+    ? '.png'
+    : '.pdf';
   const url = window.URL.createObjectURL(new Blob([response.data]));
   const a = document.createElement('a');
   a.href = url;
-  a.download = filename;
+  a.download = `${basename}${ext}`;
   a.click();
   window.URL.revokeObjectURL(url);
 };
