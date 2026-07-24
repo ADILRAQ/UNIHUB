@@ -639,7 +639,10 @@ const PaymentsPage = () => {
     <div className="pay-page">
       <h1 className="pay-page__title">Payments</h1>
       {user?.role === 'STUDENT' && <StudentPaymentsView />}
-      {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && <AdminPaymentsView />}
+      {user?.role === 'ADMIN' && <AdminPaymentsView />}
+      {user?.role === 'TEACHER' && (
+        <p className="pay-empty">Payment management is handled by administrators.</p>
+      )}
     </div>
   );
 };
