@@ -12,6 +12,7 @@ import TimetablePage from './features/schedule/pages/TimetablePage';
 import AnnouncementsPage from './features/announcements/pages/AnnouncementsPage';
 import AnnouncementDetailPage from './features/announcements/pages/AnnouncementDetailPage';
 import ComposerPage from './features/announcements/pages/ComposerPage';
+import TeacherPage from './features/teacher/pages/TeacherPage';
 
 /**
  * Route tree.
@@ -55,7 +56,10 @@ const router = createBrowserRouter([
               },
               {
                 element: <RequireRole allowed={['TEACHER', 'ADMIN']} />,
-                children: [{ path: 'timetable', element: <TimetablePage /> }],
+                children: [
+                  { path: 'timetable', element: <TimetablePage /> },
+                  { path: 'teacher', element: <TeacherPage /> },
+                ],
               },
             ],
           },

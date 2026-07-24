@@ -5,6 +5,7 @@ import com.unihub.model.UserClassGroup;
 import com.unihub.model.UserRole;
 import com.unihub.model.UserStatus;
 import jakarta.persistence.criteria.Subquery;
+import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
@@ -47,6 +48,26 @@ public final class UserSpecifications {
                     .where(
                             cb.equal(membership.get("id").get("userId"), root.get("id")),
                             cb.equal(membership.get("id").get("classGroupId"), classGroupId));
+            return cb.exists(sub);
+        };
+    }
+
+    /**
+     * EXISTS subquery filtering users who belong to any of the given class groups.
+     * Returns {@code null} when the list is null or empty so the caller can chain it
+     * unconditionally — a null spec is ignored by {@link Specification#allOf}.
+     */
+    public static Specification<User> inAnyClassGroup(List<Long> groupIds) {
+        if (groupIds == null || groupIds.isEmpty()) {
+            return null;
+        }
+        return (root, query, cb) -> {
+            Subquery<Long> sub = query.subquery(Long.class);
+            var membership = sub.from(UserClassGroup.class);
+            sub.select(membership.get("id").get("userId"))
+                    .where(
+                            cb.equal(membership.get("id").get("userId"), root.get("id")),
+                            membership.get("id").get("classGroupId").in(groupIds));
             return cb.exists(sub);
         };
     }

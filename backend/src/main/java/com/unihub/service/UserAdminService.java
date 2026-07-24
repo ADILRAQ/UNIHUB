@@ -14,6 +14,7 @@ import com.unihub.model.UserStatus;
 import com.unihub.repository.UserClassGroupRepository;
 import com.unihub.repository.UserRepository;
 import com.unihub.repository.spec.UserSpecifications;
+import com.unihub.security.AuthenticatedUser;
 import com.unihub.security.TempPasswordGenerator;
 import com.unihub.security.TempPasswordPolicy;
 import java.util.List;
@@ -51,11 +52,42 @@ public class UserAdminService {
      * Lists users matching the optional filters (any {@code null} filter is ignored) with
      * pagination. Returns the self-owned {@link PagedResponse} envelope, never a raw
      * Spring {@code Page}.
+     *
+     * <p>When {@code caller} is a TEACHER, the result is automatically scoped to STUDENT
+     * accounts in the class groups that teacher owns; the {@code role} filter is ignored
+     * (always forced to STUDENT) and the {@code classGroupId} filter is honoured only if
+     * the caller owns that group.
      */
     @Transactional(readOnly = true)
     public PagedResponse<UserSummaryDto> listUsers(UserRole role, UserStatus status,
                                                    Long classGroupId, String search,
-                                                   Pageable pageable) {
+                                                   Pageable pageable,
+                                                   AuthenticatedUser caller) {
+        if ("TEACHER".equals(caller.role())) {
+            List<Long> ownedGroupIds = userClassGroupRepository.findOwnedGroupIds(
+                    caller.userId(), UserRole.TEACHER);
+            if (ownedGroupIds.isEmpty()) {
+                return PagedResponse.from(
+                        org.springframework.data.domain.Page.empty(pageable),
+                        AdminMapper::toSummary);
+            }
+            Specification<User> spec;
+            if (classGroupId != null && ownedGroupIds.contains(classGroupId)) {
+                spec = Specification.allOf(
+                        UserSpecifications.hasRole(UserRole.STUDENT),
+                        UserSpecifications.inClassGroup(classGroupId),
+                        UserSpecifications.matchesSearch(search));
+            } else {
+                spec = Specification.allOf(
+                        UserSpecifications.hasRole(UserRole.STUDENT),
+                        UserSpecifications.inAnyClassGroup(ownedGroupIds),
+                        UserSpecifications.matchesSearch(search));
+            }
+            Page<User> page = userRepository.findAll(spec, pageable);
+            return PagedResponse.from(page, AdminMapper::toSummary);
+        }
+
+        // ADMIN path — all filters honoured as-is
         Specification<User> spec = Specification.allOf(
                 UserSpecifications.hasRole(role),
                 UserSpecifications.hasStatus(status),

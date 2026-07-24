@@ -86,8 +86,19 @@ public class CourseService {
     }
 
     @Transactional
-    public CourseDto createCourse(CreateCourseRequest request) {
-        User teacher = requireTeacher(request.teacherId());
+    public CourseDto createCourse(CreateCourseRequest request, AuthenticatedUser caller) {
+        Long teacherId;
+        if (ROLE_TEACHER.equals(caller.role())) {
+            if (!userClassGroupRepository.existsByUser_IdAndClassGroup_Id(
+                    caller.userId(), request.classGroupId())) {
+                throw new BadRequestException(
+                        "You are not assigned to class group " + request.classGroupId() + ".");
+            }
+            teacherId = caller.userId();
+        } else {
+            teacherId = request.teacherId();
+        }
+        User teacher = requireTeacher(teacherId);
         ClassGroup group = requireGroup(request.classGroupId());
 
         Course course = new Course();
