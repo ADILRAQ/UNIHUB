@@ -57,9 +57,10 @@ public class UserImportPersistenceService {
      *
      * @param classGroup the group to enroll the user into, or {@code null} for no membership
      * @param plaintextTempPassword the caller-generated temp password (hashed, not stored raw)
+     * @return the id of the newly created {@link User}
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void createAccount(String email, String fullName, UserRole role,
+    public Long createAccount(String email, String fullName, UserRole role,
                               ClassGroup classGroup, String plaintextTempPassword) {
         User user = new User();
         user.setEmail(email);
@@ -74,5 +75,6 @@ public class UserImportPersistenceService {
         if (classGroup != null) {
             userClassGroupRepository.save(new UserClassGroup(saved, classGroup));
         }
+        return saved.getId();
     }
 }
