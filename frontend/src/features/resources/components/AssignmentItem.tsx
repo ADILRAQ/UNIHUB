@@ -65,7 +65,7 @@ const AssignmentItem = ({
           </span>
         )}
         {isTeacherOrAdmin && (
-          <span style={{ display: 'flex', gap: '0.4rem', marginLeft: 'auto' }}>
+          <span style={{ display: 'flex', gap: 'var(--space-1)', marginLeft: 'auto' }}>
             <button
               type="button"
               className="res-btn res-btn--sm res-btn--ghost"
@@ -90,10 +90,10 @@ const AssignmentItem = ({
 
       <p className="res-assignment__meta">
         Due:{' '}
-        <span style={{ color: isPast ? '#b3261e' : 'inherit' }}>
+        <span style={{ color: isPast ? 'var(--color-danger-dark)' : 'inherit' }}>
           {dueDate.toLocaleString()}
         </span>
-        {isPast && <span style={{ marginLeft: '0.35rem', color: '#b3261e' }}>Overdue</span>}
+        {isPast && <span style={{ marginLeft: 'var(--space-1)', color: 'var(--color-danger-dark)' }}>Overdue</span>}
       </p>
 
       {assignment.description && (
@@ -101,7 +101,7 @@ const AssignmentItem = ({
       )}
 
       {canUpload && (
-        <span style={{ display: 'inline-block', marginTop: '0.5rem' }}>
+        <span style={{ display: 'inline-block', marginTop: 'var(--space-2)' }}>
           <input
             ref={fileInputRef}
             type="file"
@@ -127,7 +127,7 @@ const AssignmentItem = ({
       )}
 
       {isExpanded && submissions && (
-        <div style={{ marginTop: '0.75rem' }}>
+        <div style={{ marginTop: 'var(--space-3)' }}>
           <SubmissionsTable
             rows={submissions}
             onDownload={onDownloadSubmission}

@@ -16,40 +16,60 @@ const LoginPage = () => {
   } = useLoginPage();
 
   return (
-    <main className="auth-screen">
-      <form className="auth-card" onSubmit={onSubmit} noValidate>
-        <h1 className="auth-card__title">Sign in to UniHub</h1>
+    <div className="auth-split">
+      <section className="auth-split__hero" aria-hidden="true">
+        <div className="auth-hero__logo">UH</div>
+        <h1 className="auth-hero__title">UniHub</h1>
+        <p className="auth-hero__subtitle">
+          Your university department, all in one place.
+        </p>
+        <ul className="auth-hero__features">
+          <li>Announcements &amp; class calendar</li>
+          <li>Course resources &amp; assignments</li>
+          <li>Session recaps for missed classes</li>
+          <li>Tuition payment tracking</li>
+        </ul>
+      </section>
 
-        <AuthField
-          label="Email"
-          type="email"
-          name="email"
-          autoComplete="username"
-          value={email}
-          onChange={onEmailChange}
-          disabled={isPending}
-          required
-        />
+      <div className="auth-split__form">
+        <div className="card" style={{ width: '100%', maxWidth: '400px' }}>
+          <h2 style={{ margin: '0 0 var(--space-6)', fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-weight-bold)', letterSpacing: '-0.02em' }}>
+            Sign in
+          </h2>
 
-        <AuthField
-          label="Password"
-          type="password"
-          name="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={onPasswordChange}
-          disabled={isPending}
-          required
-        />
+          <form onSubmit={onSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+            <AuthField
+              label="Email"
+              type="email"
+              name="email"
+              autoComplete="username"
+              value={email}
+              onChange={onEmailChange}
+              disabled={isPending}
+              required
+            />
 
-        <AuthErrorMessage message={fieldError} />
-        <AuthErrorMessage message={serverError} />
+            <AuthField
+              label="Password"
+              type="password"
+              name="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={onPasswordChange}
+              disabled={isPending}
+              required
+            />
 
-        <button type="submit" className="auth-button" disabled={isPending}>
-          {isPending ? 'Signing in...' : 'Sign in'}
-        </button>
-      </form>
-    </main>
+            <AuthErrorMessage message={fieldError} />
+            <AuthErrorMessage message={serverError} />
+
+            <button type="submit" className="btn btn--primary w-full" disabled={isPending}>
+              {isPending ? 'Signing in…' : 'Sign in'}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 };
 

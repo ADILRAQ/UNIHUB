@@ -9,7 +9,7 @@ const CoursesPage = () => {
   if (isLoading) {
     return (
       <div className="res-page">
-        <h1 style={{ margin: '0 0 1rem' }}>Courses</h1>
+        <h1 style={{ margin: '0 0 var(--space-4)' }}>Courses</h1>
         <p className="res-resource__meta">Loading…</p>
       </div>
     );
@@ -18,8 +18,8 @@ const CoursesPage = () => {
   if (isError) {
     return (
       <div className="res-page">
-        <h1 style={{ margin: '0 0 1rem' }}>Courses</h1>
-        <p style={{ color: '#b3261e' }}>Failed to load courses.</p>
+        <h1 style={{ margin: '0 0 var(--space-4)' }}>Courses</h1>
+        <div className="alert alert--danger">Failed to load courses.</div>
       </div>
     );
   }
@@ -28,7 +28,7 @@ const CoursesPage = () => {
 
   return (
     <div className="res-page">
-      <h1 style={{ margin: '0 0 1.25rem' }}>Courses</h1>
+      <h1 style={{ margin: '0 0 var(--space-5)' }}>Courses</h1>
       {courses.length === 0 ? (
         <p className="res-resource__meta">No courses found.</p>
       ) : (

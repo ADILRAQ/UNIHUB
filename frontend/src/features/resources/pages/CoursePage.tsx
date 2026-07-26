@@ -49,26 +49,18 @@ const ResourcesTab = ({ courseId, canEdit }: { courseId: number; canEdit: boolea
       {/* Search bar */}
       <div className="res-search">
         <input
+          className="input"
           type="search"
           placeholder="Search resources…"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          style={{
-            padding: '0.5rem 0.75rem',
-            border: '1px solid #d0d7de',
-            borderRadius: '6px',
-            fontSize: '0.9rem',
-            width: '100%',
-            maxWidth: '360px',
-            background: 'transparent',
-            color: 'inherit',
-          }}
+          style={{ maxWidth: '360px' }}
         />
       </div>
 
       {/* Search results */}
       {searchQuery.length > 0 ? (
-        <div style={{ marginTop: '1rem' }}>
+        <div style={{ marginTop: 'var(--space-4)' }}>
           {isSearching && <p className="res-resource__meta">Searching…</p>}
           {!isSearching && searchResults.length === 0 && (
             <p className="res-resource__meta">No results for &ldquo;{searchQuery}&rdquo;</p>
@@ -91,10 +83,10 @@ const ResourcesTab = ({ courseId, canEdit }: { courseId: number; canEdit: boolea
         </div>
       ) : (
         /* Module tree */
-        <div style={{ marginTop: '1rem' }}>
+        <div style={{ marginTop: 'var(--space-4)' }}>
           {isLoadingModules && <p className="res-resource__meta">Loading modules…</p>}
           {isErrorModules && (
-            <p style={{ color: '#b3261e' }}>Failed to load modules.</p>
+            <div className="alert alert--danger">Failed to load modules.</div>
           )}
 
           {!isLoadingModules && modules.length === 0 && !isErrorModules && (
@@ -119,14 +111,13 @@ const ResourcesTab = ({ courseId, canEdit }: { courseId: number; canEdit: boolea
           ))}
 
           {canEdit && (
-            <div style={{ marginTop: '1rem' }}>
+            <div style={{ marginTop: 'var(--space-4)' }}>
               {showNewModule ? (
                 <div className="res-form">
                   <div className="res-form__field">
-                    <label style={{ fontSize: '0.85rem', color: '#57606a' }}>
-                      Module title
-                    </label>
+                    <label className="label">Module title</label>
                     <input
+                      className="input"
                       type="text"
                       value={newModuleTitle}
                       onChange={(e) => setNewModuleTitle(e.target.value)}
@@ -135,14 +126,6 @@ const ResourcesTab = ({ courseId, canEdit }: { courseId: number; canEdit: boolea
                         if (e.key === 'Escape') setShowNewModule(false);
                       }}
                       autoFocus
-                      style={{
-                        padding: '0.5rem 0.6rem',
-                        border: '1px solid #d0d7de',
-                        borderRadius: '6px',
-                        fontSize: '0.9rem',
-                        background: 'transparent',
-                        color: 'inherit',
-                      }}
                     />
                   </div>
                   <div className="res-form__actions">
@@ -224,7 +207,7 @@ const AssignmentsTab = ({
   };
 
   if (isLoading) return <p className="res-resource__meta">Loading assignments…</p>;
-  if (isError) return <p style={{ color: '#b3261e' }}>Failed to load assignments.</p>;
+  if (isError) return <div className="alert alert--danger">Failed to load assignments.</div>;
 
   return (
     <div>
@@ -248,58 +231,35 @@ const AssignmentsTab = ({
       )}
 
       {(role === 'TEACHER' || role === 'ADMIN') && (
-        <div style={{ marginTop: '1.25rem' }}>
+        <div style={{ marginTop: 'var(--space-5)' }}>
           {showNewAssignment ? (
             <div className="res-form">
               <div className="res-form__field">
-                <label style={{ fontSize: '0.85rem', color: '#57606a' }}>Title</label>
+                <label className="label">Title</label>
                 <input
+                  className="input"
                   type="text"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   autoFocus
-                  style={{
-                    padding: '0.5rem 0.6rem',
-                    border: '1px solid #d0d7de',
-                    borderRadius: '6px',
-                    fontSize: '0.9rem',
-                    background: 'transparent',
-                    color: 'inherit',
-                  }}
                 />
               </div>
               <div className="res-form__field">
-                <label style={{ fontSize: '0.85rem', color: '#57606a' }}>
-                  Description (optional)
-                </label>
+                <label className="label">Description (optional)</label>
                 <input
+                  className="input"
                   type="text"
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
-                  style={{
-                    padding: '0.5rem 0.6rem',
-                    border: '1px solid #d0d7de',
-                    borderRadius: '6px',
-                    fontSize: '0.9rem',
-                    background: 'transparent',
-                    color: 'inherit',
-                  }}
                 />
               </div>
               <div className="res-form__field">
-                <label style={{ fontSize: '0.85rem', color: '#57606a' }}>Due date</label>
+                <label className="label">Due date</label>
                 <input
+                  className="input"
                   type="datetime-local"
                   value={newDueAt}
                   onChange={(e) => setNewDueAt(e.target.value)}
-                  style={{
-                    padding: '0.5rem 0.6rem',
-                    border: '1px solid #d0d7de',
-                    borderRadius: '6px',
-                    fontSize: '0.9rem',
-                    background: 'transparent',
-                    color: 'inherit',
-                  }}
                 />
               </div>
               <div className="res-form__actions">
@@ -346,12 +306,16 @@ const CoursePage = () => {
   const canEdit = role === 'TEACHER' || role === 'ADMIN';
 
   if (!courseId || isNaN(id)) {
-    return <p style={{ color: '#b3261e' }}>Invalid course ID.</p>;
+    return <div className="alert alert--danger">Invalid course ID.</div>;
   }
 
   return (
     <div className="res-page">
-      <Link to="/courses" className="res-btn res-btn--ghost" style={{ marginBottom: '1rem', display: 'inline-block' }}>
+      <Link
+        to="/courses"
+        className="res-btn res-btn--ghost"
+        style={{ marginBottom: 'var(--space-4)', display: 'inline-block' }}
+      >
         &larr; Back to courses
       </Link>
 
@@ -372,7 +336,7 @@ const CoursePage = () => {
         </button>
       </div>
 
-      <div style={{ marginTop: '1.25rem' }}>
+      <div style={{ marginTop: 'var(--space-5)' }}>
         {activeTab === 'resources' && (
           <ResourcesTab courseId={id} canEdit={canEdit} />
         )}

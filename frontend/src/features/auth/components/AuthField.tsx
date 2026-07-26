@@ -12,9 +12,7 @@ interface AuthFieldProps {
 }
 
 /**
- * Labeled text input shared by the auth pages (login + change-password). Renders
- * the exact `auth-field` markup both pages used, so factoring it out removes the
- * duplicated label/input boilerplate without changing the DOM or styling.
+ * Labeled text input shared by the auth pages (login + change-password).
  */
 const AuthField = ({
   label,
@@ -27,9 +25,13 @@ const AuthField = ({
   required = false,
 }: AuthFieldProps) => {
   return (
-    <label className="auth-field">
-      <span>{label}</span>
+    <div className="form-group">
+      <label className="label" htmlFor={name}>
+        {label}
+      </label>
       <input
+        id={name}
+        className="input"
         type={type}
         name={name}
         autoComplete={autoComplete}
@@ -38,7 +40,7 @@ const AuthField = ({
         disabled={disabled}
         required={required}
       />
-    </label>
+    </div>
   );
 };
 

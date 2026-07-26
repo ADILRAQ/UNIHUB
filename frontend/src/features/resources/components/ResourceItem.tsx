@@ -24,7 +24,7 @@ const ResourceItem = ({
     <span className="res-resource__meta">
       {formatBytes(resource.sizeBytes)} &middot; {resource.uploadedByName}
     </span>
-    <div style={{ display: 'flex', gap: '0.4rem' }}>
+    <div style={{ display: 'flex', gap: 'var(--space-1)' }}>
       <button
         type="button"
         className="res-btn res-btn--sm res-btn--ghost"

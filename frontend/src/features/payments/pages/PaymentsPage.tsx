@@ -43,7 +43,7 @@ const StudentPaymentsView = () => {
     useStudentPayments();
 
   if (isLoading) return <p className="pay-empty">Loading…</p>;
-  if (isError) return <p style={{ color: '#b3261e' }}>Failed to load payments.</p>;
+  if (isError) return <p className="pay-empty" style={{ color: 'var(--color-danger-dark)' }}>Failed to load payments.</p>;
 
   return (
     <div className="pay-installments">
@@ -259,7 +259,7 @@ const QueueTab = ({
   onDownloadProof,
 }: QueueTabProps) => {
   if (isLoading) return <p className="pay-empty">Loading queue…</p>;
-  if (isError) return <p style={{ color: '#b3261e' }}>Failed to load queue.</p>;
+  if (isError) return <p className="pay-empty" style={{ color: 'var(--color-danger-dark)' }}>Failed to load queue.</p>;
   if (queue.length === 0)
     return <p className="pay-empty">No proofs awaiting validation.</p>;
 
@@ -288,7 +288,7 @@ const QueueTab = ({
                 <td>{item.dueDate}</td>
                 <td>{new Date(item.submittedAt).toLocaleString()}</td>
                 <td>
-                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: 'var(--space-1)', flexWrap: 'wrap' }}>
                     <button
                       type="button"
                       className="pay-btn pay-btn--sm"
@@ -384,20 +384,13 @@ const OverdueTab = ({
   onGroupChange,
 }: OverdueTabProps) => (
   <div>
-    <div style={{ marginBottom: '1rem' }}>
+    <div style={{ marginBottom: 'var(--space-4)' }}>
       <select
         value={selectedGroupId ?? ''}
         onChange={(e) =>
           onGroupChange(e.target.value ? Number(e.target.value) : undefined)
         }
-        style={{
-          padding: '0.45rem 0.6rem',
-          border: '1px solid #d0d7de',
-          borderRadius: '6px',
-          fontSize: '0.9rem',
-          background: 'transparent',
-          color: 'inherit',
-        }}
+        className="select"
       >
         <option value="">All class groups</option>
         {classGroups.map((g) => (
@@ -432,7 +425,7 @@ const OverdueTab = ({
                   background: student.overdueInstallments.some(
                     (ins) => ins.status === 'UNPAID',
                   )
-                    ? '#fff8f0'
+                    ? 'var(--color-warning-light)'
                     : undefined,
                 }}
               >
@@ -529,13 +522,13 @@ const PlanTab = ({
       {/* Existing plans */}
       {isLoading && <p className="pay-empty">Loading plans…</p>}
       {!isLoading && Object.keys(yearPlans).length === 0 && (
-        <p className="pay-empty" style={{ marginBottom: '1.5rem' }}>
+        <p className="pay-empty" style={{ marginBottom: 'var(--space-6)' }}>
           No year plans configured yet.
         </p>
       )}
       {Object.entries(yearPlans).map(([year, periods]) => (
-        <div key={year} style={{ marginBottom: '1.25rem' }}>
-          <h3 style={{ margin: '0 0 0.5rem', fontSize: '1rem' }}>
+        <div key={year} style={{ marginBottom: 'var(--space-5)' }}>
+          <h3 style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-base)' }}>
             Academic year: {year}
           </h3>
           <div className="pay-table-wrap">
@@ -562,32 +555,25 @@ const PlanTab = ({
       ))}
 
       {/* Create form */}
-      <h3 style={{ margin: '1.5rem 0 0.75rem', fontSize: '1rem' }}>
+      <h3 style={{ margin: 'var(--space-6) 0 var(--space-3)', fontSize: 'var(--text-base)' }}>
         Create new year plan
       </h3>
       <div className="pay-plan-form">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', marginBottom: '0.75rem' }}>
-          <label style={{ fontSize: '0.85rem', color: '#57606a' }}>Academic year</label>
+        <div className="form-group" style={{ marginBottom: 'var(--space-3)' }}>
+          <label className="label">Academic year</label>
           <input
+            className="input"
             type="text"
             placeholder="e.g. 2025-2026"
             value={academicYear}
             onChange={(e) => setAcademicYear(e.target.value)}
-            style={{
-              padding: '0.5rem 0.6rem',
-              border: '1px solid #d0d7de',
-              borderRadius: '6px',
-              fontSize: '0.9rem',
-              background: 'transparent',
-              color: 'inherit',
-              maxWidth: '200px',
-            }}
+            style={{ maxWidth: '200px' }}
           />
         </div>
 
         {rows.map((row, i) => (
           <div key={i} className="pay-plan-row">
-            <span style={{ fontSize: '0.85rem', color: '#57606a', minWidth: '1.5rem' }}>
+            <span className="text-sm text-muted" style={{ minWidth: '1.5rem' }}>
               {i + 1}.
             </span>
             <input
@@ -612,9 +598,9 @@ const PlanTab = ({
         ))}
 
         {(formError ?? planError) && (
-          <p style={{ color: '#b3261e', margin: '0.5rem 0', fontSize: '0.9rem' }}>
+          <div className="alert alert--danger">
             {formError ?? planError}
-          </p>
+          </div>
         )}
 
         <button

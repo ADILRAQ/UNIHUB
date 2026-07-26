@@ -72,7 +72,7 @@ const ModulePanel = ({
         )}
 
         {canEdit && (
-          <span style={{ display: 'flex', gap: '0.4rem', marginLeft: 'auto' }}>
+          <span style={{ display: 'flex', gap: 'var(--space-1)', marginLeft: 'auto' }}>
             <button
               type="button"
               className="res-btn res-btn--sm res-btn--ghost"
@@ -101,9 +101,9 @@ const ModulePanel = ({
       </div>
 
       {isExpanded && (
-        <div style={{ paddingLeft: '1.5rem' }}>
+        <div style={{ paddingLeft: 'var(--space-6)' }}>
           {resources.length === 0 ? (
-            <p className="res-resource__meta" style={{ margin: '0.5rem 0' }}>
+            <p className="res-resource__meta" style={{ margin: 'var(--space-2) 0' }}>
               No files yet.
             </p>
           ) : (
