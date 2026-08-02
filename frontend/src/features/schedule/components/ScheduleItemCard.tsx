@@ -30,7 +30,7 @@ const ScheduleItemCard = ({ item, canManage, onManage }: ScheduleItemCardProps) 
         <span className="sched-item__time">{formatTimeRange(item.startTime, item.endTime)}</span>
       </div>
 
-      <h3 className={`sched-item__title${visual.isCancelled ? ' sched-item__title--struck' : ''}`}>
+      <h3 className={`sched-item__title${visual.isCancelled ? ' sched-item__title--cancelled' : ''}`}>
         {item.title}
       </h3>
 

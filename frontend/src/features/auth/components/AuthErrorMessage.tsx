@@ -3,10 +3,8 @@ interface AuthErrorMessageProps {
 }
 
 /**
- * Inline error banner shared by the auth pages. Both the field-validation and
- * server-error messages on login + change-password rendered the identical
- * `auth-error` alert paragraph; this factors out that duplicated markup. Renders
- * nothing when there is no message (matches the previous `{error && ...}` guard).
+ * Inline error banner shared by the auth pages. Renders nothing when there
+ * is no message.
  */
 const AuthErrorMessage = ({ message }: AuthErrorMessageProps) => {
   if (!message) {
@@ -14,9 +12,9 @@ const AuthErrorMessage = ({ message }: AuthErrorMessageProps) => {
   }
 
   return (
-    <p className="auth-error" role="alert">
+    <div className="alert alert--danger" role="alert">
       {message}
-    </p>
+    </div>
   );
 };
 

@@ -1,16 +1,24 @@
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../features/auth/AuthContext';
 import useGetData from '../../hooks/useGetData';
 import { getUnreadCount } from '../../features/announcements/services/announcementService';
 
 /**
- * Top bar for the authenticated area (rendered inside `RequireAuth` via
- * `BaseLayout`, so a user is always present). Shows the signed-in user's name
- * and role, nav links for all roles (Announcements, Calendar), role-scoped
- * links (Timetable for TEACHER/ADMIN, Admin console for ADMIN), and a logout button.
+ * Top bar for the authenticated area. Shows the signed-in user's name and
+ * role, nav links for all roles (Announcements, Courses, Calendar, Payments),
+ * role-scoped links (Timetable for TEACHER/ADMIN, Admin console for ADMIN),
+ * and a logout button.
  */
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const { data: unreadCount } = useGetData<{ count: number }, string, number>({
     queryKey: ['announcements', 'unread-count'],
@@ -19,38 +27,63 @@ const Navbar = () => {
     enabled: !!user,
   });
 
+  const linkClass = ({ isActive }: { isActive: boolean }) =>
+    isActive ? 'navbar__link navbar__link--active' : 'navbar__link';
+
   return (
-    <header className="navbar">
-      <Link to="/" className="navbar__title">
-        UniHub
-      </Link>
+    <header className={`navbar${scrolled ? ' navbar--scrolled' : ''}`}>
+      <NavLink to="/" className="navbar__brand" aria-label="UniHub home">
+        <span className="navbar__logo" aria-hidden="true">UH</span>
+        <span className="navbar__wordmark">UniHub</span>
+      </NavLink>
+
       <nav className="navbar__nav" aria-label="Main navigation">
-        <Link to="/announcements" className="navbar__link navbar__link--with-badge">
+        <NavLink
+          to="/announcements"
+          className={({ isActive }) =>
+            isActive
+              ? 'navbar__link navbar__link--active navbar__link--with-badge'
+              : 'navbar__link navbar__link--with-badge'
+          }
+        >
           Announcements
           {!!unreadCount && unreadCount > 0 && (
-            <span className="ann-unread-badge">{unreadCount}</span>
+            <span className="ann-unread-badge" aria-label={`${unreadCount} unread`}>
+              {unreadCount}
+            </span>
           )}
-        </Link>
-        <Link to="/schedule" className="navbar__link">
+        </NavLink>
+
+        <NavLink to="/courses" className={linkClass}>
+          Courses
+        </NavLink>
+
+        <NavLink to="/schedule" className={linkClass}>
           Calendar
-        </Link>
+        </NavLink>
+
+        <NavLink to="/payments" className={linkClass}>
+          Payments
+        </NavLink>
+
         {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
-          <Link to="/timetable" className="navbar__link">
+          <NavLink to="/timetable" className={linkClass}>
             Timetable
-          </Link>
+          </NavLink>
         )}
+
         {user?.role === 'ADMIN' && (
-          <Link to="/admin" className="navbar__link">
-            Admin console
-          </Link>
+          <NavLink to="/admin" className={linkClass}>
+            Admin
+          </NavLink>
         )}
       </nav>
+
       {user && (
         <div className="navbar__user">
-          <span className="navbar__identity">
-            {user.fullName} <span className="navbar__role">{user.role}</span>
-          </span>
-          <button type="button" className="navbar__logout" onClick={logout}>
+          <span className="navbar__name">{user.fullName}</span>
+          <span className="badge badge--neutral">{user.role}</span>
+          <button type="button" className="btn btn--ghost btn--sm" onClick={logout}>
             Log out
           </button>
         </div>

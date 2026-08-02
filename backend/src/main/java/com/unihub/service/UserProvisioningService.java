@@ -14,6 +14,8 @@ import com.unihub.security.AuthenticatedUser;
 import com.unihub.security.TempPasswordGenerator;
 import java.util.HashSet;
 import java.util.Set;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -41,16 +43,25 @@ public class UserProvisioningService {
     private final UserImportPersistenceService persistenceService;
     private final TempPasswordGenerator tempPasswordGenerator;
 
+    /**
+     * Lazily injected to avoid a potential circular dependency: PaymentService depends on
+     * UserRepository, which is also a dependency here. The @Lazy proxy breaks the cycle at
+     * startup without changing the runtime behaviour.
+     */
+    private final PaymentService paymentService;
+
     public UserProvisioningService(ClassGroupRepository classGroupRepository,
                                    UserRepository userRepository,
                                    UserClassGroupRepository userClassGroupRepository,
                                    UserImportPersistenceService persistenceService,
-                                   TempPasswordGenerator tempPasswordGenerator) {
+                                   TempPasswordGenerator tempPasswordGenerator,
+                                   @Lazy PaymentService paymentService) {
         this.classGroupRepository = classGroupRepository;
         this.userRepository = userRepository;
         this.userClassGroupRepository = userClassGroupRepository;
         this.persistenceService = persistenceService;
         this.tempPasswordGenerator = tempPasswordGenerator;
+        this.paymentService = paymentService;
     }
 
     /**
@@ -68,12 +79,19 @@ public class UserProvisioningService {
         }
 
         String tempPassword = tempPasswordGenerator.generate();
+        Long newUserId;
         try {
-            persistenceService.createAccount(email, fullName, role, group, tempPassword);
+            newUserId = persistenceService.createAccount(email, fullName, role, group, tempPassword);
         } catch (DataIntegrityViolationException ex) {
             // Lost a race on the unique-email index after the pre-check — normalize to the
             // same conflict the pre-check would have thrown.
             throw new ConflictException("A user with email '" + email + "' already exists.");
+        }
+
+        // Generate payment installments for newly created students.
+        // createAccount() committed in REQUIRES_NEW, so the user row is visible here.
+        if (role == UserRole.STUDENT) {
+            paymentService.generateInstallmentsForNewStudent(newUserId);
         }
 
         String groupName = group != null ? group.getName() : null;

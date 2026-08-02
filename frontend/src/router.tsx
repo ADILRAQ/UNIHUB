@@ -12,6 +12,9 @@ import TimetablePage from './features/schedule/pages/TimetablePage';
 import AnnouncementsPage from './features/announcements/pages/AnnouncementsPage';
 import AnnouncementDetailPage from './features/announcements/pages/AnnouncementDetailPage';
 import ComposerPage from './features/announcements/pages/ComposerPage';
+import CoursesPage from './features/resources/pages/CoursesPage';
+import CoursePage from './features/resources/pages/CoursePage';
+import PaymentsPage from './features/payments/pages/PaymentsPage';
 import TeacherPage from './features/teacher/pages/TeacherPage';
 
 /**
@@ -43,6 +46,9 @@ const router = createBrowserRouter([
               { path: 'schedule', element: <CalendarPage /> },
               { path: 'announcements', element: <AnnouncementsPage /> },
               { path: 'announcements/:id', element: <AnnouncementDetailPage /> },
+              { path: 'courses', element: <CoursesPage /> },
+              { path: 'courses/:courseId', element: <CoursePage /> },
+              { path: 'payments', element: <PaymentsPage /> },
               {
                 element: <RequireRole allowed={['TEACHER', 'ADMIN']} />,
                 children: [

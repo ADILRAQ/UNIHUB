@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import usePostData from '../../../hooks/usePostData';
+import { useToast } from '../../../components/ui/Toast';
 import { apiErrorMessage } from '../../../utils/apiError';
 import { createUser } from '../services/userService';
 import useClassGroupsData from './useClassGroupsData';
@@ -36,6 +37,7 @@ export interface UseAddUserSection {
  */
 const useAddUserSection = (): UseAddUserSection => {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const { classGroups, isLoading: classGroupsLoading } = useClassGroupsData();
 
   const [fullName, setFullName] = useState('');
@@ -55,10 +57,14 @@ const useAddUserSection = (): UseAddUserSection => {
       setEmail('');
       setRole('STUDENT');
       setClassGroupId(null);
+      toast.success('User created successfully!');
       void queryClient.invalidateQueries({ queryKey: ['admin', 'users', 'list'] });
     },
-    onErrorFn: (error) =>
-      setServerError(apiErrorMessage(error, 'Could not create the user. Please try again.')),
+    onErrorFn: (error) => {
+      const msg = apiErrorMessage(error, 'Could not create the user. Please try again.');
+      setServerError(msg);
+      toast.error(msg);
+    },
   });
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {

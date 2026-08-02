@@ -19,17 +19,23 @@ const CancelRescheduleDialog = ({ session, onClose }: CancelRescheduleDialogProp
 
   return (
     <div
-      className="sched-modal"
+      className="sched-dialog-overlay"
       role="dialog"
       aria-modal="true"
       aria-label="Cancel or reschedule session"
     >
-      <div className="sched-modal__card">
-        <header className="sched-modal__head">
-          <h2 className="sched-modal__title">{session.title}</h2>
+      <div className="sched-dialog">
+        <header className="sched-dialog__header">
+          <div>
+            <h2 className="sched-dialog__title">{session.title}</h2>
+            <p style={{ margin: '0', fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>
+              {formatDateLong(parseISODate(session.date))} &middot;{' '}
+              {formatTimeRange(session.startTime, session.endTime)}
+            </p>
+          </div>
           <button
             type="button"
-            className="sched-modal__close"
+            className="btn btn--ghost btn--sm"
             aria-label="Close"
             onClick={onClose}
           >
@@ -37,95 +43,91 @@ const CancelRescheduleDialog = ({ session, onClose }: CancelRescheduleDialogProp
           </button>
         </header>
 
-        <p className="sched-modal__sub">
-          {formatDateLong(parseISODate(session.date))} ·{' '}
-          {formatTimeRange(session.startTime, session.endTime)}
-        </p>
+        <form onSubmit={onSubmit}>
+          <div className="sched-dialog__body">
+            <div className="sched-tabs">
+              <button
+                type="button"
+                className={`sched-tab${mode === 'cancel' ? ' sched-tab--active' : ''}`}
+                onClick={() => onSelectMode('cancel')}
+              >
+                Cancel session
+              </button>
+              <button
+                type="button"
+                className={`sched-tab${mode === 'reschedule' ? ' sched-tab--active' : ''}`}
+                onClick={() => onSelectMode('reschedule')}
+              >
+                Reschedule
+              </button>
+            </div>
 
-        <div className="sched-modal__tabs">
-          <button
-            type="button"
-            className={`sched-modal__tab${mode === 'cancel' ? ' sched-modal__tab--active' : ''}`}
-            onClick={() => onSelectMode('cancel')}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className={`sched-modal__tab${
-              mode === 'reschedule' ? ' sched-modal__tab--active' : ''
-            }`}
-            onClick={() => onSelectMode('reschedule')}
-          >
-            Reschedule
-          </button>
-        </div>
-
-        <form className="sched-form" onSubmit={onSubmit}>
-          {mode === 'reschedule' && (
-            <>
-              <label className="sched-field">
-                <span>New date (an off day — a make-up class)</span>
-                <input
-                  type="date"
-                  value={form.newDate}
-                  onChange={(event) => onFormChange({ newDate: event.target.value })}
-                  disabled={isPending}
-                  required
-                />
-              </label>
-              <div className="sched-field-row">
+            {mode === 'reschedule' && (
+              <>
                 <label className="sched-field">
-                  <span>Start</span>
+                  <span>New date (an off day — a make-up class)</span>
                   <input
-                    type="time"
-                    value={form.startTime}
-                    onChange={(event) => onFormChange({ startTime: event.target.value })}
+                    type="date"
+                    value={form.newDate}
+                    onChange={(event) => onFormChange({ newDate: event.target.value })}
                     disabled={isPending}
                     required
                   />
                 </label>
+                <div className="sched-field-row">
+                  <label className="sched-field">
+                    <span>Start</span>
+                    <input
+                      type="time"
+                      value={form.startTime}
+                      onChange={(event) => onFormChange({ startTime: event.target.value })}
+                      disabled={isPending}
+                      required
+                    />
+                  </label>
+                  <label className="sched-field">
+                    <span>End</span>
+                    <input
+                      type="time"
+                      value={form.endTime}
+                      onChange={(event) => onFormChange({ endTime: event.target.value })}
+                      disabled={isPending}
+                      required
+                    />
+                  </label>
+                </div>
                 <label className="sched-field">
-                  <span>End</span>
+                  <span>Room (optional)</span>
                   <input
-                    type="time"
-                    value={form.endTime}
-                    onChange={(event) => onFormChange({ endTime: event.target.value })}
+                    type="text"
+                    value={form.room}
+                    onChange={(event) => onFormChange({ room: event.target.value })}
                     disabled={isPending}
-                    required
                   />
                 </label>
-              </div>
-              <label className="sched-field">
-                <span>Room (optional)</span>
-                <input
-                  type="text"
-                  value={form.room}
-                  onChange={(event) => onFormChange({ room: event.target.value })}
-                  disabled={isPending}
-                />
-              </label>
-            </>
-          )}
+              </>
+            )}
 
-          <label className="sched-field">
-            <span>Note (optional)</span>
-            <textarea
-              value={note}
-              onChange={(event) => onNoteChange(event.target.value)}
-              disabled={isPending}
-              rows={2}
-            />
-          </label>
+            <label className="sched-field">
+              <span>Note (optional)</span>
+              <textarea
+                value={note}
+                onChange={(event) => onNoteChange(event.target.value)}
+                disabled={isPending}
+                rows={2}
+              />
+            </label>
 
-          {error && <p className="sched-error">{error}</p>}
+            {error && <p className="sched-error">{error}</p>}
+          </div>
 
-          <div className="sched-form__actions">
+          <footer className="sched-dialog__footer">
+            <button type="button" className="sched-btn" onClick={onClose} disabled={isPending}>
+              Close
+            </button>
             <button
               type="submit"
-              className={`sched-btn sched-btn--primary${
-                mode === 'cancel' ? ' sched-btn--danger' : ''
-              }`}
+              className={`sched-btn sched-btn--primary${mode === 'cancel' ? ' sched-btn--danger' : ''}`}
               disabled={isPending}
             >
               {isPending
@@ -134,10 +136,7 @@ const CancelRescheduleDialog = ({ session, onClose }: CancelRescheduleDialogProp
                   ? 'Cancel this session'
                   : 'Reschedule session'}
             </button>
-            <button type="button" className="sched-btn" onClick={onClose} disabled={isPending}>
-              Close
-            </button>
-          </div>
+          </footer>
         </form>
       </div>
     </div>
