@@ -85,7 +85,7 @@
 .btn--primary:hover:not(:disabled) {
   background: var(--color-brand-700);
   border-color: var(--color-brand-700);
-  box-shadow: 0 8px 25px rgba(79, 70, 229, 0.35);
+  box-shadow: 0 8px 25px rgba(26, 71, 112, 0.35);
 }
 
 .btn--secondary {
@@ -204,7 +204,7 @@ button .badge:hover {
 .textarea:focus {
   border-color: var(--color-brand-500);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 0 0 3px rgba(29, 108, 182, 0.2);
   transform: scale(1.005);
 }
 
