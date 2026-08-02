@@ -1,0 +1,1043 @@
+<title>FSAC × UniHub — Color System</title>
+<style>
+/* ── TOKENS ──────────────────────────────────────────────── */
+:root {
+  /* Primary — FSAC Navy (extracted from #1A4770) */
+  --p-50:  #EEF4FB;
+  --p-100: #DAEAF7;
+  --p-200: #B3D1EF;
+  --p-300: #7FB4E0;
+  --p-400: #4A8FCC;
+  --p-500: #2871B2;
+  --p-600: #1D6CB6;
+  --p-700: #1A4770;
+  --p-800: #143860;
+  --p-900: #0E2540;
+  --p-950: #071628;
+
+  /* Accent — Academic Gold */
+  --a-50:  #FEF8EC;
+  --a-100: #FDF0D0;
+  --a-200: #FAE0A2;
+  --a-300: #F5C564;
+  --a-400: #EEA930;
+  --a-500: #C9942A;
+  --a-600: #A87620;
+  --a-700: #815A18;
+  --a-800: #5A3E12;
+  --a-900: #3A280C;
+
+  /* Neutral — Blue-Gray */
+  --n-50:  #F7F9FC;
+  --n-100: #EEF2F7;
+  --n-200: #DCE4EF;
+  --n-300: #C0CEDF;
+  --n-400: #9EB0C6;
+  --n-500: #7A93AD;
+  --n-600: #5B7490;
+  --n-700: #415771;
+  --n-800: #2C3D52;
+  --n-900: #1A2737;
+  --n-950: #0F1822;
+
+  /* Semantic */
+  --sem-success: #16A34A;
+  --sem-success-bg: #DCFCE7;
+  --sem-warning: #D97706;
+  --sem-warning-bg: #FEF3C7;
+  --sem-error: #DC2626;
+  --sem-error-bg: #FEE2E2;
+  --sem-info: #1D6CB6;
+  --sem-info-bg: #DAEAF7;
+
+  /* Surface tokens (light default) */
+  --bg:          #FFFFFF;
+  --bg-subtle:   #F7F9FC;
+  --bg-card:     #FFFFFF;
+  --border:      #DCE4EF;
+  --border-focus: #1D6CB6;
+  --text-primary: #1A2737;
+  --text-secondary: #5B7490;
+  --text-disabled: #9EB0C6;
+  --text-inverse: #FFFFFF;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:           #0F1822;
+    --bg-subtle:    #1A2737;
+    --bg-card:      #1A2737;
+    --border:       #2C3D52;
+    --border-focus: #4A8FCC;
+    --text-primary: #EEF2F7;
+    --text-secondary: #9EB0C6;
+    --text-disabled: #5B7490;
+    --text-inverse: #0F1822;
+    --sem-success-bg: #14532d;
+    --sem-warning-bg: #78350f;
+    --sem-error-bg:   #7f1d1d;
+    --sem-info-bg:    #0E2540;
+  }
+}
+:root[data-theme="light"] {
+  --bg:          #FFFFFF;
+  --bg-subtle:   #F7F9FC;
+  --bg-card:     #FFFFFF;
+  --border:      #DCE4EF;
+  --border-focus: #1D6CB6;
+  --text-primary: #1A2737;
+  --text-secondary: #5B7490;
+  --text-disabled: #9EB0C6;
+  --text-inverse: #FFFFFF;
+  --sem-success-bg: #DCFCE7;
+  --sem-warning-bg: #FEF3C7;
+  --sem-error-bg:   #FEE2E2;
+  --sem-info-bg:    #DAEAF7;
+}
+:root[data-theme="dark"] {
+  --bg:           #0F1822;
+  --bg-subtle:    #1A2737;
+  --bg-card:      #1A2737;
+  --border:       #2C3D52;
+  --border-focus: #4A8FCC;
+  --text-primary: #EEF2F7;
+  --text-secondary: #9EB0C6;
+  --text-disabled: #5B7490;
+  --text-inverse: #0F1822;
+  --sem-success-bg: #14532d;
+  --sem-warning-bg: #78350f;
+  --sem-error-bg:   #7f1d1d;
+  --sem-info-bg:    #0E2540;
+}
+
+/* ── RESET ───────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* ── BASE ────────────────────────────────────────────────── */
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  transition: background .2s, color .2s;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ── HEADER ──────────────────────────────────────────────── */
+.header {
+  background: var(--p-700);
+  color: #fff;
+  padding: 20px 28px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.header-eyebrow {
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--a-400);
+  font-weight: 600;
+}
+.header-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -.3px;
+  color: #fff;
+  line-height: 1.1;
+}
+.header-subtitle {
+  font-size: 12px;
+  color: rgba(255,255,255,.55);
+  margin-top: 2px;
+}
+.header-subtitle a {
+  color: var(--a-300);
+  text-decoration: none;
+}
+.header-subtitle a:hover { text-decoration: underline; }
+
+.theme-toggle {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background .15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.theme-toggle:hover { background: rgba(255,255,255,.22); }
+.theme-toggle:focus-visible { outline: 2px solid var(--a-400); outline-offset: 2px; }
+
+/* ── CONTENT ─────────────────────────────────────────────── */
+.content {
+  padding: 28px 28px 48px;
+  max-width: 1200px;
+}
+
+/* ── SCALE SECTION ───────────────────────────────────────── */
+.scale-section {
+  margin-bottom: 32px;
+}
+.scale-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.scale-name {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.scale-desc {
+  font-size: 11px;
+  color: var(--text-disabled);
+}
+.scale-strip {
+  display: grid;
+  gap: 4px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.scale-strip.primary-scale  { grid-template-columns: repeat(11, 1fr); }
+.scale-strip.gold-scale     { grid-template-columns: repeat(10, 1fr); }
+.scale-strip.neutral-scale  { grid-template-columns: repeat(11, 1fr); }
+
+.swatch {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 80px;
+  padding: 6px 7px;
+  position: relative;
+  cursor: default;
+  transition: transform .1s;
+}
+.swatch:hover { transform: scaleY(1.04); transform-origin: bottom; z-index: 1; }
+
+.swatch.brand-marker::after {
+  content: '';
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.7);
+  box-shadow: 0 0 0 1.5px rgba(0,0,0,.25);
+}
+
+.swatch-shade {
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.swatch-hex {
+  font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 9.5px;
+  line-height: 1;
+  opacity: .85;
+}
+.swatch-light .swatch-shade,
+.swatch-light .swatch-hex { color: rgba(0,0,0,.6); }
+.swatch-dark  .swatch-shade,
+.swatch-dark  .swatch-hex  { color: rgba(255,255,255,.85); }
+
+/* ── DIVIDER ─────────────────────────────────────────────── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin-bottom: 28px;
+}
+
+/* ── SEMANTIC ────────────────────────────────────────────── */
+.semantic-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 32px;
+}
+.semantic-card {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.semantic-swatch {
+  height: 52px;
+}
+.semantic-body {
+  padding: 10px 12px;
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.semantic-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.semantic-hex {
+  font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 11px;
+  color: var(--text-primary);
+}
+.semantic-use {
+  font-size: 10px;
+  color: var(--text-disabled);
+  margin-top: 2px;
+}
+
+/* ── USAGE TABLE ─────────────────────────────────────────── */
+.usage-section {
+  margin-bottom: 32px;
+}
+.usage-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.usage-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.usage-table th {
+  text-align: left;
+  font-size: 10px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-disabled);
+  font-weight: 600;
+  padding: 0 12px 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.usage-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.usage-table tr:last-child td { border-bottom: none; }
+.usage-table .token {
+  font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 11px;
+  color: var(--p-600);
+  background: var(--bg-subtle);
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+:root[data-theme="dark"] .usage-table .token,
+@media (prefers-color-scheme: dark) {
+  .usage-table .token { color: var(--p-300); }
+}
+.usage-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-right: 7px;
+}
+.usage-element { color: var(--text-secondary); }
+
+/* ── CODE BLOCK ──────────────────────────────────────────── */
+.code-section {
+  background: var(--n-950);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.06);
+}
+.code-header {
+  background: rgba(255,255,255,.05);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.code-file {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,.5);
+}
+.copy-btn {
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.15);
+  color: rgba(255,255,255,.7);
+  border-radius: 5px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.copy-btn:hover { background: rgba(255,255,255,.18); color: #fff; }
+.copy-btn:focus-visible { outline: 2px solid var(--a-500); outline-offset: 2px; }
+.copy-btn.copied { color: #4ade80; border-color: #4ade80; }
+
+pre {
+  padding: 18px 16px;
+  overflow-x: auto;
+  font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: #cdd6f4;
+}
+.c-comment  { color: #6e7a8a; }
+.c-var      { color: #89b4fa; }
+.c-val      { color: #a6e3a1; }
+.c-punct    { color: #cdd6f4; }
+
+/* ── PREVIEW STRIP ───────────────────────────────────────── */
+.preview-section {
+  margin-bottom: 32px;
+}
+.preview-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.preview-strip {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Mini Nav */
+.mini-nav {
+  background: var(--p-700);
+  border-radius: 8px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 48px;
+  flex: 1;
+  min-width: 280px;
+}
+.mini-nav-brand {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  margin-right: 20px;
+  letter-spacing: -.3px;
+}
+.mini-nav-brand span { color: var(--a-400); }
+.mini-nav-link {
+  font-size: 12px;
+  color: rgba(255,255,255,.6);
+  padding: 4px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.mini-nav-link:hover { color: #fff; background: rgba(255,255,255,.1); }
+.mini-nav-link.active { color: #fff; background: rgba(255,255,255,.15); }
+
+/* Mini Buttons */
+.mini-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+.btn-primary {
+  background: var(--p-700);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+}
+.btn-primary:hover { background: var(--p-800); }
+.btn-secondary {
+  background: transparent;
+  color: var(--p-700);
+  border: 1.5px solid var(--p-200);
+  border-radius: 6px;
+  padding: 7px 15px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.btn-secondary:hover { background: var(--p-50); border-color: var(--p-300); }
+.btn-accent {
+  background: var(--a-500);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+}
+.btn-accent:hover { background: var(--a-600); }
+
+/* Mini Card */
+.mini-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  flex: 1;
+  min-width: 180px;
+}
+.mini-card-eyebrow {
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--a-500);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.mini-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+.mini-card-sub {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.mini-card-badge {
+  display: inline-block;
+  margin-top: 10px;
+  background: var(--p-50);
+  color: var(--p-700);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 1px solid var(--p-100);
+}
+
+:root[data-theme="dark"] .mini-card-badge {
+  background: var(--p-900);
+  color: var(--p-300);
+  border-color: var(--p-800);
+}
+
+</style>
+
+<div class="header">
+  <div class="header-left">
+    <div class="header-eyebrow">Faculté des Sciences Aïn Chock</div>
+    <div class="header-title">FSAC × UniHub — Color System</div>
+    <div class="header-subtitle">
+      Extracted from <a href="https://fsac.univh2c.ma" target="_blank">fsac.univh2c.ma</a> · Hassan II University of Casablanca
+    </div>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle color theme">
+    <span id="themeIcon">☀</span> Light
+  </button>
+</div>
+
+<div class="content">
+
+  <!-- PRIMARY SCALE -->
+  <div class="scale-section">
+    <div class="scale-header">
+      <div class="scale-name">Primary — Navy Blue</div>
+      <div class="scale-desc">University brand color · navbars, headings, primary buttons, borders</div>
+    </div>
+    <div class="scale-strip primary-scale">
+      <div class="swatch swatch-light" style="background:#EEF4FB">
+        <div class="swatch-shade">50</div><div class="swatch-hex">#EEF4FB</div>
+      </div>
+      <div class="swatch swatch-light" style="background:#DAEAF7">
+        <div class="swatch-shade">100</div><div class="swatch-hex">#DAEAF7</div>
+      </div>
+      <div class="swatch swatch-light" style="background:#B3D1EF">
+        <div class="swatch-shade">200</div><div class="swatch-hex">#B3D1EF</div>
+      </div>
+      <div class="swatch swatch-light" style="background:#7FB4E0">
+        <div class="swatch-shade">300</div><div class="swatch-hex">#7FB4E0</div>
+      </div>
+      <div class="swatch swatch-dark" style="background:#4A8FCC">
+        <div class="swatch-shade">400</div><div class="swatch-hex">#4A8FCC</div>
+      </div>
+      <div class="swatch swatch-dark" style="background:#2871B2">
+        <div class="swatch-shade">500</div><div class="swatch-hex">#2871B2</div>
+      </div>
+      <div class="swatch swatch-dark brand-marker" style="background:#1D6CB6">
+        <div class="swatch-shade">600</div><div class="swatch-hex">#1D6CB6</div>
+      </div>
+      <div class="swatch swatch-dark brand-marker" style="background:#1A4770">
+        <div class="swatch-shade">700</div><div class="swatch-hex">#1A4770</div>
+      </div>
+      <div class="swatch swatch-dark" style="background:#143860">
+        <div class="swatch-shade">800</div><div class="swatch-hex">#143860</div>
+      </div>
+      <div class="swatch swatch-dark" style="background:#0E2540">
+        <div class="swatch-shade">900</div><div class="swatch-hex">#0E2540</div>
+      </div>
+      <div class="swatch swatch-dark" style="background:#071628">
+        <div class="swatch-shade">950</div><div class="swatch-hex">#071628</div>
+      </div>
+    </div>
+    <div style="margin-top:5px;font-size:10px;color:var(--text-disabled);">
+      ● 700 = FSAC brand primary &nbsp;·&nbsp; ● 600 = interactive / link color (from live site CSS)
+    </div>
+  </div>
+
+  <!-- GOLD SCALE -->
+  <div class="scale-section">
+    <div class="scale-header">
+      <div class="scale-name">Accent — Academic Gold</div>
+      <div class="scale-desc">Warm Moroccan accent · highlights, badges, decorative marks, CTA accents</div>
+    </div>
+    <div class="scale-strip gold-scale">
+      <div class="swatch swatch-light" style="background:#FEF8EC">
+        <div class="swatch-shade">50</div><div class="swatch-hex">#FEF8EC</div>
+      </div>
+      <div class="swatch swatch-light" style="background:#FDF0D0">
+        <div class="swatch-shade">100</div><div class="swatch-hex">#FDF0D0</div>
+      </div>
+      <div class="swatch swatch-light" style="background:#FAE0A2">
+        <div class="swatch-shade">200</div><div class="swatch-hex">#FAE0A2</div>
+      </div>
+      <div class="swatch swatch-light" style="background:#F5C564">
+        <div class="swatch-shade">300</div><div class="swatch-hex">#F5C564</div>
+      </div>
+      <div class="swatch swatch-dark" style="background:#EEA930">
+        <div class="swatch-shade">400</div><div class="swatch-hex">#EEA930</div>
+      </div>
+      <div class="swatch swatch-dark brand-marker" style="background:#C9942A">
+        <div class="swatch-shade">500</div><div class="swatch-hex">#C9942A</div>
+      </div>
+      <div class="swatch swatch-dark" style="background:#A87620">
+        <div class="swatch-shade">600</div><div class="swatch-hex">#A87620</div>
+      </div>
+      <div class="swatch swatch-dark" style="background:#815A18">
+        <div class="swatch-shade">700</div><div class="swatch-hex">#815A18</div>
+      </div>
+      <div class="swatch swatch-dark" style="background:#5A3E12">
+        <div class="swatch-shade">800</div><div class="swatch-hex">#5A3E12</div>
+      </div>
+      <div class="swatch swatch-dark" style="background:#3A280C">
+        <div class="swatch-shade">900</div><div class="swatch-hex">#3A280C</div>
+      </div>
+    </div>
+    <div style="margin-top:5px;font-size:10px;color:var(--text-disabled);">
+      ● 500 = primary accent &nbsp;·&nbsp; Use 400 on dark backgrounds, 600 in body copy links
+    </div>
+  </div>
+
+  <!-- NEUTRAL SCALE -->
+  <div class="scale-section">
+    <div class="scale-header">
+      <div class="scale-name">Neutral — Blue Gray</div>
+      <div class="scale-desc">Slightly blue-tinted gray, cohesive with navy · surfaces, borders, body text, icons</div>
+    </div>
+    <div class="scale-strip neutral-scale">
+      <div class="swatch swatch-light" style="background:#F7F9FC">
+        <div class="swatch-shade">50</div><div class="swatch-hex">#F7F9FC</div>
+      </div>
+      <div class="swatch swatch-light" style="background:#EEF2F7">
+        <div class="swatch-shade">100</div><div class="swatch-hex">#EEF2F7</div>
+      </div>
+      <div class="swatch swatch-light" style="background:#DCE4EF">
+        <div class="swatch-shade">200</div><div class="swatch-hex">#DCE4EF</div>
+      </div>
+      <div class="swatch swatch-light" style="background:#C0CEDF">
+        <div class="swatch-shade">300</div><div class="swatch-hex">#C0CEDF</div>
+      </div>
+      <div class="swatch swatch-dark" style="background:#9EB0C6">
+        <div class="swatch-shade">400</div><div class="swatch-hex">#9EB0C6</div>
+      </div>
+      <div class="swatch swatch-dark" style="background:#7A93AD">
+        <div class="swatch-shade">500</div><div class="swatch-hex">#7A93AD</div>
+      </div>
+      <div class="swatch swatch-dark" style="background:#5B7490">
+        <div class="swatch-shade">600</div><div class="swatch-hex">#5B7490</div>
+      </div>
+      <div class="swatch swatch-dark" style="background:#415771">
+        <div class="swatch-shade">700</div><div class="swatch-hex">#415771</div>
+      </div>
+      <div class="swatch swatch-dark" style="background:#2C3D52">
+        <div class="swatch-shade">800</div><div class="swatch-hex">#2C3D52</div>
+      </div>
+      <div class="swatch swatch-dark" style="background:#1A2737">
+        <div class="swatch-shade">900</div><div class="swatch-hex">#1A2737</div>
+      </div>
+      <div class="swatch swatch-dark" style="background:#0F1822">
+        <div class="swatch-shade">950</div><div class="swatch-hex">#0F1822</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SEMANTIC -->
+  <div class="usage-title" style="margin-bottom:10px">Semantic Colors</div>
+  <div class="semantic-grid">
+    <div class="semantic-card">
+      <div class="semantic-swatch" style="background:#16A34A"></div>
+      <div class="semantic-body">
+        <div class="semantic-label">Success</div>
+        <div class="semantic-hex">#16A34A</div>
+        <div class="semantic-use">Payment validated, submission accepted</div>
+      </div>
+    </div>
+    <div class="semantic-card">
+      <div class="semantic-swatch" style="background:#D97706"></div>
+      <div class="semantic-body">
+        <div class="semantic-label">Warning</div>
+        <div class="semantic-hex">#D97706</div>
+        <div class="semantic-use">Proof pending review, overdue date</div>
+      </div>
+    </div>
+    <div class="semantic-card">
+      <div class="semantic-swatch" style="background:#DC2626"></div>
+      <div class="semantic-body">
+        <div class="semantic-label">Error</div>
+        <div class="semantic-hex">#DC2626</div>
+        <div class="semantic-use">Payment rejected, form error</div>
+      </div>
+    </div>
+    <div class="semantic-card">
+      <div class="semantic-swatch" style="background:#1D6CB6"></div>
+      <div class="semantic-body">
+        <div class="semantic-label">Info</div>
+        <div class="semantic-hex">#1D6CB6</div>
+        <div class="semantic-use">Session announcements, links</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- USAGE TABLE -->
+  <div class="usage-section">
+    <div class="usage-title">Token Mapping — tokens.css</div>
+    <div style="overflow-x:auto">
+      <table class="usage-table">
+        <thead>
+          <tr>
+            <th>Token</th>
+            <th>Value</th>
+            <th>UniHub Usage</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code class="token">--color-primary</code></td>
+            <td><span class="usage-dot" style="background:#1A4770"></span>#1A4770</td>
+            <td class="usage-element">Navbar background, primary buttons, headings</td>
+          </tr>
+          <tr>
+            <td><code class="token">--color-primary-hover</code></td>
+            <td><span class="usage-dot" style="background:#143860"></span>#143860</td>
+            <td class="usage-element">Button hover, active nav item</td>
+          </tr>
+          <tr>
+            <td><code class="token">--color-interactive</code></td>
+            <td><span class="usage-dot" style="background:#1D6CB6"></span>#1D6CB6</td>
+            <td class="usage-element">Links, focus rings, input borders on focus</td>
+          </tr>
+          <tr>
+            <td><code class="token">--color-accent</code></td>
+            <td><span class="usage-dot" style="background:#C9942A"></span>#C9942A</td>
+            <td class="usage-element">Badges, payment step indicators, special CTAs</td>
+          </tr>
+          <tr>
+            <td><code class="token">--color-bg</code></td>
+            <td><span class="usage-dot" style="background:#FFFFFF;border:1px solid #DCE4EF"></span>#FFFFFF / #0F1822</td>
+            <td class="usage-element">Page background (light / dark)</td>
+          </tr>
+          <tr>
+            <td><code class="token">--color-bg-subtle</code></td>
+            <td><span class="usage-dot" style="background:#F7F9FC;border:1px solid #DCE4EF"></span>#F7F9FC / #1A2737</td>
+            <td class="usage-element">Sidebar, table stripes, input fills</td>
+          </tr>
+          <tr>
+            <td><code class="token">--color-border</code></td>
+            <td><span class="usage-dot" style="background:#DCE4EF"></span>#DCE4EF / #2C3D52</td>
+            <td class="usage-element">Card borders, dividers, table rows</td>
+          </tr>
+          <tr>
+            <td><code class="token">--color-text</code></td>
+            <td><span class="usage-dot" style="background:#1A2737"></span>#1A2737 / #EEF2F7</td>
+            <td class="usage-element">Body text, labels</td>
+          </tr>
+          <tr>
+            <td><code class="token">--color-text-muted</code></td>
+            <td><span class="usage-dot" style="background:#5B7490"></span>#5B7490 / #9EB0C6</td>
+            <td class="usage-element">Captions, placeholders, metadata</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- PREVIEW STRIP -->
+  <div class="preview-section">
+    <div class="preview-title">Preview</div>
+    <div class="preview-strip">
+      <div class="mini-nav">
+        <div class="mini-nav-brand">Uni<span>Hub</span></div>
+        <div class="mini-nav-link active">Accueil</div>
+        <div class="mini-nav-link">Cours</div>
+        <div class="mini-nav-link">Paiements</div>
+        <div class="mini-nav-link">Ressources</div>
+      </div>
+    </div>
+    <div class="preview-strip" style="margin-top:10px">
+      <div class="mini-buttons">
+        <button class="btn-primary">Soumettre</button>
+        <button class="btn-secondary">Annuler</button>
+        <button class="btn-accent">Nouvelle annonce</button>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-eyebrow">Paiement</div>
+        <div class="mini-card-title">Tranche 1</div>
+        <div class="mini-card-sub">Échéance · 15 octobre 2026</div>
+        <div class="mini-card-badge">En attente de validation</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-eyebrow">Cours</div>
+        <div class="mini-card-title">Algorithmique Avancée</div>
+        <div class="mini-card-sub">Prof. Hassan Amrani · L3 Info A</div>
+        <div class="mini-card-badge">Session aujourd'hui</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CODE EXPORT -->
+  <div class="code-section">
+    <div class="code-header">
+      <span class="code-file">frontend/src/styles/tokens.css</span>
+      <button class="copy-btn" id="copyBtn" onclick="copyCSS()">Copy</button>
+    </div>
+    <pre id="cssCode"><span class="c-comment">/* ── FSAC × UniHub Color System ─────────────────── */</span>
+<span class="c-punct">:root {</span>
+  <span class="c-comment">/* Primary — Navy Blue */</span>
+  <span class="c-var">--color-primary-50</span><span class="c-punct">:</span>  <span class="c-val">#EEF4FB</span><span class="c-punct">;</span>
+  <span class="c-var">--color-primary-100</span><span class="c-punct">:</span> <span class="c-val">#DAEAF7</span><span class="c-punct">;</span>
+  <span class="c-var">--color-primary-200</span><span class="c-punct">:</span> <span class="c-val">#B3D1EF</span><span class="c-punct">;</span>
+  <span class="c-var">--color-primary-300</span><span class="c-punct">:</span> <span class="c-val">#7FB4E0</span><span class="c-punct">;</span>
+  <span class="c-var">--color-primary-400</span><span class="c-punct">:</span> <span class="c-val">#4A8FCC</span><span class="c-punct">;</span>
+  <span class="c-var">--color-primary-500</span><span class="c-punct">:</span> <span class="c-val">#2871B2</span><span class="c-punct">;</span>
+  <span class="c-var">--color-primary-600</span><span class="c-punct">:</span> <span class="c-val">#1D6CB6</span><span class="c-punct">;</span>  <span class="c-comment">/* interactive / links */</span>
+  <span class="c-var">--color-primary-700</span><span class="c-punct">:</span> <span class="c-val">#1A4770</span><span class="c-punct">;</span>  <span class="c-comment">/* FSAC brand — navbar, headings */</span>
+  <span class="c-var">--color-primary-800</span><span class="c-punct">:</span> <span class="c-val">#143860</span><span class="c-punct">;</span>
+  <span class="c-var">--color-primary-900</span><span class="c-punct">:</span> <span class="c-val">#0E2540</span><span class="c-punct">;</span>
+  <span class="c-var">--color-primary-950</span><span class="c-punct">:</span> <span class="c-val">#071628</span><span class="c-punct">;</span>
+
+  <span class="c-comment">/* Accent — Academic Gold */</span>
+  <span class="c-var">--color-accent-50</span><span class="c-punct">:</span>  <span class="c-val">#FEF8EC</span><span class="c-punct">;</span>
+  <span class="c-var">--color-accent-100</span><span class="c-punct">:</span> <span class="c-val">#FDF0D0</span><span class="c-punct">;</span>
+  <span class="c-var">--color-accent-200</span><span class="c-punct">:</span> <span class="c-val">#FAE0A2</span><span class="c-punct">;</span>
+  <span class="c-var">--color-accent-300</span><span class="c-punct">:</span> <span class="c-val">#F5C564</span><span class="c-punct">;</span>
+  <span class="c-var">--color-accent-400</span><span class="c-punct">:</span> <span class="c-val">#EEA930</span><span class="c-punct">;</span>
+  <span class="c-var">--color-accent-500</span><span class="c-punct">:</span> <span class="c-val">#C9942A</span><span class="c-punct">;</span>  <span class="c-comment">/* primary accent */</span>
+  <span class="c-var">--color-accent-600</span><span class="c-punct">:</span> <span class="c-val">#A87620</span><span class="c-punct">;</span>
+  <span class="c-var">--color-accent-700</span><span class="c-punct">:</span> <span class="c-val">#815A18</span><span class="c-punct">;</span>
+  <span class="c-var">--color-accent-800</span><span class="c-punct">:</span> <span class="c-val">#5A3E12</span><span class="c-punct">;</span>
+  <span class="c-var">--color-accent-900</span><span class="c-punct">:</span> <span class="c-val">#3A280C</span><span class="c-punct">;</span>
+
+  <span class="c-comment">/* Neutral — Blue Gray */</span>
+  <span class="c-var">--color-neutral-50</span><span class="c-punct">:</span>  <span class="c-val">#F7F9FC</span><span class="c-punct">;</span>
+  <span class="c-var">--color-neutral-100</span><span class="c-punct">:</span> <span class="c-val">#EEF2F7</span><span class="c-punct">;</span>
+  <span class="c-var">--color-neutral-200</span><span class="c-punct">:</span> <span class="c-val">#DCE4EF</span><span class="c-punct">;</span>
+  <span class="c-var">--color-neutral-300</span><span class="c-punct">:</span> <span class="c-val">#C0CEDF</span><span class="c-punct">;</span>
+  <span class="c-var">--color-neutral-400</span><span class="c-punct">:</span> <span class="c-val">#9EB0C6</span><span class="c-punct">;</span>
+  <span class="c-var">--color-neutral-500</span><span class="c-punct">:</span> <span class="c-val">#7A93AD</span><span class="c-punct">;</span>
+  <span class="c-var">--color-neutral-600</span><span class="c-punct">:</span> <span class="c-val">#5B7490</span><span class="c-punct">;</span>
+  <span class="c-var">--color-neutral-700</span><span class="c-punct">:</span> <span class="c-val">#415771</span><span class="c-punct">;</span>
+  <span class="c-var">--color-neutral-800</span><span class="c-punct">:</span> <span class="c-val">#2C3D52</span><span class="c-punct">;</span>
+  <span class="c-var">--color-neutral-900</span><span class="c-punct">:</span> <span class="c-val">#1A2737</span><span class="c-punct">;</span>
+  <span class="c-var">--color-neutral-950</span><span class="c-punct">:</span> <span class="c-val">#0F1822</span><span class="c-punct">;</span>
+
+  <span class="c-comment">/* Semantic */</span>
+  <span class="c-var">--color-success</span><span class="c-punct">:</span>        <span class="c-val">#16A34A</span><span class="c-punct">;</span>
+  <span class="c-var">--color-success-subtle</span><span class="c-punct">:</span> <span class="c-val">#DCFCE7</span><span class="c-punct">;</span>
+  <span class="c-var">--color-warning</span><span class="c-punct">:</span>        <span class="c-val">#D97706</span><span class="c-punct">;</span>
+  <span class="c-var">--color-warning-subtle</span><span class="c-punct">:</span> <span class="c-val">#FEF3C7</span><span class="c-punct">;</span>
+  <span class="c-var">--color-error</span><span class="c-punct">:</span>          <span class="c-val">#DC2626</span><span class="c-punct">;</span>
+  <span class="c-var">--color-error-subtle</span><span class="c-punct">:</span>   <span class="c-val">#FEE2E2</span><span class="c-punct">;</span>
+
+  <span class="c-comment">/* Surface tokens (light) */</span>
+  <span class="c-var">--color-bg</span><span class="c-punct">:</span>           <span class="c-val">#FFFFFF</span><span class="c-punct">;</span>
+  <span class="c-var">--color-bg-subtle</span><span class="c-punct">:</span>    <span class="c-val">#F7F9FC</span><span class="c-punct">;</span>
+  <span class="c-var">--color-border</span><span class="c-punct">:</span>       <span class="c-val">#DCE4EF</span><span class="c-punct">;</span>
+  <span class="c-var">--color-border-focus</span><span class="c-punct">:</span> <span class="c-val">#1D6CB6</span><span class="c-punct">;</span>
+  <span class="c-var">--color-text</span><span class="c-punct">:</span>         <span class="c-val">#1A2737</span><span class="c-punct">;</span>
+  <span class="c-var">--color-text-muted</span><span class="c-punct">:</span>   <span class="c-val">#5B7490</span><span class="c-punct">;</span>
+  <span class="c-var">--color-text-disabled</span><span class="c-punct">:</span><span class="c-val">#9EB0C6</span><span class="c-punct">;</span>
+<span class="c-punct">}</span>
+
+<span class="c-comment">/* Dark mode */</span>
+<span class="c-punct">@media (prefers-color-scheme: dark) {</span>
+  <span class="c-var">:root</span> <span class="c-punct">{</span>
+    <span class="c-var">--color-bg</span><span class="c-punct">:</span>            <span class="c-val">#0F1822</span><span class="c-punct">;</span>
+    <span class="c-var">--color-bg-subtle</span><span class="c-punct">:</span>     <span class="c-val">#1A2737</span><span class="c-punct">;</span>
+    <span class="c-var">--color-border</span><span class="c-punct">:</span>        <span class="c-val">#2C3D52</span><span class="c-punct">;</span>
+    <span class="c-var">--color-border-focus</span><span class="c-punct">:</span>  <span class="c-val">#4A8FCC</span><span class="c-punct">;</span>
+    <span class="c-var">--color-text</span><span class="c-punct">:</span>          <span class="c-val">#EEF2F7</span><span class="c-punct">;</span>
+    <span class="c-var">--color-text-muted</span><span class="c-punct">:</span>    <span class="c-val">#9EB0C6</span><span class="c-punct">;</span>
+    <span class="c-var">--color-text-disabled</span><span class="c-punct">:</span> <span class="c-val">#5B7490</span><span class="c-punct">;</span>
+    <span class="c-var">--color-success-subtle</span><span class="c-punct">:</span><span class="c-val">#14532d</span><span class="c-punct">;</span>
+    <span class="c-var">--color-warning-subtle</span><span class="c-punct">:</span><span class="c-val">#78350f</span><span class="c-punct">;</span>
+    <span class="c-var">--color-error-subtle</span><span class="c-punct">:</span>  <span class="c-val">#7f1d1d</span><span class="c-punct">;</span>
+  <span class="c-punct">}</span>
+<span class="c-punct">}</span></pre>
+  </div>
+
+</div>
+
+<script>
+  // Sync initial theme with OS
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  let currentTheme = prefersDark ? 'dark' : 'light';
+  applyTheme(currentTheme);
+
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    const btn = document.getElementById('themeBtn');
+    const icon = document.getElementById('themeIcon');
+    if (t === 'dark') {
+      icon.textContent = '☽';
+      btn.innerHTML = '<span id="themeIcon">☽</span> Dark';
+    } else {
+      icon.textContent = '☀';
+      btn.innerHTML = '<span id="themeIcon">☀</span> Light';
+    }
+    currentTheme = t;
+  }
+
+  function toggleTheme() {
+    applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+  }
+
+  function copyCSS() {
+    const raw = `/* ── FSAC × UniHub Color System ─────────────────── */
+:root {
+  /* Primary — Navy Blue */
+  --color-primary-50:  #EEF4FB;
+  --color-primary-100: #DAEAF7;
+  --color-primary-200: #B3D1EF;
+  --color-primary-300: #7FB4E0;
+  --color-primary-400: #4A8FCC;
+  --color-primary-500: #2871B2;
+  --color-primary-600: #1D6CB6;
+  --color-primary-700: #1A4770;
+  --color-primary-800: #143860;
+  --color-primary-900: #0E2540;
+  --color-primary-950: #071628;
+
+  /* Accent — Academic Gold */
+  --color-accent-50:  #FEF8EC;
+  --color-accent-100: #FDF0D0;
+  --color-accent-200: #FAE0A2;
+  --color-accent-300: #F5C564;
+  --color-accent-400: #EEA930;
+  --color-accent-500: #C9942A;
+  --color-accent-600: #A87620;
+  --color-accent-700: #815A18;
+  --color-accent-800: #5A3E12;
+  --color-accent-900: #3A280C;
+
+  /* Neutral — Blue Gray */
+  --color-neutral-50:  #F7F9FC;
+  --color-neutral-100: #EEF2F7;
+  --color-neutral-200: #DCE4EF;
+  --color-neutral-300: #C0CEDF;
+  --color-neutral-400: #9EB0C6;
+  --color-neutral-500: #7A93AD;
+  --color-neutral-600: #5B7490;
+  --color-neutral-700: #415771;
+  --color-neutral-800: #2C3D52;
+  --color-neutral-900: #1A2737;
+  --color-neutral-950: #0F1822;
+
+  /* Semantic */
+  --color-success:        #16A34A;
+  --color-success-subtle: #DCFCE7;
+  --color-warning:        #D97706;
+  --color-warning-subtle: #FEF3C7;
+  --color-error:          #DC2626;
+  --color-error-subtle:   #FEE2E2;
+
+  /* Surface tokens (light) */
+  --color-bg:           #FFFFFF;
+  --color-bg-subtle:    #F7F9FC;
+  --color-border:       #DCE4EF;
+  --color-border-focus: #1D6CB6;
+  --color-text:         #1A2737;
+  --color-text-muted:   #5B7490;
+  --color-text-disabled:#9EB0C6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg:            #0F1822;
+    --color-bg-subtle:     #1A2737;
+    --color-border:        #2C3D52;
+    --color-border-focus:  #4A8FCC;
+    --color-text:          #EEF2F7;
+    --color-text-muted:    #9EB0C6;
+    --color-text-disabled: #5B7490;
+    --color-success-subtle:#14532d;
+    --color-warning-subtle:#78350f;
+    --color-error-subtle:  #7f1d1d;
+  }
+}`;
+    navigator.clipboard.writeText(raw).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+</script>

@@ -36,7 +36,9 @@ export const submitAssignment = (
   const form = new FormData();
   form.append('file', file);
   return apiClient
-    .post<SubmissionDto>(`/api/assignments/${assignmentId}/submit`, form)
+    .post<SubmissionDto>(`/api/assignments/${assignmentId}/submit`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
     .then((r) => r.data);
 };
 

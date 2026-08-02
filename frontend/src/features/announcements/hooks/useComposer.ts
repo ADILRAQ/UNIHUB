@@ -8,6 +8,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../auth/AuthContext';
 import useGetData from '../../../hooks/useGetData';
 import usePostData from '../../../hooks/usePostData';
+import { useToast } from '../../../components/ui/Toast';
 import * as announcementService from '../services/announcementService';
 import { getPostableGroups } from '../services/classGroupService';
 import type { AnnouncementDto, ClassGroupOption, CreateAnnouncementRequest } from '../types';
@@ -44,6 +45,7 @@ const useComposer = ({ initialAnnouncement }: UseComposerOptions): UseComposerRe
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   const isEditing = !!initialAnnouncement;
 
@@ -77,6 +79,7 @@ const useComposer = ({ initialAnnouncement }: UseComposerOptions): UseComposerRe
     keys: ['announcements', 'create'],
     serviceFn: (data) => announcementService.createAnnouncement(data),
     onSuccessFn: () => {
+      toast.success('Announcement published!');
       void queryClient.invalidateQueries({ queryKey: ['announcements'] });
       navigate('/announcements');
     },
@@ -84,6 +87,7 @@ const useComposer = ({ initialAnnouncement }: UseComposerOptions): UseComposerRe
       // err is typed `any` by usePostData — safe to access .response.data.message
       const msg: string = (err?.response?.data?.message as string | undefined) ?? 'Failed to publish announcement.';
       setError(msg);
+      toast.error(msg);
     },
   });
 
@@ -96,12 +100,14 @@ const useComposer = ({ initialAnnouncement }: UseComposerOptions): UseComposerRe
     serviceFn: ({ id, title: t, body }) =>
       announcementService.updateAnnouncement(id, { title: t, body }),
     onSuccessFn: () => {
+      toast.success('Announcement saved!');
       void queryClient.invalidateQueries({ queryKey: ['announcements'] });
       navigate('/announcements');
     },
     onErrorFn: (err) => {
       const msg: string = (err?.response?.data?.message as string | undefined) ?? 'Failed to save changes.';
       setError(msg);
+      toast.error(msg);
     },
   });
 
@@ -113,12 +119,14 @@ const useComposer = ({ initialAnnouncement }: UseComposerOptions): UseComposerRe
     keys: ['announcements', 'delete'],
     serviceFn: (id) => announcementService.deleteAnnouncement(id),
     onSuccessFn: () => {
+      toast.success('Announcement deleted.');
       void queryClient.invalidateQueries({ queryKey: ['announcements'] });
       navigate('/announcements');
     },
     onErrorFn: (err) => {
       const msg: string = (err?.response?.data?.message as string | undefined) ?? 'Failed to delete announcement.';
       setError(msg);
+      toast.error(msg);
     },
   });
 

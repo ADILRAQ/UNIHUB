@@ -6,6 +6,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import useGetData from '../../../hooks/useGetData';
 import usePostData from '../../../hooks/usePostData';
+import { useToast } from '../../../components/ui/Toast';
 import * as moduleService from '../services/moduleService';
 import * as resourceService from '../services/resourceService';
 import type {
@@ -39,6 +40,7 @@ interface UseCourseResourcesReturn {
 
 const useCourseResources = (courseId: number): UseCourseResourcesReturn => {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [expandedModules, setExpandedModules] = useState<Set<number>>(new Set());
   const [resourcesByModule, setResourcesByModule] = useState<
     Record<number, ResourceDto[]>
@@ -158,9 +160,11 @@ const useCourseResources = (courseId: number): UseCourseResourcesReturn => {
         [newResource.moduleId]: [...(prev[newResource.moduleId] ?? []), newResource],
       }));
       setUploadingModuleId(null);
+      toast.success('Resource uploaded successfully!');
     },
     onErrorFn: () => {
       setUploadingModuleId(null);
+      toast.error('Upload failed, please try again.');
     },
   });
 

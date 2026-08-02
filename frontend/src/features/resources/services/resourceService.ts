@@ -10,7 +10,9 @@ export const uploadResource = (moduleId: number, file: File): Promise<ResourceDt
   const form = new FormData();
   form.append('file', file);
   return apiClient
-    .post<ResourceDto>(`/api/modules/${moduleId}/resources`, form)
+    .post<ResourceDto>(`/api/modules/${moduleId}/resources`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
     .then((r) => r.data);
 };
 

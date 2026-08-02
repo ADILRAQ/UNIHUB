@@ -14,7 +14,9 @@ export const uploadProof = (installmentId: number, file: File): Promise<void> =>
   const form = new FormData();
   form.append('file', file);
   return apiClient
-    .post(`/api/payments/${installmentId}/proof`, form)
+    .post(`/api/payments/${installmentId}/proof`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
     .then(() => undefined);
 };
 

@@ -6,6 +6,7 @@ import { useState, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import useGetData from '../../../hooks/useGetData';
 import usePostData from '../../../hooks/usePostData';
+import { useToast } from '../../../components/ui/Toast';
 import * as paymentService from '../services/paymentService';
 import type { InstallmentDto } from '../types';
 
@@ -22,6 +23,7 @@ interface UseStudentPaymentsReturn {
 
 const useStudentPayments = (): UseStudentPaymentsReturn => {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [uploadingId, setUploadingId] = useState<number | null>(null);
   const [uploadFeedback, setUploadFeedback] = useState<Record<number, string>>({});
   const pendingIdRef = useRef<number | null>(null);
@@ -54,6 +56,7 @@ const useStudentPayments = (): UseStudentPaymentsReturn => {
         }));
         pendingIdRef.current = null;
       }
+      toast.success('Proof uploaded successfully!');
       void queryClient.invalidateQueries({ queryKey: [...INSTALLMENTS_KEY] });
     },
     onErrorFn: () => {
@@ -63,6 +66,7 @@ const useStudentPayments = (): UseStudentPaymentsReturn => {
         setUploadFeedback((prev) => ({ ...prev, [id]: 'Upload failed. Try again.' }));
         pendingIdRef.current = null;
       }
+      toast.error('Upload failed, please try again.');
     },
   });
 

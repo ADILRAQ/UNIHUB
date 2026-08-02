@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../features/auth/AuthContext';
 import useGetData from '../../hooks/useGetData';
@@ -11,6 +12,13 @@ import { getUnreadCount } from '../../features/announcements/services/announceme
  */
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const { data: unreadCount } = useGetData<{ count: number }, string, number>({
     queryKey: ['announcements', 'unread-count'],
@@ -23,7 +31,7 @@ const Navbar = () => {
     isActive ? 'navbar__link navbar__link--active' : 'navbar__link';
 
   return (
-    <header className="navbar">
+    <header className={`navbar${scrolled ? ' navbar--scrolled' : ''}`}>
       <NavLink to="/" className="navbar__brand" aria-label="UniHub home">
         <span className="navbar__logo" aria-hidden="true">UH</span>
         <span className="navbar__wordmark">UniHub</span>
