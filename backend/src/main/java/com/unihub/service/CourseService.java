@@ -51,8 +51,7 @@ public class CourseService {
     @Transactional(readOnly = true)
     public List<CourseDto> listCourses(AuthenticatedUser caller) {
         List<Course> courses = switch (caller.role()) {
-            case ROLE_ADMIN -> courseRepository.findAll();
-            case ROLE_TEACHER -> courseRepository.findByTeacher_Id(caller.userId());
+            case ROLE_ADMIN, ROLE_TEACHER -> courseRepository.findAll();
             default -> {
                 List<Long> groupIds = userClassGroupRepository.findGroupIdsByUserId(caller.userId());
                 yield groupIds.isEmpty() ? List.of() : courseRepository.findByClassGroup_IdIn(groupIds);
@@ -78,8 +77,7 @@ public class CourseService {
 
     private boolean isVisibleTo(Course course, AuthenticatedUser caller) {
         return switch (caller.role()) {
-            case ROLE_ADMIN -> true;
-            case ROLE_TEACHER -> course.getTeacher().getId().equals(caller.userId());
+            case ROLE_ADMIN, ROLE_TEACHER -> true;
             default -> userClassGroupRepository.existsByUser_IdAndClassGroup_Id(
                     caller.userId(), course.getClassGroup().getId());
         };

@@ -147,7 +147,7 @@ public class ResourceService {
     // -------------------------------------------------------------------------
 
     private List<Long> getAccessibleModuleIds(Long callerId, String callerRole) {
-        if (ROLE_ADMIN.equals(callerRole)) {
+        if (ROLE_ADMIN.equals(callerRole) || ROLE_TEACHER.equals(callerRole)) {
             return moduleRepository.findAll().stream().map(CourseModule::getId).toList();
         }
 
@@ -156,30 +156,15 @@ public class ResourceService {
             return List.of();
         }
 
-        // Get all modules from courses accessible to the caller
+        // STUDENT: only modules from courses in the student's class groups
         return moduleRepository.findAll().stream()
-                .filter(m -> {
-                    Course c = m.getCourse();
-                    if (ROLE_TEACHER.equals(callerRole)) {
-                        return c.getTeacher().getId().equals(callerId)
-                                || groupIds.contains(c.getClassGroup().getId());
-                    }
-                    return groupIds.contains(c.getClassGroup().getId());
-                })
+                .filter(m -> groupIds.contains(m.getCourse().getClassGroup().getId()))
                 .map(CourseModule::getId)
                 .toList();
     }
 
     private void assertCanRead(Course course, Long callerId, String callerRole) {
-        if (ROLE_ADMIN.equals(callerRole)) {
-            return;
-        }
-        if (ROLE_TEACHER.equals(callerRole)) {
-            if (!course.getTeacher().getId().equals(callerId)
-                    && !userClassGroupRepository.existsByUser_IdAndClassGroup_Id(
-                            callerId, course.getClassGroup().getId())) {
-                throw new AccessDeniedException("You do not have access to this course.");
-            }
+        if (ROLE_ADMIN.equals(callerRole) || ROLE_TEACHER.equals(callerRole)) {
             return;
         }
         if (!userClassGroupRepository.existsByUser_IdAndClassGroup_Id(
@@ -189,13 +174,7 @@ public class ResourceService {
     }
 
     private void assertCanWrite(Course course, Long callerId, String callerRole) {
-        if (ROLE_ADMIN.equals(callerRole)) {
-            return;
-        }
-        if (ROLE_TEACHER.equals(callerRole)) {
-            if (!course.getTeacher().getId().equals(callerId)) {
-                throw new AccessDeniedException("You can only manage resources for your own courses.");
-            }
+        if (ROLE_ADMIN.equals(callerRole) || ROLE_TEACHER.equals(callerRole)) {
             return;
         }
         throw new AccessDeniedException("Students cannot manage course resources.");

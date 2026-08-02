@@ -42,13 +42,13 @@ public class ClassGroupController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ClassGroupDto createGroup(@Valid @RequestBody ClassGroupRequest request) {
         return classGroupService.createGroup(request.name());
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ClassGroupDto renameGroup(@PathVariable Long id,
                                      @Valid @RequestBody ClassGroupRequest request) {
         return classGroupService.renameGroup(id, request.name());
@@ -56,21 +56,21 @@ public class ClassGroupController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public void deleteGroup(@PathVariable Long id) {
         classGroupService.deleteGroup(id);
     }
 
     @PostMapping("/{id}/teachers/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public void assignTeacher(@PathVariable Long id, @PathVariable Long userId) {
         classGroupService.assignTeacher(id, userId);
     }
 
     @DeleteMapping("/{id}/teachers/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public void revokeTeacher(@PathVariable Long id, @PathVariable Long userId) {
         classGroupService.revokeTeacher(id, userId);
     }

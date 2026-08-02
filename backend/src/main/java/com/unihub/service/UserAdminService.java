@@ -11,6 +11,7 @@ import com.unihub.model.User;
 import com.unihub.model.UserClassGroup;
 import com.unihub.model.UserRole;
 import com.unihub.model.UserStatus;
+import org.springframework.security.access.AccessDeniedException;
 import com.unihub.repository.UserClassGroupRepository;
 import com.unihub.repository.UserRepository;
 import com.unihub.repository.spec.UserSpecifications;
@@ -107,19 +108,28 @@ public class UserAdminService {
     }
 
     /**
-     * Sets a user's account status. Guards against an admin deactivating their own account
-     * (which would immediately lock them out), rejecting that with a 400.
+     * Sets a user's account status. Guards:
+     * <ul>
+     *   <li>No caller may deactivate their own account.</li>
+     *   <li>A TEACHER caller may not change the status of an ADMIN account.</li>
+     * </ul>
      *
-     * @param callerId the authenticated admin's own user id
+     * @param callerId   the authenticated caller's own user id
+     * @param callerRole the authenticated caller's role string (e.g. "ADMIN" or "TEACHER")
      */
     @Transactional
-    public UserSummaryDto updateStatus(Long id, UserStatus status, Long callerId) {
+    public UserSummaryDto updateStatus(Long id, UserStatus status, Long callerId, String callerRole) {
         if (id.equals(callerId) && status == UserStatus.INACTIVE) {
             throw new BadRequestException("You cannot deactivate your own account.");
         }
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User " + id + " not found"));
+
+        if ("TEACHER".equals(callerRole) && user.getRole() == UserRole.ADMIN) {
+            throw new AccessDeniedException("Teachers cannot modify the status of admin accounts.");
+        }
+
         user.setStatus(status);
         User saved = userRepository.save(user);
         return AdminMapper.toSummary(saved);

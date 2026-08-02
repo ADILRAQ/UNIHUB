@@ -171,15 +171,7 @@ public class AssignmentService {
     }
 
     private void assertCanReadCourse(Course course, Long callerId, String callerRole) {
-        if (ROLE_ADMIN.equals(callerRole)) {
-            return;
-        }
-        if (ROLE_TEACHER.equals(callerRole)) {
-            if (!course.getTeacher().getId().equals(callerId)
-                    && !userClassGroupRepository.existsByUser_IdAndClassGroup_Id(
-                            callerId, course.getClassGroup().getId())) {
-                throw new AccessDeniedException("You do not have access to this course.");
-            }
+        if (ROLE_ADMIN.equals(callerRole) || ROLE_TEACHER.equals(callerRole)) {
             return;
         }
         if (!userClassGroupRepository.existsByUser_IdAndClassGroup_Id(
@@ -189,13 +181,7 @@ public class AssignmentService {
     }
 
     private void assertCanWriteCourse(Course course, Long callerId, String callerRole) {
-        if (ROLE_ADMIN.equals(callerRole)) {
-            return;
-        }
-        if (ROLE_TEACHER.equals(callerRole)) {
-            if (!course.getTeacher().getId().equals(callerId)) {
-                throw new AccessDeniedException("You can only manage assignments for your own courses.");
-            }
+        if (ROLE_ADMIN.equals(callerRole) || ROLE_TEACHER.equals(callerRole)) {
             return;
         }
         throw new AccessDeniedException("Students cannot manage assignments.");

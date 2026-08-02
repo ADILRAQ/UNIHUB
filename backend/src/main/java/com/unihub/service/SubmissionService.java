@@ -116,13 +116,10 @@ public class SubmissionService {
                                                        String callerRole) {
         Assignment assignment = assignmentService.requireAssignment(assignmentId);
 
-        // Caller must be the teacher of the course or ADMIN
-        if (!ROLE_ADMIN.equals(callerRole)) {
-            if (!ROLE_TEACHER.equals(callerRole)
-                    || !assignment.getCourse().getTeacher().getId().equals(callerId)) {
-                throw new AccessDeniedException(
-                        "Only the course teacher or an admin can view all submissions.");
-            }
+        // Caller must be a TEACHER or ADMIN
+        if (!ROLE_ADMIN.equals(callerRole) && !ROLE_TEACHER.equals(callerRole)) {
+            throw new AccessDeniedException(
+                    "Only the course teacher or an admin can view all submissions.");
         }
 
         Long classGroupId = assignment.getCourse().getClassGroup().getId();
@@ -159,12 +156,9 @@ public class SubmissionService {
                         "Submission " + submissionId + " not found."));
 
         Assignment assignment = submission.getAssignment();
-        if (!ROLE_ADMIN.equals(callerRole)) {
-            if (!ROLE_TEACHER.equals(callerRole)
-                    || !assignment.getCourse().getTeacher().getId().equals(callerId)) {
-                throw new AccessDeniedException(
-                        "Only the course teacher or an admin can download submissions.");
-            }
+        if (!ROLE_ADMIN.equals(callerRole) && !ROLE_TEACHER.equals(callerRole)) {
+            throw new AccessDeniedException(
+                    "Only the course teacher or an admin can download submissions.");
         }
 
         StorageService.StorageObject obj = storageService.download(submission.getStorageKey());

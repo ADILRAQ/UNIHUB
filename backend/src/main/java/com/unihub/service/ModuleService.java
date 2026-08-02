@@ -126,16 +126,7 @@ public class ModuleService {
     // -------------------------------------------------------------------------
 
     private void assertCanReadCourse(Course course, Long callerId, String callerRole) {
-        if (ROLE_ADMIN.equals(callerRole)) {
-            return;
-        }
-        if (ROLE_TEACHER.equals(callerRole)) {
-            // Teachers can see modules for courses they teach OR belong to
-            if (!course.getTeacher().getId().equals(callerId)
-                    && !userClassGroupRepository.existsByUser_IdAndClassGroup_Id(
-                            callerId, course.getClassGroup().getId())) {
-                throw new AccessDeniedException("You do not have access to this course.");
-            }
+        if (ROLE_ADMIN.equals(callerRole) || ROLE_TEACHER.equals(callerRole)) {
             return;
         }
         // STUDENT: must be in the course's class group
@@ -146,13 +137,7 @@ public class ModuleService {
     }
 
     private void assertCanWriteCourse(Course course, Long callerId, String callerRole) {
-        if (ROLE_ADMIN.equals(callerRole)) {
-            return;
-        }
-        if (ROLE_TEACHER.equals(callerRole)) {
-            if (!course.getTeacher().getId().equals(callerId)) {
-                throw new AccessDeniedException("You can only manage modules for your own courses.");
-            }
+        if (ROLE_ADMIN.equals(callerRole) || ROLE_TEACHER.equals(callerRole)) {
             return;
         }
         throw new AccessDeniedException("Students cannot manage course modules.");

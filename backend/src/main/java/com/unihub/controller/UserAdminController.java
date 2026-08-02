@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/users")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
 public class UserAdminController {
 
     private final UserAdminService userAdminService;
@@ -85,7 +85,7 @@ public class UserAdminController {
             @PathVariable Long id,
             @Valid @RequestBody UpdateUserStatusRequest request,
             @AuthenticationPrincipal AuthenticatedUser caller) {
-        return userAdminService.updateStatus(id, request.status(), caller.userId());
+        return userAdminService.updateStatus(id, request.status(), caller.userId(), caller.role());
     }
 
     /**

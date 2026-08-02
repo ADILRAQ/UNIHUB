@@ -83,7 +83,7 @@ public class PaymentController {
      * Returns all payment periods grouped by academic year.
      */
     @GetMapping("/periods")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public Map<String, List<PaymentPeriodDto>> getYearPlans() {
         return paymentService.getYearPlans();
     }
@@ -94,7 +94,7 @@ public class PaymentController {
      */
     @PostMapping("/periods")
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public List<PaymentPeriodDto> createYearPlan(
             @Valid @RequestBody CreatePeriodRequest request,
             @AuthenticationPrincipal AuthenticatedUser caller) {
@@ -106,7 +106,7 @@ public class PaymentController {
      * sorted by submission time ascending.
      */
     @GetMapping("/queue")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public List<ProofQueueItemDto> getPendingQueue() {
         return paymentService.getPendingQueue();
     }
@@ -115,7 +115,7 @@ public class PaymentController {
      * Streams the proof file for the given installment to the admin.
      */
     @GetMapping("/{id}/proof")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<StreamingResponseBody> getProof(@PathVariable Long id) {
         StorageService.StorageObject obj = paymentService.getProofStream(id);
 
@@ -138,7 +138,7 @@ public class PaymentController {
      * Approves the installment proof. Sets status to PAID and unlocks the next installment.
      */
     @PatchMapping("/{id}/approve")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public InstallmentDto approve(@PathVariable Long id,
                                    @AuthenticationPrincipal AuthenticatedUser caller) {
         return paymentService.approveInstallment(id, caller.userId());
@@ -149,7 +149,7 @@ public class PaymentController {
      * The student can re-upload after rejection.
      */
     @PatchMapping("/{id}/reject")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public InstallmentDto reject(@PathVariable Long id,
                                   @Valid @RequestBody RejectRequest request,
                                   @AuthenticationPrincipal AuthenticatedUser caller) {
@@ -161,7 +161,7 @@ public class PaymentController {
      * Optionally filtered by class group.
      */
     @GetMapping("/overdue")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public List<OverdueStudentDto> getOverdue(
             @RequestParam(required = false) Long classGroupId) {
         return paymentService.getOverdueInstallments(classGroupId);

@@ -57,7 +57,7 @@ public class CourseController {
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public CourseDto updateCourse(@PathVariable Long id,
                                   @Valid @RequestBody UpdateCourseRequest request) {
         return courseService.updateCourse(id, request);
@@ -65,7 +65,7 @@ public class CourseController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public void deleteCourse(@PathVariable Long id) {
         courseService.deleteCourse(id);
     }
