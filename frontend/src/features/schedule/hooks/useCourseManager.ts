@@ -64,7 +64,7 @@ export interface UseCourseManager {
 const useCourseManager = (): UseCourseManager => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const canManage = user?.role === 'ADMIN';
+  const canManage = user?.role === 'ADMIN' || user?.role === 'TEACHER';
 
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [formOpen, setFormOpen] = useState(false);

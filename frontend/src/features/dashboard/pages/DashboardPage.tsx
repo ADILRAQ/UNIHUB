@@ -16,13 +16,6 @@ const STUDENT_CARDS: NavCard[] = [
   { to: '/payments',      label: 'Payments',      description: 'Track tuition installments',  emoji: '💳' },
 ];
 
-const TEACHER_CARDS: NavCard[] = [
-  { to: '/announcements', label: 'Announcements', description: 'Post and manage notices',     emoji: '📢' },
-  { to: '/timetable',     label: 'Timetable',     description: 'Manage your courses',         emoji: '🗓️' },
-  { to: '/courses',       label: 'Courses',       description: 'Resources and assignments',   emoji: '📚' },
-  { to: '/schedule',      label: 'Calendar',      description: 'View the class calendar',     emoji: '📅' },
-];
-
 const ADMIN_CARDS: NavCard[] = [
   { to: '/admin',         label: 'Admin Console', description: 'Users, groups, and settings', emoji: '⚙️' },
   { to: '/announcements', label: 'Announcements', description: 'Post and manage notices',     emoji: '📢' },
@@ -37,7 +30,7 @@ const ADMIN_CARDS: NavCard[] = [
 const DashboardPage = () => {
   const { user, isAdmin, isTeacher } = useDashboardPage();
 
-  const cards = isAdmin ? ADMIN_CARDS : isTeacher ? TEACHER_CARDS : STUDENT_CARDS;
+  const cards = (isAdmin || isTeacher) ? ADMIN_CARDS : STUDENT_CARDS;
 
   return (
     <div className="stack stack--lg">

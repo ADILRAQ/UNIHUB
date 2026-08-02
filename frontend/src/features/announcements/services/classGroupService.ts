@@ -48,7 +48,7 @@ const getTeacherGroups = (): Promise<ClassGroupOption[]> =>
  * an announcement. Dispatches to the correct endpoint based on role.
  */
 export const getPostableGroups = (role: string): Promise<ClassGroupOption[]> => {
-  if (role === 'ADMIN') {
+  if (role === 'ADMIN' || role === 'TEACHER') {
     return getAdminGroups();
   }
   return getTeacherGroups();

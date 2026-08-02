@@ -60,7 +60,7 @@ const Navbar = () => {
       {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
         <NavLink to="/timetable" className={linkClass}>Timetable</NavLink>
       )}
-      {user?.role === 'ADMIN' && (
+      {(user?.role === 'ADMIN' || user?.role === 'TEACHER') && (
         <NavLink to="/admin" className={linkClass}>Admin</NavLink>
       )}
     </>

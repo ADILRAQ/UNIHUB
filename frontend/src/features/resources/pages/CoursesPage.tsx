@@ -24,7 +24,7 @@ const CoursesPage = () => {
     );
   }
 
-  const showTeacher = user?.role === 'ADMIN';
+  const showTeacher = user?.role === 'ADMIN' || user?.role === 'TEACHER';
 
   return (
     <div className="res-page">
