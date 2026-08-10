@@ -75,7 +75,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     restart: unless-stopped
     environment:
       # Must be a browser-reachable URL (not the internal "api" hostname):
