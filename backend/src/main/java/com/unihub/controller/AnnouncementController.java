@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -49,6 +50,7 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>Business logic lives entirely in the service layer; this class handles only
  * HTTP binding and RBAC at the URL level.
  */
+@Tag(name = "Announcements")
 @RestController
 @RequestMapping("/api/announcements")
 public class AnnouncementController {

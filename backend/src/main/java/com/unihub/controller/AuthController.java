@@ -5,6 +5,7 @@ import com.unihub.dto.ChangePasswordRequest;
 import com.unihub.dto.LoginRequest;
 import com.unihub.security.AuthenticatedUser;
 import com.unihub.service.AuthService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
  * is on the must-change-password filter's allow-list so a flagged user can reach it. All
  * business logic lives in {@link AuthService}.
  */
+@Tag(name = "Authentication")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
  * <p>Separate from {@code UserAdminController} (which is class-level ADMIN-only) so the two
  * can coexist under {@code /api/users} with different authorization.
  */
+@Tag(name = "User Management")
 @RestController
 public class UserImportController {
 

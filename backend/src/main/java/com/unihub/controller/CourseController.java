@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
  * timetable of their assigned courses, not the courses themselves. Business logic lives in
  * {@link CourseService}.
  */
+@Tag(name = "Calendar & Scheduling")
 @RestController
 @RequestMapping("/api/courses")
 public class CourseController {

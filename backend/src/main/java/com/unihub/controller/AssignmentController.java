@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 /**
@@ -41,6 +42,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
  *   <li>View submissions / download — TEACHER or ADMIN; service enforces course ownership.</li>
  * </ul>
  */
+@Tag(name = "Assignments")
 @RestController
 public class AssignmentController {
 

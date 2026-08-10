@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
  * {@code @PreAuthorize}); a caller with another role gets a 403 via the security
  * access-denied handler. Business logic lives in {@link UserAdminService}.
  */
+@Tag(name = "User Management")
 @RestController
 @RequestMapping("/api/users")
 @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
