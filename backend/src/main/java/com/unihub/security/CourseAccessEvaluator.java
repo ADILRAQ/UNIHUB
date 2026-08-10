@@ -71,15 +71,11 @@ public class CourseAccessEvaluator {
     }
 
     /**
-     * Returns {@code true} if the caller is a member of the class group that the given
-     * session's course belongs to. Used as the student-access gate on the recap read
-     * endpoints: a student in the wrong class group gets a 403 from the enclosing
-     * {@code @PreAuthorize} expression rather than a data leak.
-     *
-     * <p>This check is intentionally role-agnostic — it answers "is this user in the
-     * group", which is also true for the owning teacher (covered separately by
-     * {@code ownsSession}). The combined SpEL expression {@code ownsSession OR canViewSession}
-     * therefore grants read access to both the teacher and enrolled students.
+     * Returns {@code true} if the caller is a STUDENT enrolled in the class group that the
+     * given session's course belongs to. Non-students (TEACHER, ADMIN) must use
+     * {@code ownsSession} or the {@code hasRole('ADMIN')} arm — this guard is student-only
+     * to prevent a teacher assigned to the same group for import-rights from reading another
+     * teacher's session recap.
      */
     public boolean canViewSession(Authentication authentication, Long sessionId) {
         if (authentication == null || sessionId == null) {
@@ -88,21 +84,27 @@ public class CourseAccessEvaluator {
         if (!(authentication.getPrincipal() instanceof AuthenticatedUser user)) {
             return false;
         }
+        if (!"STUDENT".equals(user.role())) {
+            return false;
+        }
         return sessionRepository.findClassGroupIdBySessionId(sessionId)
                 .map(cgId -> userClassGroupRepository.existsByUser_IdAndClassGroup_Id(user.userId(), cgId))
                 .orElse(false);
     }
 
     /**
-     * Returns {@code true} if the caller is a member of the class group that the given
-     * course belongs to. Mirrors {@link #canViewSession} for the course-level past-sessions
-     * list endpoint.
+     * Returns {@code true} if the caller is a STUDENT enrolled in the class group that the
+     * given course belongs to. Mirrors {@link #canViewSession} for the course-level
+     * past-sessions list endpoint. Non-students use {@code ownsCourse} or ADMIN role check.
      */
     public boolean canViewCourse(Authentication authentication, Long courseId) {
         if (authentication == null || courseId == null) {
             return false;
         }
         if (!(authentication.getPrincipal() instanceof AuthenticatedUser user)) {
+            return false;
+        }
+        if (!"STUDENT".equals(user.role())) {
             return false;
         }
         return courseRepository.findClassGroupIdByCourseId(courseId)
