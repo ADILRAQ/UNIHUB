@@ -41,6 +41,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -488,10 +489,13 @@ public class DemoDataSeeder implements ApplicationRunner {
      */
     private void seedRecaps(Course course, List<Resource> moduleResources) {
         List<Session> past = sessionRepository.findPastSessionsByCourseId(
-                course.getId(), LocalDate.now());
+                course.getId(), LocalDate.now())
+                .stream()
+                .sorted(Comparator.comparing(Session::getDate).reversed())
+                .limit(2)
+                .toList();
         int chapter = 1;
         for (Session session : past) {
-            if (chapter > 2) break;
             session.setRecordingUrl(RECORDING_URL);
             session.setNotesHtml(
                     "<p>Session summary: covered key concepts from chapter " + chapter
