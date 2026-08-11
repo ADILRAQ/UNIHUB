@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
  * own — enforced in the service, since the {@code courseId} target is in the body). Edit/delete
  * is ADMIN or the owning teacher ({@code @courseAccess.ownsEvent}). Logic in {@link EventService}.
  */
+@Tag(name = "Calendar & Scheduling")
 @RestController
 @RequestMapping("/api/events")
 public class EventController {

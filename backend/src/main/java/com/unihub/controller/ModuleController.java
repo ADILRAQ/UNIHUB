@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>List — any authenticated user; visibility scoped in service.</li>
  * </ul>
  */
+@Tag(name = "Resources")
 @RestController
 public class ModuleController {
 

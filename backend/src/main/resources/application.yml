@@ -51,3 +51,10 @@ app:
     full-name: ${STUDENT_FULL_NAME:}
   seed:
     class-group: ${SEED_CLASS_GROUP:L3 Info A}
+
+springdoc:
+  api-docs:
+    path: /api/api-docs
+  swagger-ui:
+    path: /api/swagger-ui.html
+    disable-swagger-default-url: true

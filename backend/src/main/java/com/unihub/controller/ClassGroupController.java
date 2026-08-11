@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  * groups); write operations (create, rename, delete, teacher assignment) remain ADMIN-only.
  * Business logic lives in {@link ClassGroupService}.
  */
+@Tag(name = "User Management")
 @RestController
 @RequestMapping("/api/class-groups")
 public class ClassGroupController {

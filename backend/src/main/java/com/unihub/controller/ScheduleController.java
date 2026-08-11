@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  * sessions and events in range, merged into one chronologically sorted {@link ScheduleItemDto}
  * list. Open to any authenticated caller; scoping is per-role in {@link ScheduleService}.
  */
+@Tag(name = "Calendar & Scheduling")
 @RestController
 @RequestMapping("/api/schedule")
 public class ScheduleController {
