@@ -24,4 +24,12 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
      */
     @Query("select c.teacher.id from Course c where c.id = :courseId")
     Optional<Long> findTeacherIdByCourseId(@Param("courseId") Long courseId);
+
+    /**
+     * The class group id of a course — used by the {@code canViewCourse} evaluator so a
+     * student's membership in that group can be verified without navigating lazy associations.
+     * Empty when the course is absent.
+     */
+    @Query("select c.classGroup.id from Course c where c.id = :courseId")
+    Optional<Long> findClassGroupIdByCourseId(@Param("courseId") Long courseId);
 }

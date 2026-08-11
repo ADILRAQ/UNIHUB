@@ -44,4 +44,20 @@ public class HtmlSanitizer {
         }
         return clean;
     }
+
+    /**
+     * Sanitizes {@code rawHtml} when non-blank, or returns {@code null} when the input is
+     * blank or null. Used for optional rich-text fields (e.g. session recap notes) where an
+     * absent value is valid and should be stored as {@code NULL}.
+     *
+     * @param rawHtml the untrusted HTML input, may be null or blank
+     * @return sanitized HTML safe to persist and render, or {@code null}
+     */
+    public String sanitizeOptional(String rawHtml) {
+        if (rawHtml == null || rawHtml.isBlank()) {
+            return null;
+        }
+        String clean = Jsoup.clean(rawHtml, SAFELIST);
+        return clean.isBlank() ? null : clean;
+    }
 }

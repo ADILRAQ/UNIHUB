@@ -4,6 +4,7 @@ import com.unihub.repository.CourseRepository;
 import com.unihub.repository.EventRepository;
 import com.unihub.repository.ScheduleTemplateRepository;
 import com.unihub.repository.SessionRepository;
+import com.unihub.repository.UserClassGroupRepository;
 import java.util.Optional;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -30,15 +31,18 @@ public class CourseAccessEvaluator {
     private final ScheduleTemplateRepository scheduleTemplateRepository;
     private final SessionRepository sessionRepository;
     private final EventRepository eventRepository;
+    private final UserClassGroupRepository userClassGroupRepository;
 
     public CourseAccessEvaluator(CourseRepository courseRepository,
                                  ScheduleTemplateRepository scheduleTemplateRepository,
                                  SessionRepository sessionRepository,
-                                 EventRepository eventRepository) {
+                                 EventRepository eventRepository,
+                                 UserClassGroupRepository userClassGroupRepository) {
         this.courseRepository = courseRepository;
         this.scheduleTemplateRepository = scheduleTemplateRepository;
         this.sessionRepository = sessionRepository;
         this.eventRepository = eventRepository;
+        this.userClassGroupRepository = userClassGroupRepository;
     }
 
     /** @return true if the caller is the teacher who owns {@code courseId}. */
@@ -64,6 +68,48 @@ public class CourseAccessEvaluator {
      */
     public boolean ownsEvent(Authentication authentication, Long eventId) {
         return ownedBy(authentication, eventId, eventRepository::findCourseTeacherIdByEventId);
+    }
+
+    /**
+     * Returns {@code true} if the caller is a STUDENT enrolled in the class group that the
+     * given session's course belongs to. Non-students (TEACHER, ADMIN) must use
+     * {@code ownsSession} or the {@code hasRole('ADMIN')} arm — this guard is student-only
+     * to prevent a teacher assigned to the same group for import-rights from reading another
+     * teacher's session recap.
+     */
+    public boolean canViewSession(Authentication authentication, Long sessionId) {
+        if (authentication == null || sessionId == null) {
+            return false;
+        }
+        if (!(authentication.getPrincipal() instanceof AuthenticatedUser user)) {
+            return false;
+        }
+        if (!"STUDENT".equals(user.role())) {
+            return false;
+        }
+        return sessionRepository.findClassGroupIdBySessionId(sessionId)
+                .map(cgId -> userClassGroupRepository.existsByUser_IdAndClassGroup_Id(user.userId(), cgId))
+                .orElse(false);
+    }
+
+    /**
+     * Returns {@code true} if the caller is a STUDENT enrolled in the class group that the
+     * given course belongs to. Mirrors {@link #canViewSession} for the course-level
+     * past-sessions list endpoint. Non-students use {@code ownsCourse} or ADMIN role check.
+     */
+    public boolean canViewCourse(Authentication authentication, Long courseId) {
+        if (authentication == null || courseId == null) {
+            return false;
+        }
+        if (!(authentication.getPrincipal() instanceof AuthenticatedUser user)) {
+            return false;
+        }
+        if (!"STUDENT".equals(user.role())) {
+            return false;
+        }
+        return courseRepository.findClassGroupIdByCourseId(courseId)
+                .map(cgId -> userClassGroupRepository.existsByUser_IdAndClassGroup_Id(user.userId(), cgId))
+                .orElse(false);
     }
 
     /**

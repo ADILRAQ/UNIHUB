@@ -9,11 +9,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -82,6 +86,37 @@ public class Session {
 
     @Column(name = "manually_modified", nullable = false)
     private boolean manuallyModified = false;
+
+    // -----------------------------------------------------------------------
+    // Recap fields (UNIH-37) — all nullable; recap_updated_at is the
+    // lightweight "has recap" indicator set on every teacher PUT.
+    // -----------------------------------------------------------------------
+
+    @Column(name = "recording_url", length = 1000)
+    private String recordingUrl;
+
+    @Column(name = "notes_html", columnDefinition = "TEXT")
+    private String notesHtml;
+
+    /** Set to NOW() on every recap PUT; stays null until the teacher first saves a recap. */
+    @Column(name = "recap_updated_at")
+    private Instant recapUpdatedAt;
+
+    /** Existing course resources pinned to this session's recap. */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "session_recap_resources",
+            joinColumns = @JoinColumn(name = "session_id"),
+            inverseJoinColumns = @JoinColumn(name = "resource_id"))
+    private List<Resource> recapResources = new ArrayList<>();
+
+    /** Existing course assignments pinned to this session's recap. */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "session_recap_assignments",
+            joinColumns = @JoinColumn(name = "session_id"),
+            inverseJoinColumns = @JoinColumn(name = "assignment_id"))
+    private List<Assignment> recapAssignments = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
