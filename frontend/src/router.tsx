@@ -16,6 +16,8 @@ import CoursesPage from './features/resources/pages/CoursesPage';
 import CoursePage from './features/resources/pages/CoursePage';
 import PaymentsPage from './features/payments/pages/PaymentsPage';
 import TeacherPage from './features/teacher/pages/TeacherPage';
+import SessionRecapPage from './features/recaps/pages/SessionRecapPage';
+import TeacherRecapEditorPage from './features/recaps/pages/TeacherRecapEditorPage';
 
 /**
  * Route tree.
@@ -49,11 +51,13 @@ const router = createBrowserRouter([
               { path: 'courses', element: <CoursesPage /> },
               { path: 'courses/:courseId', element: <CoursePage /> },
               { path: 'payments', element: <PaymentsPage /> },
+              { path: 'sessions/:sessionId/recap', element: <SessionRecapPage /> },
               {
                 element: <RequireRole allowed={['TEACHER', 'ADMIN']} />,
                 children: [
                   { path: 'announcements/new', element: <ComposerPage /> },
                   { path: 'announcements/:id/edit', element: <ComposerPage /> },
+                  { path: 'sessions/:sessionId/recap/edit', element: <TeacherRecapEditorPage /> },
                 ],
               },
               {

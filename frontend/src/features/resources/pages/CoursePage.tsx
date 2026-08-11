@@ -5,8 +5,9 @@ import useCourseResources from '../hooks/useCourseResources';
 import useCourseAssignments from '../hooks/useCourseAssignments';
 import ModulePanel from '../components/ModulePanel';
 import AssignmentItem from '../components/AssignmentItem';
+import PastSessionsTab from '../../recaps/components/PastSessionsTab';
 
-type TabKey = 'resources' | 'assignments';
+type TabKey = 'resources' | 'assignments' | 'past-sessions';
 
 /**
  * Sub-component for the Resources tab — keeps resource state in its own scope
@@ -334,6 +335,13 @@ const CoursePage = () => {
         >
           Assignments
         </button>
+        <button
+          type="button"
+          className={`res-tab${activeTab === 'past-sessions' ? ' res-tab--active' : ''}`}
+          onClick={() => setActiveTab('past-sessions')}
+        >
+          Past Sessions
+        </button>
       </div>
 
       <div style={{ marginTop: 'var(--space-5)' }}>
@@ -342,6 +350,9 @@ const CoursePage = () => {
         )}
         {activeTab === 'assignments' && (
           <AssignmentsTab courseId={id} role={role as 'STUDENT' | 'TEACHER' | 'ADMIN'} />
+        )}
+        {activeTab === 'past-sessions' && (
+          <PastSessionsTab courseId={id} />
         )}
       </div>
     </div>
