@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import useCourseResources from '../hooks/useCourseResources';
 import useCourseAssignments from '../hooks/useCourseAssignments';
 import ModulePanel from '../components/ModulePanel';
 import AssignmentItem from '../components/AssignmentItem';
+import PastSessionsTab from '../../recaps/components/PastSessionsTab';
 
-type TabKey = 'resources' | 'assignments';
+type TabKey = 'resources' | 'assignments' | 'past-sessions';
 
 /**
  * Sub-component for the Resources tab — keeps resource state in its own scope
@@ -298,8 +299,10 @@ const AssignmentsTab = ({
 /** Course detail page — two tabs: Resources and Assignments. */
 const CoursePage = () => {
   const { courseId } = useParams<{ courseId: string }>();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<TabKey>('resources');
+  const initialTab = (searchParams.get('tab') as TabKey | null) ?? 'resources';
+  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
 
   const id = Number(courseId);
   const role = user?.role ?? 'STUDENT';
@@ -334,6 +337,13 @@ const CoursePage = () => {
         >
           Assignments
         </button>
+        <button
+          type="button"
+          className={`res-tab${activeTab === 'past-sessions' ? ' res-tab--active' : ''}`}
+          onClick={() => setActiveTab('past-sessions')}
+        >
+          Past Sessions
+        </button>
       </div>
 
       <div style={{ marginTop: 'var(--space-5)' }}>
@@ -342,6 +352,9 @@ const CoursePage = () => {
         )}
         {activeTab === 'assignments' && (
           <AssignmentsTab courseId={id} role={role as 'STUDENT' | 'TEACHER' | 'ADMIN'} />
+        )}
+        {activeTab === 'past-sessions' && (
+          <PastSessionsTab courseId={id} />
         )}
       </div>
     </div>
