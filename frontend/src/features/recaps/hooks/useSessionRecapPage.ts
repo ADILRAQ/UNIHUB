@@ -7,7 +7,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import useGetData from '../../../hooks/useGetData';
 import { getSessionRecap } from '../services/recapService';
-import { downloadResource } from '../../resources/services/resourceService';
+import { downloadResource } from '../../../utils/downloadResource';
 import type { SessionRecap } from '../types';
 
 interface UseSessionRecapPageReturn {

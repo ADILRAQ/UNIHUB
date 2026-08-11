@@ -9,6 +9,7 @@ import usePostData from '../../../hooks/usePostData';
 import { useToast } from '../../../components/ui/Toast';
 import * as moduleService from '../services/moduleService';
 import * as resourceService from '../services/resourceService';
+import { downloadResource } from '../../../utils/downloadResource';
 import type {
   ModuleDto,
   ResourceDto,
@@ -220,7 +221,7 @@ const useCourseResources = (courseId: number): UseCourseResourcesReturn => {
     setSearchQuery,
     searchResults: searchResults ?? [],
     isSearching,
-    downloadResource: resourceService.downloadResource,
+    downloadResource,
   };
 };
 

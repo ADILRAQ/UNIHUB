@@ -23,8 +23,9 @@ const ScheduleItemCard = ({ item, canManage, onManage }: ScheduleItemCardProps) 
   const canJoin = visual.isSession && !visual.isCancelled && Boolean(item.meetLink);
   const canManageThis =
     canManage && visual.isSession && item.status !== 'CANCELLED' && Boolean(onManage);
-  const isPastSession =
-    visual.isSession && !visual.isCancelled && item.date < new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const localToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const isPastSession = visual.isSession && !visual.isCancelled && item.date < localToday;
 
   return (
     <article className={`sched-item sched-item--${visual.variant}`}>

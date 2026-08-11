@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import useCourseResources from '../hooks/useCourseResources';
 import useCourseAssignments from '../hooks/useCourseAssignments';
@@ -299,8 +299,10 @@ const AssignmentsTab = ({
 /** Course detail page — two tabs: Resources and Assignments. */
 const CoursePage = () => {
   const { courseId } = useParams<{ courseId: string }>();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<TabKey>('resources');
+  const initialTab = (searchParams.get('tab') as TabKey | null) ?? 'resources';
+  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
 
   const id = Number(courseId);
   const role = user?.role ?? 'STUDENT';
