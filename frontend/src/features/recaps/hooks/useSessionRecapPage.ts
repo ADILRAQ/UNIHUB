@@ -7,6 +7,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import useGetData from '../../../hooks/useGetData';
 import { getSessionRecap } from '../services/recapService';
+import { downloadResource } from '../../resources/services/resourceService';
 import type { SessionRecap } from '../types';
 
 interface UseSessionRecapPageReturn {
@@ -17,6 +18,7 @@ interface UseSessionRecapPageReturn {
   /** courseId forwarded from the query-string (set when navigating from CoursePage). */
   courseId: number | undefined;
   canEdit: boolean;
+  handleDownload: (resourceId: number, title: string) => void;
 }
 
 const useSessionRecapPage = (): UseSessionRecapPageReturn => {
@@ -41,7 +43,11 @@ const useSessionRecapPage = (): UseSessionRecapPageReturn => {
 
   const canEdit = user?.role === 'TEACHER' || user?.role === 'ADMIN';
 
-  return { recap, isLoading, isError, sessionId: id, courseId, canEdit };
+  const handleDownload = (resourceId: number, title: string) => {
+    void downloadResource(resourceId, title);
+  };
+
+  return { recap, isLoading, isError, sessionId: id, courseId, canEdit, handleDownload };
 };
 
 export default useSessionRecapPage;

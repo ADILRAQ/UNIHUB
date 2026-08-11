@@ -10,10 +10,9 @@
  */
 import { Link } from 'react-router-dom';
 import useSessionRecapPage from '../hooks/useSessionRecapPage';
-import { downloadResource } from '../../resources/services/resourceService';
 
 const SessionRecapPage = () => {
-  const { recap, isLoading, isError, sessionId, courseId, canEdit } = useSessionRecapPage();
+  const { recap, isLoading, isError, sessionId, courseId, canEdit, handleDownload } = useSessionRecapPage();
 
   if (isLoading) {
     return (
@@ -110,7 +109,7 @@ const SessionRecapPage = () => {
                     <button
                       type="button"
                       className="res-btn res-btn--sm res-btn--ghost"
-                      onClick={() => void downloadResource(resource.id, resource.title)}
+                      onClick={() => handleDownload(resource.id, resource.title)}
                     >
                       Download
                     </button>
@@ -131,7 +130,7 @@ const SessionRecapPage = () => {
                   <li key={assignment.id}>
                     {courseId ? (
                       <Link
-                        to={`/courses/${courseId}`}
+                        to={`/courses/${courseId}?tab=assignments`}
                         className="res-resource__name"
                         style={{ textDecoration: 'underline' }}
                       >

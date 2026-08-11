@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { formatTimeRange, parseISODate, formatDateLong } from '../calendar';
 import { itemVisual } from '../itemStyle';
 import type { ScheduleItem } from '../types';
@@ -22,6 +23,8 @@ const ScheduleItemCard = ({ item, canManage, onManage }: ScheduleItemCardProps) 
   const canJoin = visual.isSession && !visual.isCancelled && Boolean(item.meetLink);
   const canManageThis =
     canManage && visual.isSession && item.status !== 'CANCELLED' && Boolean(onManage);
+  const isPastSession =
+    visual.isSession && !visual.isCancelled && item.date < new Date().toISOString().slice(0, 10);
 
   return (
     <article className={`sched-item sched-item--${visual.variant}`}>
@@ -58,7 +61,7 @@ const ScheduleItemCard = ({ item, canManage, onManage }: ScheduleItemCardProps) 
         <p className="sched-item__note">{item.description}</p>
       )}
 
-      {(canJoin || canManageThis) && (
+      {(canJoin || canManageThis || isPastSession) && (
         <div className="sched-item__actions">
           {canJoin && (
             <a
@@ -69,6 +72,14 @@ const ScheduleItemCard = ({ item, canManage, onManage }: ScheduleItemCardProps) 
             >
               Join Meet
             </a>
+          )}
+          {isPastSession && (
+            <Link
+              className="sched-btn"
+              to={`/sessions/${item.id}/recap${item.courseId ? `?courseId=${item.courseId}` : ''}`}
+            >
+              View Recap
+            </Link>
           )}
           {canManageThis && (
             <button
