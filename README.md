@@ -63,14 +63,29 @@ To stop: `docker compose down` (add `-v` to also drop volumes / reset the databa
 
 ## Demo credentials
 
+The base accounts below are seeded from environment variables (`.env.example`).
+When running with `SPRING_PROFILES_ACTIVE=dev` (the default in `docker compose up`),
+`DemoDataSeeder` also seeds a full demo dataset on first boot — courses, sessions,
+announcements, resources, assignments, payments — covering every app feature.
+
+**Base accounts** (seeded from `.env.example`):
+
 | Role | Email | Password |
 |------|-------|----------|
 | Admin | admin@unihub.local | changeme-admin |
-| Teacher | teacher@unihub.local | changeme-teacher |
-| Student | student@unihub.local | changeme-student |
+| Teacher (Alice Martin) | teacher@unihub.local | changeme-teacher |
+| Student (Bob Dupont) | student@unihub.local | changeme-student |
 
-*(Seeded automatically on startup when the `ADMIN_EMAIL`, `TEACHER_EMAIL`, and
-`STUDENT_EMAIL` environment variables are set — see `.env.example`.)*
+**Additional demo accounts** (seeded by `DemoDataSeeder` on first boot in `dev`):
+
+| Role | Email | Password | Group |
+|------|-------|----------|-------|
+| Teacher (Carol Sow) | teacher2@unihub.local | changeme-teacher2 | L3 Info B |
+| Student (David Kim) | student2@unihub.local | changeme-student2 | L3 Info A |
+| Student (Emma Touré) | student3@unihub.local | changeme-student3 | L3 Info A |
+| Student (Fatima Osei) | student4@unihub.local | changeme-student4 | L3 Info B |
+| Student (Hugo Blanc) | student5@unihub.local | changeme-student5 | L3 Info B |
+| Student (Inès Bah) | student6@unihub.local | changeme-student6 | L3 Info B |
 
 ## Environment variables
 

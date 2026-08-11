@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,7 @@ import org.springframework.util.StringUtils;
  * Missing env vars cause a warning log, not a startup failure.
  */
 @Component
+@Order(1)
 public class AdminSeeder implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(AdminSeeder.class);
