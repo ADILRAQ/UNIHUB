@@ -65,9 +65,9 @@ To stop: `docker compose down` (add `-v` to also drop volumes / reset the databa
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | admin@unihub.local | Admin123! |
-| Teacher | teacher1@unihub.local | Teacher123! |
-| Student | student1@unihub.local | Student123! |
+| Admin | admin@unihub.local | changeme-admin |
+| Teacher | teacher@unihub.local | changeme-teacher |
+| Student | student@unihub.local | changeme-student |
 
 *(Seeded automatically on startup when the `ADMIN_EMAIL`, `TEACHER_EMAIL`, and
 `STUDENT_EMAIL` environment variables are set — see `.env.example`.)*

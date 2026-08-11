@@ -93,8 +93,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         // Swagger UI and OpenAPI spec — public for documentation purposes
-                        .requestMatchers("/api/swagger-ui/**", "/api/api-docs/**",
-                                         "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/swagger-ui.html", "/api/swagger-ui/**",
+                                         "/api/api-docs/**", "/swagger-ui/**",
+                                         "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
                         // Route present-but-invalid Bearer tokens through our JSON entry
