@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,6 +67,12 @@ public class SessionRecapService {
         Session session = requireSession(sessionId);
         Long courseId = session.getCourse().getId();
 
+        // Validate recording URL — must be absolute http/https to prevent stored XSS via javascript: scheme.
+        String recordingUrl = req.recordingUrl();
+        if (recordingUrl != null && !recordingUrl.startsWith("https://") && !recordingUrl.startsWith("http://")) {
+            throw new BadRequestException("recordingUrl must be an absolute http or https URL");
+        }
+
         // Sanitize notes (null → null, non-blank → sanitized HTML).
         String sanitizedNotes = htmlSanitizer.sanitizeOptional(req.notesHtml());
 
@@ -77,11 +82,14 @@ public class SessionRecapService {
         // Resolve and validate linked assignments — they must belong to the session's course.
         List<Assignment> assignments = resolveAssignments(req.linkedAssignmentIds(), courseId);
 
-        session.setRecordingUrl(req.recordingUrl());
+        session.setRecordingUrl(recordingUrl);
         session.setNotesHtml(sanitizedNotes);
         session.setRecapUpdatedAt(Instant.now());
-        session.setRecapResources(resources);
-        session.setRecapAssignments(assignments);
+        // Use clear+addAll to let Hibernate's PersistentBag handle dirty tracking safely.
+        session.getRecapResources().clear();
+        session.getRecapResources().addAll(resources);
+        session.getRecapAssignments().clear();
+        session.getRecapAssignments().addAll(assignments);
 
         Session saved = sessionRepository.save(session);
         return toRecapDto(saved);
@@ -135,7 +143,7 @@ public class SessionRecapService {
             return new ArrayList<>();
         }
         List<Resource> found = resourceRepository.findAllById(ids);
-        if (found.size() != ids.size()) {
+        if (found.size() != ids.stream().distinct().count()) {
             throw new ResourceNotFoundException("One or more linked resources were not found");
         }
         for (Resource r : found) {
@@ -156,7 +164,7 @@ public class SessionRecapService {
             return new ArrayList<>();
         }
         List<Assignment> found = assignmentRepository.findAllById(ids);
-        if (found.size() != ids.size()) {
+        if (found.size() != ids.stream().distinct().count()) {
             throw new ResourceNotFoundException("One or more linked assignments were not found");
         }
         for (Assignment a : found) {
