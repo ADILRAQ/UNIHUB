@@ -491,7 +491,7 @@ public class DemoDataSeeder implements ApplicationRunner {
         List<Session> past = sessionRepository.findPastSessionsByCourseId(
                 course.getId(), LocalDate.now())
                 .stream()
-                .sorted(Comparator.comparing(Session::getDate).reversed())
+                .sorted(Comparator.comparing(Session::getSessionDate).reversed())
                 .limit(2)
                 .toList();
         int chapter = 1;
