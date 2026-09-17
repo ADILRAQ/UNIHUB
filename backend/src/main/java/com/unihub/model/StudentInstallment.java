@@ -48,7 +48,7 @@ public class StudentInstallment {
 
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "installment_status")
+    @Column(nullable = false, columnDefinition = "installmentstatus")
     private InstallmentStatus status = InstallmentStatus.LOCKED;
 
     @Column(name = "proof_storage_key", length = 512)

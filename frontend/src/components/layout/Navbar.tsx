@@ -4,6 +4,13 @@ import { useAuth } from '../../features/auth/AuthContext';
 import useGetData from '../../hooks/useGetData';
 import { getUnreadCount } from '../../features/announcements/services/announcementService';
 
+const TODAY = new Date().toLocaleDateString('en-US', {
+  weekday: 'long',
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+});
+
 const Navbar = () => {
   const { user, logout } = useAuth();
   const [scrolled, setScrolled] = useState(false);
@@ -16,10 +23,8 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
-  // Close on Escape
   useEffect(() => {
     if (!menuOpen) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
@@ -36,32 +41,29 @@ const Navbar = () => {
     enabled: !!user,
   });
 
-  const linkClass = ({ isActive }: { isActive: boolean }) =>
-    isActive ? 'navbar__link navbar__link--active' : 'navbar__link';
+  const role = user?.role ?? '';
 
-  const announcementClass = ({ isActive }: { isActive: boolean }) =>
-    isActive
-      ? 'navbar__link navbar__link--active navbar__link--with-badge'
-      : 'navbar__link navbar__link--with-badge';
-
-  const navLinks = (
+  // Mobile menu links only — desktop nav is in the sidebar
+  const mobileLinks = (
     <>
-      <NavLink to="/announcements" className={announcementClass}>
+      <NavLink to="/" end className={({ isActive }) => isActive ? 'navbar__link navbar__link--active' : 'navbar__link'}>Home</NavLink>
+      <NavLink to="/announcements" className={({ isActive }) => isActive ? 'navbar__link navbar__link--active navbar__link--with-badge' : 'navbar__link navbar__link--with-badge'}>
         Announcements
         {!!unreadCount && unreadCount > 0 && (
-          <span className="ann-unread-badge" aria-label={`${unreadCount} unread`}>
-            {unreadCount}
-          </span>
+          <span className="ann-unread-badge" aria-label={`${unreadCount} unread`}>{unreadCount}</span>
         )}
       </NavLink>
-      <NavLink to="/courses" className={linkClass}>Courses</NavLink>
-      <NavLink to="/schedule" className={linkClass}>Calendar</NavLink>
-      <NavLink to="/payments" className={linkClass}>Payments</NavLink>
-      {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
-        <NavLink to="/timetable" className={linkClass}>Timetable</NavLink>
+      <NavLink to="/courses"  className={({ isActive }) => isActive ? 'navbar__link navbar__link--active' : 'navbar__link'}>Courses</NavLink>
+      <NavLink to="/schedule" className={({ isActive }) => isActive ? 'navbar__link navbar__link--active' : 'navbar__link'}>Calendar</NavLink>
+      <NavLink to="/payments" className={({ isActive }) => isActive ? 'navbar__link navbar__link--active' : 'navbar__link'}>Payments</NavLink>
+      {(role === 'TEACHER' || role === 'ADMIN') && (
+        <NavLink to="/timetable" className={({ isActive }) => isActive ? 'navbar__link navbar__link--active' : 'navbar__link'}>Timetable</NavLink>
       )}
-      {(user?.role === 'ADMIN' || user?.role === 'TEACHER') && (
-        <NavLink to="/admin" className={linkClass}>Admin</NavLink>
+      {(role === 'TEACHER' || role === 'ADMIN') && (
+        <NavLink to="/teacher" className={({ isActive }) => isActive ? 'navbar__link navbar__link--active' : 'navbar__link'}>Workspace</NavLink>
+      )}
+      {role === 'ADMIN' && (
+        <NavLink to="/admin" className={({ isActive }) => isActive ? 'navbar__link navbar__link--active' : 'navbar__link'}>Admin</NavLink>
       )}
     </>
   );
@@ -74,9 +76,8 @@ const Navbar = () => {
           <span className="navbar__wordmark">UniHub</span>
         </NavLink>
 
-        <nav className="navbar__nav" aria-label="Main navigation">
-          {navLinks}
-        </nav>
+        {/* Date — hidden on mobile */}
+        <span className="navbar__date">{TODAY}</span>
 
         {user && (
           <div className="navbar__user">
@@ -101,7 +102,7 @@ const Navbar = () => {
 
       {menuOpen && (
         <div className="navbar__mobile-menu" role="navigation" aria-label="Mobile navigation">
-          {navLinks}
+          {mobileLinks}
           {user && (
             <div className="navbar__mobile-footer">
               <span className="navbar__name">{user.fullName}</span>

@@ -1,6 +1,7 @@
 package com.unihub.dto;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
@@ -18,13 +19,15 @@ public record SessionRecapDto(
         /** Sanitized HTML notes, or {@code null} if not set. */
         String notesHtml,
 
-        /** IDs of the resources linked to this recap. Never null — empty list when none. */
-        List<Long> linkedResourceIds,
+        /** Resources linked to this recap with display metadata. Never null. */
+        List<LinkedResource> linkedResources,
 
-        /** IDs of the assignments linked to this recap. Never null — empty list when none. */
-        List<Long> linkedAssignmentIds,
+        /** Assignments linked to this recap with display metadata. Never null. */
+        List<LinkedAssignment> linkedAssignments,
 
         /** Timestamp of the last recap update; {@code null} if the recap has never been saved. */
         Instant recapUpdatedAt
 ) {
+    public record LinkedResource(Long id, String name, String contentType) {}
+    public record LinkedAssignment(Long id, String title, OffsetDateTime dueAt) {}
 }

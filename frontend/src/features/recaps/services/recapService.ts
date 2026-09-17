@@ -51,8 +51,8 @@ export const getCourseResourcesForRecap = async (
 
   return resourceArrays.flat().map((r) => ({
     id: r.id,
-    title: r.name,
-    type: r.contentType,
+    name: r.name,
+    contentType: r.contentType,
   }));
 };
 
@@ -68,5 +68,5 @@ export const getCourseAssignmentsForRecap = (
       `/api/courses/${courseId}/assignments`,
     )
     .then((r) =>
-      r.data.map((a) => ({ id: a.id, title: a.title, dueDate: a.dueAt })),
+      r.data.map((a) => ({ id: a.id, title: a.title, dueAt: a.dueAt })),
     );

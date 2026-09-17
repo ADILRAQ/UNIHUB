@@ -177,18 +177,18 @@ public class SessionRecapService {
     }
 
     private static SessionRecapDto toRecapDto(Session session) {
-        List<Long> resourceIds = session.getRecapResources().stream()
-                .map(Resource::getId)
+        List<SessionRecapDto.LinkedResource> resources = session.getRecapResources().stream()
+                .map(r -> new SessionRecapDto.LinkedResource(r.getId(), r.getName(), r.getContentType()))
                 .toList();
-        List<Long> assignmentIds = session.getRecapAssignments().stream()
-                .map(Assignment::getId)
+        List<SessionRecapDto.LinkedAssignment> assignments = session.getRecapAssignments().stream()
+                .map(a -> new SessionRecapDto.LinkedAssignment(a.getId(), a.getTitle(), a.getDueAt()))
                 .toList();
         return new SessionRecapDto(
                 session.getId(),
                 session.getRecordingUrl(),
                 session.getNotesHtml(),
-                resourceIds,
-                assignmentIds,
+                resources,
+                assignments,
                 session.getRecapUpdatedAt());
     }
 

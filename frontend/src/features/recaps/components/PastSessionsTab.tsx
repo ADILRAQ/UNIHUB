@@ -41,9 +41,9 @@ const PastSessionsTab = ({ courseId }: PastSessionsTabProps) => {
           }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-1)', flex: 1, minWidth: 0 }}>
-            <span style={{ fontWeight: 500 }}>{session.title}</span>
+            <span style={{ fontWeight: 500 }}>{session.courseName}</span>
             <span className="res-resource__meta">
-              {new Date(session.date).toLocaleDateString(undefined, {
+              {new Date(session.sessionDate).toLocaleDateString(undefined, {
                 weekday: 'short',
                 year: 'numeric',
                 month: 'short',

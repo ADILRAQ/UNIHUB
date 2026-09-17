@@ -105,8 +105,8 @@ const TeacherRecapEditorPage = () => {
                       checked={selectedResourceIds.includes(resource.id)}
                       onChange={() => toggleResource(resource.id)}
                     />
-                    <span>{resource.title}</span>
-                    <span className="res-resource__meta">{resource.type}</span>
+                    <span>{resource.name}</span>
+                    <span className="res-resource__meta">{resource.contentType.split('/').pop()?.toUpperCase()}</span>
                   </label>
                 </li>
               ))}
@@ -135,7 +135,7 @@ const TeacherRecapEditorPage = () => {
                     />
                     <span>{assignment.title}</span>
                     <span className="res-resource__meta">
-                      Due: {new Date(assignment.dueDate).toLocaleDateString()}
+                      Due: {new Date(assignment.dueAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                     </span>
                   </label>
                 </li>

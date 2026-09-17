@@ -91,7 +91,7 @@ const AssignmentItem = ({
       <p className="res-assignment__meta">
         Due:{' '}
         <span style={{ color: isPast ? 'var(--color-danger-dark)' : 'inherit' }}>
-          {dueDate.toLocaleString()}
+          {dueDate.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
         </span>
         {isPast && <span style={{ marginLeft: 'var(--space-1)', color: 'var(--color-danger-dark)' }}>Overdue</span>}
       </p>

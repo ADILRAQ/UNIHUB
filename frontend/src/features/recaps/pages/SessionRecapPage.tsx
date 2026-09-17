@@ -104,12 +104,12 @@ const SessionRecapPage = () => {
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
                 {recap.linkedResources.map((resource) => (
                   <li key={resource.id} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-                    <span className="res-resource__name">{resource.title}</span>
-                    <span className="res-resource__meta">{resource.type}</span>
+                    <span className="res-resource__name">{resource.name}</span>
+                    <span className="res-resource__meta">{resource.contentType.split('/').pop()?.toUpperCase()}</span>
                     <button
                       type="button"
                       className="res-btn res-btn--sm res-btn--ghost"
-                      onClick={() => handleDownload(resource.id, resource.title)}
+                      onClick={() => handleDownload(resource.id, resource.name)}
                     >
                       Download
                     </button>
@@ -140,7 +140,7 @@ const SessionRecapPage = () => {
                       <span className="res-resource__name">{assignment.title}</span>
                     )}
                     <span className="res-resource__meta" style={{ marginLeft: 'var(--space-3)' }}>
-                      Due: {new Date(assignment.dueDate).toLocaleDateString()}
+                      Due: {new Date(assignment.dueAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                     </span>
                   </li>
                 ))}

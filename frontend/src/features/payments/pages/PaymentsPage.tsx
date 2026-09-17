@@ -90,7 +90,9 @@ const InstallmentCard = ({
       <p className="pay-card__label">{installment.label}</p>
       <p className="pay-card__amount">{formatAmount(installment.amount)}</p>
       <p className="pay-card__due">Due: {installment.dueDate}</p>
-      <p className="pay-card__days">{daysLabel(installment.dueDate)}</p>
+      {installment.status !== 'PAID' && installment.status !== 'LOCKED' && (
+        <p className="pay-card__days">{daysLabel(installment.dueDate)}</p>
+      )}
 
       <span className={`pay-badge ${statusBadgeClass[installment.status]}`}>
         {statusLabel[installment.status]}

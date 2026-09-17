@@ -69,7 +69,7 @@ public class DemoDataSeeder implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DemoDataSeeder.class);
 
-    private static final String RECORDING_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+    private static final String RECORDING_URL = null;
     private static final String ACADEMIC_YEAR  = "2025-2026";
 
     private final CourseRepository courseRepository;
