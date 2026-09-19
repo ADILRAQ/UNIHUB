@@ -3,39 +3,45 @@ import UsersSection from '../components/UsersSection';
 import AddUserSection from '../components/AddUserSection';
 import ImportSection from '../components/ImportSection';
 import ClassGroupsSection from '../components/ClassGroupsSection';
+import PageHeader from '../../../components/layout/PageHeader';
 
-/**
- * Admin management console (ADMIN-only, guarded by `RequireRole` in the router).
- * A simple tab layout switches between the user list, single-user create, CSV
- * bulk import, and class-group management sections. All logic lives in the
- * section hooks; this page only owns tab navigation via `useAdminPage`.
- */
 const AdminPage = () => {
   const { tabs, activeTab, onSelectTab } = useAdminPage();
 
   return (
-    <section className="admin-console">
-      <h1>Admin console</h1>
+    <>
+      <PageHeader title="Admin Console" />
+      <main style={{ flexGrow: 1, padding: '28px 32px', overflowY: 'auto' }}>
+        <nav style={{ display: 'flex', gap: 8, marginBottom: 28 }} aria-label="Admin sections">
+          {tabs.map((tab) => {
+            const active = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                aria-current={active ? 'page' : undefined}
+                onClick={() => onSelectTab(tab.key)}
+                style={{
+                  height: 40, padding: '0 16px',
+                  border: `1px solid ${active ? '#4A41C9' : '#E1DEF2'}`,
+                  borderRadius: 9,
+                  background: active ? '#EEEDFF' : '#FFFFFF',
+                  color: active ? '#4A41C9' : '#45435A',
+                  fontSize: 13.5, fontWeight: 600, cursor: 'pointer',
+                }}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </nav>
 
-      <nav className="admin-tabs" aria-label="Admin sections">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            className={`admin-tab${activeTab === tab.key ? ' admin-tab--active' : ''}`}
-            aria-current={activeTab === tab.key ? 'page' : undefined}
-            onClick={() => onSelectTab(tab.key)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </nav>
-
-      {activeTab === 'users' && <UsersSection />}
-      {activeTab === 'add-user' && <AddUserSection />}
-      {activeTab === 'import' && <ImportSection />}
-      {activeTab === 'class-groups' && <ClassGroupsSection />}
-    </section>
+        {activeTab === 'users' && <UsersSection />}
+        {activeTab === 'add-user' && <AddUserSection />}
+        {activeTab === 'import' && <ImportSection />}
+        {activeTab === 'class-groups' && <ClassGroupsSection />}
+      </main>
+    </>
   );
 };
 

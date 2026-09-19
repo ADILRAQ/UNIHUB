@@ -1,18 +1,19 @@
 :root {
-  /* ── Brand — UStudent Purple ──────────────────────────────────────────────
-     Primary: #6C63FF (108 99 255) — the exact purple from UStudent's active
-     button, sidebar indicator, and link text.
+  /* ── Brand — UniHub Purple ────────────────────────────────────────────────
+     Primary: #4A41C9 — sidebar active, headings.
+     Accent:  #6C63FF — buttons, icons, highlights.
   ── */
-  --color-brand-50:  #F0EEFF;   /* hover/active backgrounds */
-  --color-brand-100: #E2DCFF;   /* lighter tint */
-  --color-brand-200: #C5BAFF;
-  --color-brand-300: #9E8EFF;
-  --color-brand-400: #7B6FF7;
-  --color-brand-500: #6C63FF;   /* primary — matches UStudent */
-  --color-brand-600: #5A52E0;   /* button default (slightly deeper) */
-  --color-brand-700: #4640B8;   /* button hover */
-  --color-brand-800: #322D90;
-  --color-brand-900: #1E1A60;
+  --color-brand-50:  #EEEDFF;   /* hover/active backgrounds */
+  --color-brand-100: #DCD9FF;   /* lighter tint */
+  --color-brand-200: #B8B2FF;
+  --color-brand-300: #9089FF;
+  --color-brand-400: #6C63FF;
+  --color-brand-500: #4A41C9;   /* primary */
+  --color-brand-600: #5A4FE0;   /* button default */
+  --color-brand-700: #372FA6;   /* button hover */
+  --color-brand-800: #2B2485;
+  --color-brand-900: #1E1960;
+  --color-brand-accent: #6C63FF; /* accent purple */
 
   /* ── Accent — Coral ───────────────────────────────────────────────────────
      #FF6B6B — UStudent's chart coral and Explore card color.
