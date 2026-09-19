@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import useGetData from '../../../hooks/useGetData';
 import usePostData from '../../../hooks/usePostData';
@@ -27,6 +28,7 @@ export interface UseTeacherCoursesSection {
   onClassGroupChange: (value: number | null) => void;
   onMeetLinkChange: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onRowClick: (courseId: number) => void;
 }
 
 /**
@@ -37,6 +39,7 @@ export interface UseTeacherCoursesSection {
  */
 const useTeacherCoursesSection = (): UseTeacherCoursesSection => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { classGroups, isLoading: classGroupsLoading } = useTeacherClassGroupsData();
 
@@ -120,6 +123,7 @@ const useTeacherCoursesSection = (): UseTeacherCoursesSection => {
     onClassGroupChange: setClassGroupId,
     onMeetLinkChange: setMeetLink,
     onSubmit,
+    onRowClick: (courseId: number) => navigate(`/courses/${courseId}`),
   };
 };
 

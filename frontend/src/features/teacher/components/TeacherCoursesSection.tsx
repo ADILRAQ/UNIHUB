@@ -19,6 +19,7 @@ const TeacherCoursesSection = () => {
     onClassGroupChange,
     onMeetLinkChange,
     onSubmit,
+    onRowClick,
   } = useTeacherCoursesSection();
 
   return (
@@ -108,12 +109,22 @@ const TeacherCoursesSection = () => {
             </thead>
             <tbody>
               {courses.map((course) => (
-                <tr key={course.id}>
+                <tr
+                  key={course.id}
+                  onClick={() => onRowClick(course.id)}
+                  style={{ cursor: 'pointer' }}
+                  title="Open course"
+                >
                   <td>{course.name}</td>
                   <td>{course.classGroupName}</td>
                   <td>
                     {course.meetLink ? (
-                      <a href={course.meetLink} target="_blank" rel="noopener noreferrer">
+                      <a
+                        href={course.meetLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         {course.meetLink}
                       </a>
                     ) : (

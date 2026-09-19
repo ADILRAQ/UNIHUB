@@ -2,6 +2,8 @@ import { useAuth } from '../../auth/AuthContext';
 import type { AuthUser } from '../../auth/types';
 import useGetData from '../../../hooks/useGetData';
 import apiClient from '../../../api/client';
+import { getQueue } from '../../payments/services/paymentService';
+import type { PendingProofItemDto } from '../../payments/types';
 
 export interface NextSessionDto {
   sessionId: string;
@@ -19,6 +21,7 @@ export interface UseDashboardPage {
   isAdmin: boolean;
   isTeacher: boolean;
   nextSession: NextSessionDto | null | undefined;
+  pendingProofCount: number;
 }
 
 /**
@@ -29,6 +32,7 @@ export interface UseDashboardPage {
 const useDashboardPage = (): UseDashboardPage => {
   const { user } = useAuth();
   const isStudent = user?.role === 'STUDENT';
+  const isAdminOrTeacher = user?.role === 'ADMIN' || user?.role === 'TEACHER';
 
   const { data: nextSession } = useGetData<NextSessionDto | null, string, NextSessionDto | null>({
     queryKey: ['sessions', 'next'],
@@ -42,11 +46,20 @@ const useDashboardPage = (): UseDashboardPage => {
     enabled: isStudent,
   });
 
+  // Fetch pending proof queue count for admin/teacher banner
+  const { data: pendingQueue } = useGetData<PendingProofItemDto[], string, PendingProofItemDto[]>({
+    queryKey: ['payments', 'queue', 'dashboard'],
+    queryFn: getQueue,
+    transformFn: (d) => d,
+    enabled: isAdminOrTeacher,
+  });
+
   return {
     user,
     isAdmin: user?.role === 'ADMIN',
     isTeacher: user?.role === 'TEACHER',
     nextSession: isStudent ? (nextSession ?? null) : null,
+    pendingProofCount: pendingQueue?.length ?? 0,
   };
 };
 

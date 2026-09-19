@@ -179,6 +179,12 @@ const AnnouncementsPage = () => {
               {!isLoading && announcements.map((item) => (
                 <article
                   key={item.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate(`/announcements/${item.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') navigate(`/announcements/${item.id}`);
+                  }}
                   style={{
                     background: '#FFFFFF',
                     border: '1px solid #EDEBF8',
@@ -188,6 +194,7 @@ const AnnouncementsPage = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 12,
+                    cursor: 'pointer',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 20 }}>
@@ -200,20 +207,18 @@ const AnnouncementsPage = () => {
                           {item.authorName} · {new Date(item.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </span>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => navigate(`/announcements/${item.id}`)}
-                        style={{ fontSize: 19, fontWeight: 700, color: '#1F1B33', letterSpacing: '-0.015em', textDecoration: 'none', lineHeight: 1.35, background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+                      <span
+                        style={{ fontSize: 19, fontWeight: 700, color: '#1F1B33', letterSpacing: '-0.015em', lineHeight: 1.35 }}
                       >
                         {item.title}
-                      </button>
+                      </span>
                     </div>
 
                     {canPost && (
                       <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                         <button
                           type="button"
-                          onClick={() => navigate(`/announcements/${item.id}/edit`)}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/announcements/${item.id}/edit`); }}
                           style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 40, padding: '0 13px', border: '1px solid #E1DEF2', borderRadius: 9, background: '#FFFFFF', color: '#45435A', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
                         >
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
@@ -223,7 +228,7 @@ const AnnouncementsPage = () => {
                         </button>
                         <button
                           type="button"
-                          onClick={() => setConfirmDeleteId(item.id)}
+                          onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(item.id); }}
                           style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 40, padding: '0 13px', border: '1px solid #F3D3D3', borderRadius: 9, background: '#FFFFFF', color: '#B02F2F', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
                         >
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
@@ -262,14 +267,14 @@ const AnnouncementsPage = () => {
                       <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                         <button
                           type="button"
-                          onClick={() => setConfirmDeleteId(null)}
+                          onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(null); }}
                           style={{ height: 38, padding: '0 14px', border: '1px solid #E1DEF2', borderRadius: 9, background: '#FFFFFF', color: '#45435A', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
                         >
                           Cancel
                         </button>
                         <button
                           type="button"
-                          onClick={() => doDelete(item.id)}
+                          onClick={(e) => { e.stopPropagation(); doDelete(item.id); }}
                           style={{ height: 38, padding: '0 14px', border: 0, borderRadius: 9, background: '#C62828', color: '#FFFFFF', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
                         >
                           Delete

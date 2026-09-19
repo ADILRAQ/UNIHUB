@@ -23,3 +23,16 @@ export const searchResources = (q: string): Promise<ResourceSearchResult[]> =>
   apiClient
     .get<ResourceSearchResult[]>('/api/resources/search', { params: { q } })
     .then((r) => r.data);
+
+export const addLinkResource = (
+  courseId: number,
+  moduleId: number,
+  title: string,
+  url: string,
+): Promise<ResourceDto> =>
+  apiClient
+    .post<ResourceDto>(`/api/courses/${courseId}/modules/${moduleId}/resources/link`, {
+      title,
+      url,
+    })
+    .then((r) => r.data);

@@ -40,6 +40,8 @@ const ResourcesTab = ({ courseId, canEdit }: { courseId: number; canEdit: boolea
     deleteModule,
     uploadResource,
     uploadingModuleId,
+    addLink,
+    addingLinkModuleId,
     deleteResource,
     searchQuery,
     setSearchQuery,
@@ -99,11 +101,13 @@ const ResourcesTab = ({ courseId, canEdit }: { courseId: number; canEdit: boolea
               isExpanded={expandedModules.has(mod.id)}
               resources={resourcesByModule[mod.id] ?? []}
               isUploading={uploadingModuleId === mod.id}
+              isAddingLink={addingLinkModuleId === mod.id}
               canEdit={canEdit}
               onToggle={toggleModule}
               onDownload={downloadResource}
               onDeleteResource={deleteResource}
               onUpload={uploadResource}
+              onAddLink={addLink}
               onUpdate={updateModule}
               onDelete={deleteModule}
             />
@@ -165,6 +169,8 @@ const AssignmentsTab = ({
     deleteAssignment,
     submitAssignment,
     submittingAssignmentId,
+    mySubmissionMap,
+    fetchMySubmission,
     expandedSubmissions,
     submissionsMap,
     toggleSubmissions,
@@ -197,10 +203,12 @@ const AssignmentsTab = ({
           isExpanded={expandedSubmissions.has(a.id)}
           submissions={submissionsMap[a.id]}
           isSubmitting={submittingAssignmentId === a.id}
+          mySubmission={mySubmissionMap[a.id]}
           onToggleSubmissions={toggleSubmissions}
           onSubmit={submitAssignment}
           onDelete={deleteAssignment}
           onDownloadSubmission={downloadSubmission}
+          onFetchMySubmission={fetchMySubmission}
         />
       ))}
       {(role === 'TEACHER' || role === 'ADMIN') && (

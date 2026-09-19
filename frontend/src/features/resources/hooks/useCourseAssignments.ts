@@ -29,6 +29,9 @@ interface UseCourseAssignmentsReturn {
   /* STUDENT */
   submitAssignment: (assignmentId: number, file: File) => void;
   submittingAssignmentId: number | null;
+  /** Map of assignmentId → fetched submission (null means 404/error). */
+  mySubmissionMap: Record<number, SubmissionDto | null>;
+  fetchMySubmission: (assignmentId: number) => Promise<void>;
   /* Submission expansion (TEACHER / ADMIN) */
   expandedSubmissions: Set<number>;
   submissionsMap: Record<number, SubmissionStatusDto[]>;
@@ -53,6 +56,7 @@ const useCourseAssignments = (
   const [submittingAssignmentId, setSubmittingAssignmentId] = useState<number | null>(
     null,
   );
+  const [mySubmissionMap, setMySubmissionMap] = useState<Record<number, SubmissionDto | null>>({});
 
   // ref to carry assignmentId for submit mutation (void-adjacent, need context)
   const pendingSubmitRef = useRef<number | null>(null);
@@ -141,6 +145,17 @@ const useCourseAssignments = (
     }
   }, [submissionsMap]);
 
+  /** Fetch the current student's own submission for a given assignment (student role only). */
+  const fetchMySubmission = useCallback(async (assignmentId: number) => {
+    if (mySubmissionMap[assignmentId] !== undefined) return;
+    try {
+      const data = await assignmentService.getMySubmission(assignmentId);
+      setMySubmissionMap((prev) => ({ ...prev, [assignmentId]: data }));
+    } catch {
+      setMySubmissionMap((prev) => ({ ...prev, [assignmentId]: null }));
+    }
+  }, [mySubmissionMap]);
+
   const toggleSubmissions = useCallback(
     (assignmentId: number) => {
       setExpandedSubmissions((prev) => {
@@ -169,6 +184,8 @@ const useCourseAssignments = (
     deleteAssignment: (id) => deleteMutate(id),
     submitAssignment,
     submittingAssignmentId,
+    mySubmissionMap,
+    fetchMySubmission,
     expandedSubmissions,
     submissionsMap,
     fetchSubmissions,

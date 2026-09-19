@@ -108,56 +108,6 @@ const STUDENT_CARDS: NavCardDef[] = [
   },
 ];
 
-const ADMIN_CARDS: NavCardDef[] = [
-  {
-    to: '/admin',
-    label: 'Admin console',
-    description: 'Users, class groups and CSV bulk import',
-    iconBg: '#EEEDFF', iconColor: '#4A41C9',
-    icon: (
-      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2.6 20 5.6v5.9c0 4.9-3.3 8.5-8 9.9-4.7-1.4-8-5-8-9.9V5.6l8-3Z"/>
-      </svg>
-    ),
-  },
-  {
-    to: '/announcements',
-    label: 'Announcements',
-    description: 'Post to one class group or the whole department',
-    iconBg: '#EEEDFF', iconColor: '#4A41C9',
-    icon: (
-      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3.5 10.2v3.6a1.2 1.2 0 0 0 1.2 1.2h2.1L13 19V5l-6.2 4H4.7a1.2 1.2 0 0 0-1.2 1.2Z"/>
-        <path d="M17.5 8.6a4.6 4.6 0 0 1 0 6.8"/>
-      </svg>
-    ),
-  },
-  {
-    to: '/timetable',
-    label: 'Timetable',
-    description: 'Weekly templates, then generate the sessions',
-    iconBg: '#EEEDFF', iconColor: '#4A41C9',
-    icon: (
-      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/>
-        <path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>
-        <path d="M7.5 13.5h3M13.5 13.5h3M7.5 17.5h3"/>
-      </svg>
-    ),
-  },
-  {
-    to: '/payments',
-    label: 'Payments',
-    description: '7 proofs pending · overdue list · year plan setup',
-    iconBg: '#FFF1F1', iconColor: '#C23B3B',
-    icon: (
-      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2.5" y="5" width="19" height="14" rx="2.5"/>
-        <path d="M2.5 10h19"/>
-      </svg>
-    ),
-  },
-];
 
 // ── Payment panel ─────────────────────────────────────────────────────────────
 
@@ -308,9 +258,61 @@ const getGreeting = () => {
 };
 
 const DashboardPage = () => {
-  const { user, isAdmin, isTeacher, nextSession } = useDashboardPage();
+  const { user, isAdmin, isTeacher, nextSession, pendingProofCount } = useDashboardPage();
   const isStudent = !isAdmin && !isTeacher;
-  const cards = isStudent ? STUDENT_CARDS : ADMIN_CARDS;
+  const adminCards: NavCardDef[] = [
+    {
+      to: '/admin',
+      label: 'Admin console',
+      description: 'Users, class groups and CSV bulk import',
+      iconBg: '#EEEDFF', iconColor: '#4A41C9',
+      icon: (
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2.6 20 5.6v5.9c0 4.9-3.3 8.5-8 9.9-4.7-1.4-8-5-8-9.9V5.6l8-3Z"/>
+        </svg>
+      ),
+    },
+    {
+      to: '/announcements',
+      label: 'Announcements',
+      description: 'Post to one class group or the whole department',
+      iconBg: '#EEEDFF', iconColor: '#4A41C9',
+      icon: (
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3.5 10.2v3.6a1.2 1.2 0 0 0 1.2 1.2h2.1L13 19V5l-6.2 4H4.7a1.2 1.2 0 0 0-1.2 1.2Z"/>
+          <path d="M17.5 8.6a4.6 4.6 0 0 1 0 6.8"/>
+        </svg>
+      ),
+    },
+    {
+      to: '/timetable',
+      label: 'Timetable',
+      description: 'Weekly templates, then generate the sessions',
+      iconBg: '#EEEDFF', iconColor: '#4A41C9',
+      icon: (
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/>
+          <path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>
+          <path d="M7.5 13.5h3M13.5 13.5h3M7.5 17.5h3"/>
+        </svg>
+      ),
+    },
+    {
+      to: '/payments',
+      label: 'Payments',
+      description: pendingProofCount > 0
+        ? `${pendingProofCount} proof${pendingProofCount !== 1 ? 's' : ''} pending · overdue list · year plan setup`
+        : 'Overdue list · year plan setup',
+      iconBg: '#FFF1F1', iconColor: '#C23B3B',
+      icon: (
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2.5" y="5" width="19" height="14" rx="2.5"/>
+          <path d="M2.5 10h19"/>
+        </svg>
+      ),
+    },
+  ];
+  const cards = isStudent ? STUDENT_CARDS : adminCards;
   const firstName = user?.fullName?.split(' ')[0] ?? 'there';
 
   const today = new Date().toLocaleDateString('en-US', {
@@ -409,11 +411,13 @@ const DashboardPage = () => {
                     </Link>
                   )}
                 </>
-              ) : (
+              ) : pendingProofCount > 0 ? (
                 <>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
                     <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: '#FFFFFF' }}>NEEDS YOU</span>
-                    <span style={{ fontSize: 15.5, fontWeight: 600, color: '#FFFFFF' }}>Payment proofs and session recaps are waiting for review</span>
+                    <span style={{ fontSize: 15.5, fontWeight: 600, color: '#FFFFFF' }}>
+                      {pendingProofCount} payment proof{pendingProofCount !== 1 ? 's' : ''} waiting for review
+                    </span>
                   </div>
                   <Link
                     to="/payments"
@@ -423,6 +427,11 @@ const DashboardPage = () => {
                     <ArrowRight />
                   </Link>
                 </>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: '#FFFFFF' }}>ALL CLEAR</span>
+                  <span style={{ fontSize: 15.5, fontWeight: 600, color: '#FFFFFF' }}>No payment proofs pending review</span>
+                </div>
               )}
             </div>
           </section>

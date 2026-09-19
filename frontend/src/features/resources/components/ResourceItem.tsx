@@ -18,31 +18,66 @@ const ResourceItem = ({
   canDelete,
   onDownload,
   onDelete,
-}: ResourceItemProps) => (
-  <div className="res-resource">
-    <span className="res-resource__name">{resource.name}</span>
-    <span className="res-resource__meta">
-      {formatBytes(resource.sizeBytes)} &middot; {resource.uploadedByName}
-    </span>
-    <div style={{ display: 'flex', gap: 'var(--space-1)' }}>
-      <button
-        type="button"
-        className="res-btn res-btn--sm res-btn--ghost"
-        onClick={() => onDownload(resource.id, resource.name)}
-      >
-        Download
-      </button>
-      {canDelete && (
-        <button
-          type="button"
-          className="res-btn res-btn--sm res-btn--danger"
-          onClick={() => onDelete(resource.id)}
-        >
-          Delete
-        </button>
-      )}
+}: ResourceItemProps) => {
+  const isLink = resource.type === 'LINK';
+
+  return (
+    <div className="res-resource">
+      <span className="res-resource__name">
+        {isLink && (
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ marginRight: 5, verticalAlign: 'middle', color: '#4A41C9' }}
+          >
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+          </svg>
+        )}
+        {resource.name}
+      </span>
+      <span className="res-resource__meta">
+        {isLink ? 'External link' : formatBytes(resource.sizeBytes)} &middot;{' '}
+        {resource.uploadedByName}
+      </span>
+      <div style={{ display: 'flex', gap: 'var(--space-1)' }}>
+        {isLink ? (
+          <a
+            href={resource.url ?? '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="res-btn res-btn--sm res-btn--ghost"
+            style={{ textDecoration: 'none' }}
+          >
+            Open link
+          </a>
+        ) : (
+          <button
+            type="button"
+            className="res-btn res-btn--sm res-btn--ghost"
+            onClick={() => onDownload(resource.id, resource.name)}
+          >
+            Download
+          </button>
+        )}
+        {canDelete && (
+          <button
+            type="button"
+            className="res-btn res-btn--sm res-btn--danger"
+            onClick={() => onDelete(resource.id)}
+          >
+            Delete
+          </button>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default ResourceItem;

@@ -29,12 +29,15 @@ export interface UseTeacherStudentsSection {
   fieldError: string | null;
   serverError: string | null;
   isPending: boolean;
+  selectedStudent: UserSummaryDto | null;
   onToggleForm: () => void;
   onFullNameChange: (value: string) => void;
   onEmailChange: (value: string) => void;
   onClassGroupChange: (value: number | null) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onReset: () => void;
+  onSelectStudent: (student: UserSummaryDto) => void;
+  onCloseStudent: () => void;
 }
 
 /**
@@ -65,6 +68,7 @@ const useTeacherStudentsSection = (): UseTeacherStudentsSection => {
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [createdUser, setCreatedUser] = useState<CreatedUserDto | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<UserSummaryDto | null>(null);
 
   const resetFields = () => {
     setFullName('');
@@ -131,12 +135,15 @@ const useTeacherStudentsSection = (): UseTeacherStudentsSection => {
     fieldError,
     serverError,
     isPending,
+    selectedStudent,
     onToggleForm,
     onFullNameChange: setFullName,
     onEmailChange: setEmail,
     onClassGroupChange: setClassGroupId,
     onSubmit,
     onReset: () => setCreatedUser(null),
+    onSelectStudent: (student: UserSummaryDto) => setSelectedStudent(student),
+    onCloseStudent: () => setSelectedStudent(null),
   };
 };
 

@@ -1,3 +1,4 @@
+import type { FormEvent } from 'react';
 import useClassGroupsSection from '../hooks/useClassGroupsSection';
 import type { ClassGroupDto } from '../types';
 
@@ -86,7 +87,7 @@ interface GroupRowProps {
   editingName: string;
   onStartRename: (g: ClassGroupDto) => void;
   onEditingNameChange: (v: string) => void;
-  onSubmitRename: (e: React.FormEvent<HTMLFormElement>) => void;
+  onSubmitRename: (e: FormEvent<HTMLFormElement>) => void;
   onCancelRename: () => void;
   onDelete: (g: ClassGroupDto) => void;
   onSelectedTeacherChange: (groupId: number, teacherId: number | '') => void;

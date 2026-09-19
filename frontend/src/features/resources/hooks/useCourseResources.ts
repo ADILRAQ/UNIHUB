@@ -31,6 +31,8 @@ interface UseCourseResourcesReturn {
   deleteModule: (moduleId: number) => void;
   uploadResource: (moduleId: number, file: File) => void;
   uploadingModuleId: number | null;
+  addLink: (moduleId: number, title: string, url: string) => void;
+  addingLinkModuleId: number | null;
   deleteResource: (resourceId: number, moduleId: number) => void;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
@@ -50,6 +52,7 @@ const useCourseResources = (courseId: number): UseCourseResourcesReturn => {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [uploadingModuleId, setUploadingModuleId] = useState<number | null>(null);
+  const [addingLinkModuleId, setAddingLinkModuleId] = useState<number | null>(null);
   // ref to carry moduleId through delete mutation's onSuccessFn (void return)
   const pendingDeleteRef = useRef<{ resourceId: number; moduleId: number } | null>(null);
 
@@ -177,6 +180,37 @@ const useCourseResources = (courseId: number): UseCourseResourcesReturn => {
     [uploadMutate],
   );
 
+  // Add link resource: posts to /api/courses/{courseId}/modules/{moduleId}/resources/link
+  const { mutate: addLinkMutate } = usePostData<
+    string | number,
+    { moduleId: number; title: string; url: string },
+    ResourceDto
+  >({
+    keys: ['resources', 'add-link'],
+    serviceFn: ({ moduleId, title, url }) =>
+      resourceService.addLinkResource(courseId, moduleId, title, url),
+    onSuccessFn: (newResource) => {
+      setResourcesByModule((prev) => ({
+        ...prev,
+        [newResource.moduleId]: [...(prev[newResource.moduleId] ?? []), newResource],
+      }));
+      setAddingLinkModuleId(null);
+      toast.success('Link added successfully!');
+    },
+    onErrorFn: () => {
+      setAddingLinkModuleId(null);
+      toast.error('Failed to add link, please try again.');
+    },
+  });
+
+  const addLink = useCallback(
+    (moduleId: number, title: string, url: string) => {
+      setAddingLinkModuleId(moduleId);
+      addLinkMutate({ moduleId, title, url });
+    },
+    [addLinkMutate],
+  );
+
   // Delete: void return, so use a ref to carry moduleId into the success callback.
   const { mutate: deleteResourceMutate } = usePostData<string | number, number, void>({
     keys: ['resources', 'delete'],
@@ -216,6 +250,8 @@ const useCourseResources = (courseId: number): UseCourseResourcesReturn => {
     deleteModule: (moduleId) => deleteModuleMutate(moduleId),
     uploadResource,
     uploadingModuleId,
+    addLink,
+    addingLinkModuleId,
     deleteResource,
     searchQuery,
     setSearchQuery,

@@ -13,7 +13,11 @@ export interface ResourceDto {
   id: number;
   moduleId: number;
   name: string;
-  contentType: string;
+  /** "FILE" for uploaded files, "LINK" for external URL bookmarks. */
+  type: 'FILE' | 'LINK';
+  /** External URL — populated for LINK resources, null for FILE resources. */
+  url: string | null;
+  contentType: string | null;
   sizeBytes: number;
   uploadedById: number;
   uploadedByName: string;
