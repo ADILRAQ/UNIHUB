@@ -11,12 +11,15 @@ import com.unihub.model.Course;
 import com.unihub.model.User;
 import com.unihub.model.UserRole;
 import com.unihub.repository.ClassGroupRepository;
+import com.unihub.repository.CourseModuleRepository;
 import com.unihub.repository.CourseRepository;
 import com.unihub.repository.UserClassGroupRepository;
 import com.unihub.repository.UserRepository;
 import com.unihub.security.AuthenticatedUser;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,15 +40,18 @@ public class CourseService {
     private final UserRepository userRepository;
     private final ClassGroupRepository classGroupRepository;
     private final UserClassGroupRepository userClassGroupRepository;
+    private final CourseModuleRepository courseModuleRepository;
 
     public CourseService(CourseRepository courseRepository,
                          UserRepository userRepository,
                          ClassGroupRepository classGroupRepository,
-                         UserClassGroupRepository userClassGroupRepository) {
+                         UserClassGroupRepository userClassGroupRepository,
+                         CourseModuleRepository courseModuleRepository) {
         this.courseRepository = courseRepository;
         this.userRepository = userRepository;
         this.classGroupRepository = classGroupRepository;
         this.userClassGroupRepository = userClassGroupRepository;
+        this.courseModuleRepository = courseModuleRepository;
     }
 
     @Transactional(readOnly = true)
@@ -57,9 +63,16 @@ public class CourseService {
                 yield groupIds.isEmpty() ? List.of() : courseRepository.findByClassGroup_IdIn(groupIds);
             }
         };
+        // Bulk-fetch module counts in one query to avoid N+1
+        List<Long> courseIds = courses.stream().map(Course::getId).toList();
+        Map<Long, Integer> counts = new HashMap<>();
+        if (!courseIds.isEmpty()) {
+            courseModuleRepository.countByCourseIds(courseIds)
+                    .forEach(row -> counts.put((Long) row[0], ((Long) row[1]).intValue()));
+        }
         return courses.stream()
                 .sorted(Comparator.comparing(Course::getName, String.CASE_INSENSITIVE_ORDER))
-                .map(SchedulingMapper::toCourseDto)
+                .map(c -> SchedulingMapper.toCourseDto(c, counts.getOrDefault(c.getId(), 0)))
                 .toList();
     }
 
@@ -72,7 +85,8 @@ public class CourseService {
             // of courses the caller cannot see.
             throw new ResourceNotFoundException("Course " + id + " not found");
         }
-        return SchedulingMapper.toCourseDto(course);
+        return SchedulingMapper.toCourseDto(course,
+                (int) courseModuleRepository.countByCourse_Id(course.getId()));
     }
 
     private boolean isVisibleTo(Course course, AuthenticatedUser caller) {
@@ -104,7 +118,9 @@ public class CourseService {
         course.setTeacher(teacher);
         course.setClassGroup(group);
         course.setMeetLink(normalizeMeetLink(request.meetLink()));
-        return SchedulingMapper.toCourseDto(courseRepository.save(course));
+        Course saved = courseRepository.save(course);
+        return SchedulingMapper.toCourseDto(saved,
+                (int) courseModuleRepository.countByCourse_Id(saved.getId()));
     }
 
     @Transactional
@@ -129,7 +145,9 @@ public class CourseService {
             // Empty string clears the link; any other value sets it.
             course.setMeetLink(normalizeMeetLink(request.meetLink()));
         }
-        return SchedulingMapper.toCourseDto(courseRepository.save(course));
+        Course saved = courseRepository.save(course);
+        return SchedulingMapper.toCourseDto(saved,
+                (int) courseModuleRepository.countByCourse_Id(saved.getId()));
     }
 
     @Transactional

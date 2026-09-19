@@ -1,7 +1,8 @@
-import React, { useRef, useState } from 'react';
-import { useAuth } from '../../auth/AuthContext';
+import React, { useRef } from 'react';
 import useStudentPayments from '../hooks/useStudentPayments';
 import useAdminPayments from '../hooks/useAdminPayments';
+import usePaymentsPage from '../hooks/usePaymentsPage';
+import usePlanTab from '../hooks/usePlanTab';
 import PageHeader from '../../../components/layout/PageHeader';
 import type { InstallmentDto, CreatePeriodEntry } from '../types';
 
@@ -43,23 +44,36 @@ const StudentPaymentsView = () => {
   if (isLoading) return <p style={{ margin: 0, fontSize: 14, color: '#6B6B7B' }}>Loading…</p>;
   if (isError) return <p style={{ margin: 0, fontSize: 14, color: '#B91C1C' }}>Failed to load payments.</p>;
 
+  const total = installments.reduce((sum, ins) => sum + ins.amount, 0);
+  const paidCount = installments.filter((ins) => ins.status === 'PAID').length;
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {installments.map((ins) => {
-        const canUpload = ins.status === 'UNPAID' || ins.status === 'REJECTED';
-        const isUploading = uploadingId === ins.id;
-        const feedback = uploadFeedback[ins.id];
-        return (
-          <InstallmentCard
-            key={ins.id}
-            installment={ins}
-            isUploading={isUploading}
-            feedback={feedback}
-            canUpload={canUpload}
-            onUpload={uploadProof}
-          />
-        );
-      })}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {installments.length > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#FFFFFF', border: '1px solid #EDEBF8', borderRadius: 12, padding: '14px 20px' }}>
+          <span style={{ fontSize: 14, color: '#45435A', fontWeight: 500 }}>
+            {formatAmount(total)} total · {installments.length} installments
+          </span>
+          <span style={{ fontSize: 13.5, color: paidCount === installments.length ? '#0F8F5F' : '#45435A', fontWeight: 600 }}>
+            {paidCount} of {installments.length} paid
+          </span>
+        </div>
+      )}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 20 }}>
+        {installments.map((ins) => {
+          const isUploading = uploadingId === ins.id;
+          const feedback = uploadFeedback[ins.id];
+          return (
+            <InstallmentCard
+              key={ins.id}
+              installment={ins}
+              isUploading={isUploading}
+              feedback={feedback}
+              onUpload={uploadProof}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 };
@@ -68,34 +82,69 @@ interface InstallmentCardProps {
   installment: InstallmentDto;
   isUploading: boolean;
   feedback: string | undefined;
-  canUpload: boolean;
   onUpload: (id: number, file: File) => void;
 }
 
-const InstallmentCard = ({ installment, isUploading, feedback, canUpload, onUpload }: InstallmentCardProps) => {
+const InstallmentCard = ({ installment, isUploading, feedback, onUpload }: InstallmentCardProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const canUpload = installment.status === 'UNPAID' || installment.status === 'REJECTED';
+
+  const cardStyle: React.CSSProperties = installment.status === 'LOCKED'
+    ? { background: '#F5F4FA', border: '1px solid #EDEBF8', borderRadius: 16, padding: 24, opacity: 0.75, display: 'flex', flexDirection: 'column', gap: 12 }
+    : installment.status === 'UNPAID'
+      ? { background: '#FFFFFF', border: '2px solid #6C63FF', borderRadius: 16, padding: 24, boxShadow: '0 4px 18px rgba(108,99,255,0.14)', display: 'flex', flexDirection: 'column', gap: 12 }
+      : { background: '#FFFFFF', border: '1px solid #EDEBF8', borderRadius: 16, padding: 24, boxShadow: '0 1px 2px rgba(108,99,255,0.05)', display: 'flex', flexDirection: 'column', gap: 12 };
+
   return (
-    <div style={{ background: '#FFFFFF', border: '1px solid #EDEBF8', borderRadius: 14, padding: '20px 22px', boxShadow: '0 1px 2px rgba(108,99,255,0.05)', display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+    <div style={cardStyle}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: '#1F1B33' }}>{installment.label}</span>
-          <span style={{ fontSize: 22, fontWeight: 700, color: '#1F1B33', letterSpacing: '-0.02em' }}>{formatAmount(installment.amount)}</span>
-          <span style={{ fontSize: 12.5, color: '#6B6B7B' }}>Due: {installment.dueDate}</span>
-          {installment.status !== 'PAID' && installment.status !== 'LOCKED' && (
-            <span style={{ fontSize: 12, color: installment.overdue ? '#B02F2F' : '#6B6B7B' }}>{daysLabel(installment.dueDate)}</span>
-          )}
+          <span style={{ fontSize: 13, fontWeight: 600, color: '#45435A' }}>{installment.label}</span>
+          <span style={{ fontSize: 24, fontWeight: 700, color: '#1F1B33', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{formatAmount(installment.amount)}</span>
         </div>
         {badge(installment.status)}
       </div>
 
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, color: installment.overdue && installment.status === 'UNPAID' ? '#B02F2F' : '#6B6B7B' }}>
+        {installment.status === 'PAID' ? (
+          <>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F8F5F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>Paid</span>
+          </>
+        ) : installment.status === 'LOCKED' ? (
+          <>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8D8B9C" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <span>Available after previous installment</span>
+          </>
+        ) : installment.status === 'PROOF_SUBMITTED' ? (
+          <>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1D5FC2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span>Proof submitted · awaiting review</span>
+          </>
+        ) : (
+          <>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span>Due {installment.dueDate} · {daysLabel(installment.dueDate)}</span>
+          </>
+        )}
+      </div>
+
       {installment.status === 'REJECTED' && installment.rejectionReason && (
-        <div style={{ background: '#FEF2F2', border: '1px solid #F7A9A9', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: '#B91C1C' }}>
-          Rejection reason: {installment.rejectionReason}
+        <div style={{ background: '#FEF2F2', border: '1px solid #F7A9A9', borderRadius: 8, padding: '8px 12px', fontSize: 12.5, color: '#B91C1C' }}>
+          {installment.rejectionReason}
         </div>
       )}
 
       {canUpload && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
           <input
             ref={fileInputRef}
             type="file"
@@ -111,11 +160,13 @@ const InstallmentCard = ({ installment, isUploading, feedback, canUpload, onUplo
             type="button"
             disabled={isUploading}
             onClick={() => fileInputRef.current?.click()}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 7, height: 38, padding: '0 14px', border: 0, borderRadius: 9, background: isUploading ? '#8A84E8' : '#5A4FE0', color: '#FFFFFF', fontSize: 13.5, fontWeight: 600, cursor: isUploading ? 'not-allowed' : 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: 46, border: 0, borderRadius: 10, background: isUploading ? '#8A84E8' : '#5A4FE0', color: '#FFFFFF', fontSize: 14, fontWeight: 600, cursor: isUploading ? 'not-allowed' : 'pointer' }}
           >
             {isUploading ? 'Uploading…' : installment.status === 'REJECTED' ? 'Re-upload proof' : 'Upload proof'}
           </button>
-          {feedback && <span style={{ fontSize: 12.5, color: '#6B6B7B' }}>{feedback}</span>}
+          <span style={{ textAlign: 'center', fontSize: 12, color: '#8D8B9C' }}>
+            {feedback ?? 'JPEG, PNG or PDF · max 10 MB'}
+          </span>
         </div>
       )}
     </div>
@@ -204,7 +255,7 @@ const QueueTab = ({ queue, isLoading, isError, approvingId, rejectingId, rejectT
       <table style={{ borderCollapse: 'collapse', width: '100%' }}>
         <thead>
           <tr style={{ borderBottom: '1px solid #F0EEFA' }}>
-            {['Student', 'Class group', 'Installment', 'Amount', 'Due date', 'Submitted', ''].map((h, i) => (
+            {['Student', 'Class group', 'Installment', 'Amount', 'Submitted', ''].map((h, i) => (
               <th key={i} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12.5, fontWeight: 600, color: '#6B6B7B', whiteSpace: 'nowrap' }}>{h}</th>
             ))}
           </tr>
@@ -214,14 +265,13 @@ const QueueTab = ({ queue, isLoading, isError, approvingId, rejectingId, rejectT
             <React.Fragment key={item.installmentId}>
               <tr style={{ borderBottom: '1px solid #F5F4FA' }}>
                 <td style={{ padding: '12px 16px', fontSize: 13.5, color: '#1F1B33', fontWeight: 500 }}>{item.studentName}</td>
-                <td style={{ padding: '12px 16px', fontSize: 13.5, color: '#45435A' }}>{item.classGroupName}</td>
-                <td style={{ padding: '12px 16px', fontSize: 13.5, color: '#45435A' }}>{item.label}</td>
+                <td style={{ padding: '12px 16px', fontSize: 13.5, color: '#45435A' }}>{item.classGroup}</td>
+                <td style={{ padding: '12px 16px', fontSize: 13.5, color: '#45435A' }}>Installment {item.installmentNumber}</td>
                 <td style={{ padding: '12px 16px', fontSize: 13.5, color: '#45435A', fontWeight: 600 }}>{formatAmount(item.amount)}</td>
-                <td style={{ padding: '12px 16px', fontSize: 13.5, color: '#45435A' }}>{item.dueDate}</td>
                 <td style={{ padding: '12px 16px', fontSize: 12.5, color: '#6B6B7B' }}>{new Date(item.submittedAt).toLocaleString()}</td>
                 <td style={{ padding: '12px 16px' }}>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    <button type="button" onClick={() => onDownloadProof(item.installmentId, `proof-${item.studentName}-${item.label}`)} style={{ height: 32, padding: '0 10px', border: '1px solid #E1DEF2', borderRadius: 7, background: '#FFFFFF', color: '#45435A', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>View proof</button>
+                    <button type="button" onClick={() => onDownloadProof(item.installmentId, `proof-${item.studentName}-installment-${item.installmentNumber}`)} style={{ height: 32, padding: '0 10px', border: '1px solid #E1DEF2', borderRadius: 7, background: '#FFFFFF', color: '#45435A', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>View proof</button>
                     <button type="button" disabled={approvingId === item.installmentId || rejectingId === item.installmentId} onClick={() => onApprove(item.installmentId)} style={{ height: 32, padding: '0 10px', border: 0, borderRadius: 7, background: '#EAFBF3', color: '#0F8F5F', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>{approvingId === item.installmentId ? 'Approving…' : 'Approve'}</button>
                     <button type="button" disabled={approvingId === item.installmentId || rejectingId === item.installmentId} onClick={() => onOpenReject(item.installmentId)} style={{ height: 32, padding: '0 10px', border: 0, borderRadius: 7, background: '#FFE8E8', color: '#B02F2F', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>Reject</button>
                   </div>
@@ -229,7 +279,7 @@ const QueueTab = ({ queue, isLoading, isError, approvingId, rejectingId, rejectT
               </tr>
               {rejectTargetId === item.installmentId && (
                 <tr key={`reject-${item.installmentId}`} style={{ background: '#FEF2F2', borderBottom: '1px solid #F5F4FA' }}>
-                  <td colSpan={7} style={{ padding: '12px 16px' }}>
+                  <td colSpan={6} style={{ padding: '12px 16px' }}>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                       <input type="text" placeholder="Rejection reason…" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} autoFocus style={{ flexGrow: 1, height: 38, boxSizing: 'border-box', border: '1px solid #F7A9A9', borderRadius: 8, padding: '0 12px', fontSize: 13.5, color: '#1F1B33', background: '#FFFFFF', outline: 'none', fontFamily: 'inherit' }} />
                       <button type="button" disabled={!rejectReason.trim() || rejectingId != null} onClick={onConfirmReject} style={{ height: 38, padding: '0 12px', border: 0, borderRadius: 8, background: '#B02F2F', color: '#FFFFFF', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>{rejectingId === item.installmentId ? 'Rejecting…' : 'Confirm reject'}</button>
@@ -289,8 +339,6 @@ const OverdueTab = ({ overdueList, isLoading, classGroups, selectedGroupId, onGr
 
 /* ── Year plan tab ─────────────────────────────────────────────────── */
 
-const EMPTY_ROW = (): { label: string; amount: string; dueDate: string } => ({ label: '', amount: '', dueDate: '' });
-
 interface PlanTabProps {
   yearPlans: Record<string, ReturnType<typeof useAdminPayments>['yearPlans'][string]>;
   isLoading: boolean;
@@ -300,25 +348,7 @@ interface PlanTabProps {
 }
 
 const PlanTab = ({ yearPlans, isLoading, onCreatePlan, isCreating, planError }: PlanTabProps) => {
-  const [academicYear, setAcademicYear] = useState('');
-  const [rows, setRows] = useState([EMPTY_ROW(), EMPTY_ROW(), EMPTY_ROW()]);
-  const [formError, setFormError] = useState<string | null>(null);
-
-  const updateRow = (index: number, field: 'label' | 'amount' | 'dueDate', value: string) => {
-    setRows((prev) => { const next = [...prev]; next[index] = { ...next[index], [field]: value }; return next; });
-  };
-
-  const handleSubmit = () => {
-    setFormError(null);
-    if (!academicYear.trim()) { setFormError('Academic year is required.'); return; }
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-      if (!row.label.trim() || !row.amount || !row.dueDate) { setFormError(`Row ${i + 1}: all fields are required.`); return; }
-      if (Number(row.amount) <= 0) { setFormError(`Row ${i + 1}: amount must be greater than 0.`); return; }
-    }
-    if (rows[0].dueDate >= rows[1].dueDate || rows[1].dueDate >= rows[2].dueDate) { setFormError('Due dates must be in order: 1 < 2 < 3.'); return; }
-    onCreatePlan({ academicYear: academicYear.trim(), periods: rows.map((row, i) => ({ label: row.label.trim(), amount: Number(row.amount), dueDate: row.dueDate, periodOrder: i + 1 })) });
-  };
+  const { academicYear, rows, formError, setAcademicYear, updateRow, handleSubmit } = usePlanTab(onCreatePlan);
 
   const inputStyle: React.CSSProperties = { height: 38, boxSizing: 'border-box', border: '1px solid #E1DEF2', borderRadius: 8, padding: '0 10px', fontSize: 13.5, color: '#1F1B33', background: '#FFFFFF', outline: 'none', fontFamily: 'inherit', width: '100%' };
 
@@ -376,13 +406,13 @@ const PlanTab = ({ yearPlans, isLoading, onCreatePlan, isCreating, planError }: 
 /* ── Root page ───────────────────────────────────────────────────────── */
 
 const PaymentsPage = () => {
-  const { user } = useAuth();
+  const { viewType } = usePaymentsPage();
   return (
     <>
       <PageHeader title="Payments" />
       <main style={{ flexGrow: 1, padding: '28px 32px', overflowY: 'auto' }}>
-        {user?.role === 'STUDENT' && <StudentPaymentsView />}
-        {(user?.role === 'ADMIN' || user?.role === 'TEACHER') && <AdminPaymentsView />}
+        {viewType === 'student' && <StudentPaymentsView />}
+        {viewType === 'admin' && <AdminPaymentsView />}
       </main>
     </>
   );

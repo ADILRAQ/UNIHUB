@@ -54,3 +54,15 @@ export interface CreatePeriodEntry {
   dueDate: string;
   periodOrder: number;
 }
+
+/** Richer pending-proof item returned by GET /api/payments/pending-proofs. */
+export interface PendingProofItemDto {
+  installmentId: number;
+  studentName: string;
+  studentId: number;
+  classGroup: string;
+  installmentNumber: number;
+  amount: number;
+  submittedAt: string;
+  proofFileUrl: string;
+}

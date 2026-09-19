@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -53,4 +54,46 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
     @Query("select s from Session s join fetch s.course c where c.id = :courseId and s.sessionDate < :today order by s.sessionDate desc")
     List<Session> findPastSessionsByCourseId(@Param("courseId") Long courseId,
                                              @Param("today") LocalDate today);
+
+    // -------------------------------------------------------------------------
+    // Dashboard: next upcoming session per caller scope
+    // -------------------------------------------------------------------------
+
+    /**
+     * The next non-cancelled session for a student — the first upcoming occurrence
+     * across all courses of the given class groups. Uses Pageable so the caller
+     * passes {@code PageRequest.of(0, 1)} to retrieve only one row.
+     */
+    @Query("select s from Session s join fetch s.course c "
+            + "where c.classGroup.id in :groupIds "
+            + "and s.sessionDate >= :today "
+            + "and s.status <> com.unihub.model.SessionStatus.CANCELLED "
+            + "order by s.sessionDate asc, s.startTime asc")
+    List<Session> findNextForGroups(@Param("groupIds") Collection<Long> groupIds,
+                                    @Param("today") LocalDate today,
+                                    Pageable pageable);
+
+    /**
+     * The next non-cancelled session for a teacher — the first upcoming occurrence
+     * across all courses they teach. Uses Pageable so the caller passes
+     * {@code PageRequest.of(0, 1)} to retrieve only one row.
+     */
+    @Query("select s from Session s join fetch s.course c "
+            + "where c.teacher.id = :teacherId "
+            + "and s.sessionDate >= :today "
+            + "and s.status <> com.unihub.model.SessionStatus.CANCELLED "
+            + "order by s.sessionDate asc, s.startTime asc")
+    List<Session> findNextForTeacher(@Param("teacherId") Long teacherId,
+                                     @Param("today") LocalDate today,
+                                     Pageable pageable);
+
+    /**
+     * The next non-cancelled session across all courses (admin view). Uses Pageable so the
+     * caller passes {@code PageRequest.of(0, 1)} to retrieve only one row.
+     */
+    @Query("select s from Session s join fetch s.course c "
+            + "where s.sessionDate >= :today "
+            + "and s.status <> com.unihub.model.SessionStatus.CANCELLED "
+            + "order by s.sessionDate asc, s.startTime asc")
+    List<Session> findNextForAdmin(@Param("today") LocalDate today, Pageable pageable);
 }

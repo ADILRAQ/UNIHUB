@@ -54,6 +54,7 @@ export interface Course {
   classGroupId: number;
   classGroupName: string;
   meetLink: string | null;
+  moduleCount: number;
   createdAt: string;
 }
 

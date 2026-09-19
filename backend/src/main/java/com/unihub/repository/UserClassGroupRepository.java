@@ -3,6 +3,7 @@ package com.unihub.repository;
 import com.unihub.model.UserClassGroup;
 import com.unihub.model.UserClassGroupId;
 import com.unihub.model.UserRole;
+import java.util.Collection;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +12,9 @@ import org.springframework.data.repository.query.Param;
 public interface UserClassGroupRepository extends JpaRepository<UserClassGroup, UserClassGroupId> {
 
     List<UserClassGroup> findByUser_Id(Long userId);
+
+    /** Bulk lookup — returns all memberships for any user whose id is in {@code ids}. */
+    List<UserClassGroup> findByUser_IdIn(Collection<Long> ids);
 
     List<UserClassGroup> findByUser_IdAndUser_Role(Long userId, UserRole role);
 

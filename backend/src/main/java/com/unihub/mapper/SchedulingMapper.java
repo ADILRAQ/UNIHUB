@@ -22,7 +22,7 @@ public final class SchedulingMapper {
     private SchedulingMapper() {
     }
 
-    public static CourseDto toCourseDto(Course course) {
+    public static CourseDto toCourseDto(Course course, int moduleCount) {
         return new CourseDto(
                 course.getId(),
                 course.getName(),
@@ -31,6 +31,7 @@ public final class SchedulingMapper {
                 course.getClassGroup().getId(),
                 course.getClassGroup().getName(),
                 course.getMeetLink(),
+                moduleCount,
                 course.getCreatedAt());
     }
 

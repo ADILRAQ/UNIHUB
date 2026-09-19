@@ -2,7 +2,7 @@ import apiClient from '../../../api/client';
 import type {
   InstallmentDto,
   PaymentPeriodDto,
-  ProofQueueItemDto,
+  PendingProofItemDto,
   OverdueStudentDto,
   CreatePeriodEntry,
 } from '../types';
@@ -31,8 +31,8 @@ export const createYearPlan = (data: {
 }): Promise<void> =>
   apiClient.post('/api/payments/periods', data).then(() => undefined);
 
-export const getQueue = (): Promise<ProofQueueItemDto[]> =>
-  apiClient.get<ProofQueueItemDto[]>('/api/payments/queue').then((r) => r.data);
+export const getQueue = (): Promise<PendingProofItemDto[]> =>
+  apiClient.get<PendingProofItemDto[]>('/api/payments/pending-proofs').then((r) => r.data);
 
 export const downloadProof = async (
   installmentId: number,
@@ -56,14 +56,14 @@ export const downloadProof = async (
 };
 
 export const approveInstallment = (id: number): Promise<void> =>
-  apiClient.patch(`/api/payments/${id}/approve`).then(() => undefined);
+  apiClient.put(`/api/payments/installments/${id}/approve`).then(() => undefined);
 
 export const rejectInstallment = (
   id: number,
   reason: string,
 ): Promise<void> =>
   apiClient
-    .patch(`/api/payments/${id}/reject`, { reason })
+    .put(`/api/payments/installments/${id}/reject`, { reason })
     .then(() => undefined);
 
 export const getOverdue = (classGroupId?: number): Promise<OverdueStudentDto[]> =>

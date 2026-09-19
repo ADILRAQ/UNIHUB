@@ -308,7 +308,7 @@ const getGreeting = () => {
 };
 
 const DashboardPage = () => {
-  const { user, isAdmin, isTeacher } = useDashboardPage();
+  const { user, isAdmin, isTeacher, nextSession } = useDashboardPage();
   const isStudent = !isAdmin && !isTeacher;
   const cards = isStudent ? STUDENT_CARDS : ADMIN_CARDS;
   const firstName = user?.fullName?.split(' ')[0] ?? 'there';
@@ -377,18 +377,37 @@ const DashboardPage = () => {
                 <>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
                     <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: '#FFFFFF' }}>NEXT SESSION</span>
-                    <span style={{ fontSize: 15.5, fontWeight: 600, color: '#FFFFFF' }}>Check your calendar for upcoming sessions</span>
+                    <span style={{ fontSize: 15.5, fontWeight: 600, color: '#FFFFFF' }}>
+                      {nextSession
+                        ? `${nextSession.courseName} · ${new Date(nextSession.sessionDate).toLocaleDateString('en-US', { weekday: 'long' })} ${nextSession.startTime}–${nextSession.endTime} · Room ${nextSession.room}`
+                        : 'No upcoming sessions'}
+                    </span>
                   </div>
-                  <Link
-                    to="/schedule"
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 7, height: 40, flexShrink: 0, padding: '0 16px', borderRadius: 10, background: '#FFFFFF', color: '#4A41C9', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="2.5" y="6" width="13" height="12" rx="2.5"/>
-                      <path d="m15.5 10.5 6-3.2v9.4l-6-3.2"/>
-                    </svg>
-                    View calendar
-                  </Link>
+                  {nextSession ? (
+                    <a
+                      href={nextSession.meetUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 7, height: 40, flexShrink: 0, padding: '0 16px', borderRadius: 10, background: '#FFFFFF', color: '#4A41C9', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2.5" y="6" width="13" height="12" rx="2.5"/>
+                        <path d="m15.5 10.5 6-3.2v9.4l-6-3.2"/>
+                      </svg>
+                      Join Meet
+                    </a>
+                  ) : (
+                    <Link
+                      to="/schedule"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 7, height: 40, flexShrink: 0, padding: '0 16px', borderRadius: 10, background: '#FFFFFF', color: '#4A41C9', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2.5" y="6" width="13" height="12" rx="2.5"/>
+                        <path d="m15.5 10.5 6-3.2v9.4l-6-3.2"/>
+                      </svg>
+                      View calendar
+                    </Link>
+                  )}
                 </>
               ) : (
                 <>

@@ -9,7 +9,7 @@ import usePostData from '../../../hooks/usePostData';
 import { listClassGroups } from '../../admin/services/classGroupService';
 import * as paymentService from '../services/paymentService';
 import type {
-  ProofQueueItemDto,
+  PendingProofItemDto,
   OverdueStudentDto,
   PaymentPeriodDto,
   CreatePeriodEntry,
@@ -26,7 +26,7 @@ interface UseAdminPaymentsReturn {
   activeTab: AdminPaymentsTab;
   setActiveTab: (tab: AdminPaymentsTab) => void;
   /* Queue */
-  queue: ProofQueueItemDto[];
+  queue: PendingProofItemDto[];
   isLoadingQueue: boolean;
   isErrorQueue: boolean;
   approvingId: number | null;
@@ -66,7 +66,7 @@ const useAdminPayments = (): UseAdminPaymentsReturn => {
   const pendingRejectRef = useRef<number | null>(null);
 
   const { data: queue, isLoading: isLoadingQueue, isError: isErrorQueue } =
-    useGetData<ProofQueueItemDto[], string, ProofQueueItemDto[]>({
+    useGetData<PendingProofItemDto[], string, PendingProofItemDto[]>({
       queryKey: [...QUEUE_KEY],
       queryFn: paymentService.getQueue,
       transformFn: (d) => d,

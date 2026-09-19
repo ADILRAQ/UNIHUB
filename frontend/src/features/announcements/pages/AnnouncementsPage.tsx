@@ -237,11 +237,16 @@ const AnnouncementsPage = () => {
                     )}
                   </div>
 
-                  <div
-                    style={{ margin: 0, fontSize: 14.5, lineHeight: 1.65, color: '#55536B' }}
-                    // ponytail: server-sanitized HTML from backend — safe per CLAUDE.md
-                    dangerouslySetInnerHTML={{ __html: item.bodyHtml.replace(/<[^>]+>/g, ' ').slice(0, 220) + (item.bodyHtml.length > 220 ? '…' : '') }}
-                  />
+                  {(() => {
+                    const stripped = item.bodyHtml.replace(/<[^>]+>/g, ' ');
+                    return (
+                      <div
+                        style={{ margin: 0, fontSize: 14.5, lineHeight: 1.65, color: '#55536B' }}
+                        // ponytail: server-sanitized HTML from backend — safe per CLAUDE.md
+                        dangerouslySetInnerHTML={{ __html: stripped.slice(0, 220) + (stripped.length > 220 ? '…' : '') }}
+                      />
+                    );
+                  })()}
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: 7, color: '#6B6B7B' }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

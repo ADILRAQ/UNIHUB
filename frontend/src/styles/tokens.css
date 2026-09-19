@@ -63,11 +63,12 @@
   /* ── Text — light mode ────────────────────────────────────────────────────
      Near-black primary, layered grays for hierarchy.
   ── */
-  --text-primary:   #18181B;
-  --text-secondary: #3F3F46;
-  --text-muted:     #71717A;
-  --text-on-brand:  #FFFFFF;
-  --text-link:      #5A52E0;
+  --text-primary:      #1F1B33;
+  --text-secondary:    #45435A;
+  --text-muted:        #6B6B7B;
+  --text-placeholder:  #8D8B9C;
+  --text-on-brand:     #FFFFFF;
+  --text-link:         #4A41C9;
 
   /* ── Border ────────────────────────────────────────────────────────────── */
   --border-subtle:  #E4E4E7;
@@ -75,7 +76,9 @@
   --border-strong:  #A1A1AA;
 
   /* ── Typography ────────────────────────────────────────────────────────── */
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+
+  /* Utility scale (rem, for backward compat) */
   --text-xs:   0.6875rem; --leading-xs:   1rem;
   --text-sm:   0.8125rem; --leading-sm:   1.25rem;
   --text-base: 1rem;      --leading-base: 1.625rem;
@@ -84,6 +87,21 @@
   --text-2xl:  1.5rem;    --leading-2xl:  2rem;
   --text-3xl:  1.875rem;  --leading-3xl:  2.25rem;
   --text-4xl:  2.25rem;   --leading-4xl:  2.5rem;
+
+  /* Semantic type scale */
+  --fs-display-lg:  42px; --lh-display-lg:  1.15; --ls-display-lg:  -0.03em;
+  --fs-display-md:  28px; --lh-display-md:  1.2;  --ls-display-md:  -0.025em;
+  --fs-heading-xl:  26px; --lh-heading-xl:  1.2;  --ls-heading-xl:  -0.02em;
+  --fs-heading-lg:  22px; --lh-heading-lg:  1.3;  --ls-heading-lg:  -0.015em;
+  --fs-heading-md:  20px; --lh-heading-md:  1.3;  --ls-heading-md:  -0.02em;
+  --fs-heading-sm:  18px; --lh-heading-sm:  1.3;  --ls-heading-sm:  -0.01em;
+  --fs-title:       16.5px; --lh-title:     1.35; --ls-title:       -0.01em;
+  --fs-subtitle:    15px;   --lh-subtitle:  1.4;  --ls-subtitle:    normal;
+  --fs-body:        14.5px; --lh-body:      1.55; --ls-body:        normal;
+  --fs-body-sm:     13.5px; --lh-body-sm:   1.6;  --ls-body-sm:     normal;
+  --fs-caption:     12.5px; --lh-caption:   1.4;  --ls-caption:     normal;
+  --fs-label:       11.5px; --lh-label:     1.3;  --ls-label:       0.05em;
+
   --font-weight-normal:   400;
   --font-weight-medium:   500;
   --font-weight-semibold: 600;
@@ -127,4 +145,23 @@
   --gradient-brand:       linear-gradient(135deg, #4640B8 0%, #6C63FF 100%);
   --gradient-brand-light: linear-gradient(135deg, #F0EEFF 0%, #E2DCFF 100%);
 }
+
+/* ── Prose container (announcement bodies, recap notes) ─────────────────── */
+.prose {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body-sm); /* 1.75 for prose */
+  color: var(--text-secondary);
+}
+.prose p { margin: 0 0 16px; }
+.prose p:last-child { margin-bottom: 0; }
+.prose h1, .prose h2, .prose h3 {
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin: 24px 0 8px;
+  line-height: var(--lh-heading-sm);
+}
+.prose ul, .prose ol { padding-left: 1.5em; margin: 0 0 16px; }
+.prose li { margin-bottom: 4px; }
+.prose a { color: var(--text-link); }
+.prose strong { font-weight: var(--font-weight-semibold); }
 

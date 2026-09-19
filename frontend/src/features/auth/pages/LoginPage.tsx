@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import useLoginPage from '../hooks/useLoginPage';
 
 const FEATURES = [
@@ -39,12 +38,12 @@ const LoginPage = () => {
     fieldError,
     serverError,
     isPending,
+    showPassword,
     onEmailChange,
     onPasswordChange,
     onSubmit,
+    toggleShowPassword,
   } = useLoginPage();
-
-  const [showPassword, setShowPassword] = useState(false);
   const hasError = !!(fieldError || serverError);
 
   return (
@@ -164,7 +163,7 @@ const LoginPage = () => {
                   <button
                     type="button"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    onClick={() => setShowPassword(v => !v)}
+                    onClick={toggleShowPassword}
                     style={{ position: 'absolute', right: 2, top: 2, width: 44, height: 44, border: 0, background: 'transparent', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6B6B7B' }}
                   >
                     {showPassword ? (

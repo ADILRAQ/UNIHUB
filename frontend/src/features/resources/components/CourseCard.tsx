@@ -40,15 +40,14 @@ const CourseCard = ({ course, showTeacher = false, index = 0 }: CourseCardProps)
           <span style={{ fontSize: 13, color: '#6B6B7B' }}>{course.teacherName}</span>
         )}
       </div>
-      {course.meetLink && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 12, borderTop: '1px solid #F0EEFA' }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8D8B9C" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="2.5" y="6" width="13" height="12" rx="2.5"/>
-            <path d="m15.5 10.5 6-3.2v9.4l-6-3.2"/>
-          </svg>
-          <span style={{ fontSize: 12.5, color: '#8D8B9C' }}>Meet link available</span>
-        </div>
-      )}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 12, borderTop: '1px solid #F0EEFA' }}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8D8B9C" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4.5 6.5h15M4.5 12h15M4.5 17.5h9"/>
+        </svg>
+        <span style={{ fontSize: 12.5, color: '#8D8B9C' }}>
+          {course.moduleCount === 1 ? '1 module' : `${course.moduleCount ?? 0} modules`}
+        </span>
+      </div>
     </Link>
   );
 };

@@ -36,9 +36,11 @@ export interface UseLoginPage {
   fieldError: string | null;
   serverError: string | null;
   isPending: boolean;
+  showPassword: boolean;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  toggleShowPassword: () => void;
 }
 
 /**
@@ -55,6 +57,7 @@ const useLoginPage = (): UseLoginPage => {
   const [password, setPassword] = useState('');
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { mutate, isPending } = usePostData<string, LoginRequest, AuthResponse>({
     keys: ['auth', 'login'],
@@ -93,9 +96,11 @@ const useLoginPage = (): UseLoginPage => {
     fieldError,
     serverError,
     isPending,
+    showPassword,
     onEmailChange: setEmail,
     onPasswordChange: setPassword,
     onSubmit,
+    toggleShowPassword: () => setShowPassword((v) => !v),
   };
 };
 

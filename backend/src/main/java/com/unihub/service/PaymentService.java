@@ -4,6 +4,7 @@ import com.unihub.dto.CreatePeriodRequest;
 import com.unihub.dto.InstallmentDto;
 import com.unihub.dto.OverdueStudentDto;
 import com.unihub.dto.PaymentPeriodDto;
+import com.unihub.dto.PendingProofItemDto;
 import com.unihub.dto.ProofQueueItemDto;
 import com.unihub.exception.BadRequestException;
 import com.unihub.exception.ConflictException;
@@ -21,6 +22,7 @@ import com.unihub.repository.UserRepository;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -203,6 +205,36 @@ public class PaymentService {
                 .findByStatusOrderBySubmittedAtAsc(InstallmentStatus.PROOF_SUBMITTED)
                 .stream()
                 .map(this::toQueueItemDto)
+                .toList();
+    }
+
+    // =========================================================================
+    // Admin: pending-proofs (enhanced queue for the admin table view)
+    // =========================================================================
+
+    /**
+     * Returns all PROOF_SUBMITTED installments with the additional fields needed by the admin
+     * pending-proofs table: {@code installmentNumber} (1–3) and {@code proofFileUrl} (the API
+     * path the admin can call to stream the file). Sorted by submission time ascending.
+     */
+    @Transactional(readOnly = true)
+    public List<PendingProofItemDto> getPendingProofs() {
+        List<StudentInstallment> installments = installmentRepository
+                .findByStatusOrderBySubmittedAtAsc(InstallmentStatus.PROOF_SUBMITTED);
+
+        // Bulk-fetch class-group memberships to avoid N+1 queries (one lookup per installment)
+        Set<Long> studentIds = installments.stream()
+                .map(si -> si.getStudent().getId())
+                .collect(Collectors.toSet());
+        Map<Long, String> groupNameByStudentId = new HashMap<>();
+        if (!studentIds.isEmpty()) {
+            userClassGroupRepository.findByUser_IdIn(studentIds)
+                    .forEach(ucg -> groupNameByStudentId
+                            .putIfAbsent(ucg.getUser().getId(), ucg.getClassGroup().getName()));
+        }
+
+        return installments.stream()
+                .map(si -> toPendingProofItemDto(si, groupNameByStudentId))
                 .toList();
     }
 
@@ -424,5 +456,21 @@ public class PaymentService {
                 si.getPeriod().getAmount(),
                 si.getPeriod().getDueDate(),
                 si.getSubmittedAt());
+    }
+
+    private PendingProofItemDto toPendingProofItemDto(StudentInstallment si,
+                                                       Map<Long, String> groupNameByStudentId) {
+        User student = si.getStudent();
+        String classGroupName = groupNameByStudentId.get(student.getId());
+
+        return new PendingProofItemDto(
+                si.getId(),
+                student.getFullName(),
+                student.getId(),
+                classGroupName,
+                si.getPeriod().getPeriodOrder(),
+                si.getPeriod().getAmount(),
+                si.getSubmittedAt(),
+                "/api/payments/" + si.getId() + "/proof");
     }
 }
