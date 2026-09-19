@@ -6,6 +6,7 @@ import com.unihub.exception.ResourceNotFoundException;
 import com.unihub.model.Course;
 import com.unihub.model.CourseModule;
 import com.unihub.model.Resource;
+import com.unihub.model.ResourceType;
 import com.unihub.model.User;
 import com.unihub.repository.CourseModuleRepository;
 import com.unihub.repository.ResourceRepository;
@@ -50,7 +51,7 @@ public class ResourceService {
     }
 
     // -------------------------------------------------------------------------
-    // Upload
+    // Upload (file)
     // -------------------------------------------------------------------------
 
     @Transactional
@@ -68,12 +69,46 @@ public class ResourceService {
 
         Resource resource = new Resource();
         resource.setModule(module);
+        resource.setType(ResourceType.FILE);
         resource.setName(file.getOriginalFilename() != null
                 ? file.getOriginalFilename() : file.getName());
         resource.setContentType(file.getContentType() != null
                 ? file.getContentType() : "application/octet-stream");
         resource.setStorageKey(key);
         resource.setSizeBytes(file.getSize());
+        resource.setUploadedBy(uploader);
+
+        return toDto(resourceRepository.save(resource));
+    }
+
+    // -------------------------------------------------------------------------
+    // Add link resource
+    // -------------------------------------------------------------------------
+
+    /**
+     * Creates a LINK-type resource that points to an external URL. No file is stored in MinIO.
+     *
+     * @param moduleId   the module to attach the link to
+     * @param title      display name for the link
+     * @param url        the external URL
+     * @param callerId   the authenticated caller's user id
+     * @param callerRole the authenticated caller's role name
+     */
+    @Transactional
+    public ResourceDto addLinkResource(Long moduleId, String title, String url,
+                                        Long callerId, String callerRole) {
+        CourseModule module = moduleService.requireModule(moduleId);
+        assertCanWrite(module.getCourse(), callerId, callerRole);
+
+        User uploader = userRepository.findById(callerId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+
+        Resource resource = new Resource();
+        resource.setModule(module);
+        resource.setType(ResourceType.LINK);
+        resource.setName(title);
+        resource.setUrl(url);
+        resource.setSizeBytes(0L);
         resource.setUploadedBy(uploader);
 
         return toDto(resourceRepository.save(resource));
@@ -119,7 +154,9 @@ public class ResourceService {
                         r.getId(),
                         r.getModule().getId(),
                         r.getName(),
+                        r.getType() != null ? r.getType().name() : ResourceType.FILE.name(),
                         r.getContentType(),
+                        r.getUrl(),
                         r.getSizeBytes(),
                         r.getUploadedBy().getId(),
                         r.getUploadedBy().getFullName(),
@@ -190,7 +227,9 @@ public class ResourceService {
                 r.getId(),
                 r.getModule().getId(),
                 r.getName(),
+                r.getType() != null ? r.getType().name() : ResourceType.FILE.name(),
                 r.getContentType(),
+                r.getUrl(),
                 r.getSizeBytes(),
                 r.getUploadedBy().getId(),
                 r.getUploadedBy().getFullName(),
