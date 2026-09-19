@@ -10,5 +10,7 @@ public record ClassGroupDto(
         Long id,
         String name,
         long memberCount,
+        Long teacherId,
+        String teacherName,
         Instant createdAt) {
 }

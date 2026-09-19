@@ -16,6 +16,8 @@ import com.unihub.repository.UserRepository;
 import com.unihub.security.AuthenticatedUser;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +48,6 @@ public class ClassGroupService {
         if ("ADMIN".equals(caller.role())) {
             groups = classGroupRepository.findAll();
         } else {
-            // TEACHER: only the groups they are assigned to as a TEACHER
             List<Long> groupIds = userClassGroupRepository.findOwnedGroupIds(
                     caller.userId(), UserRole.TEACHER);
             if (groupIds.isEmpty()) {
@@ -54,10 +55,32 @@ public class ClassGroupService {
             }
             groups = classGroupRepository.findAllById(groupIds);
         }
+
+        List<Long> groupIds = groups.stream().map(ClassGroup::getId).toList();
+
+        // Bulk member counts — one query for all groups.
+        Map<Long, Long> countByGroup = userClassGroupRepository
+                .findTeachersByGroupIds(groupIds).stream()
+                .collect(Collectors.groupingBy(
+                        ucg -> ucg.getClassGroup().getId(), Collectors.counting()));
+
+        // Bulk teacher fetch — one query, keyed by group id.
+        Map<Long, UserClassGroup> teacherByGroup = userClassGroupRepository
+                .findTeachersByGroupIds(groupIds).stream()
+                .collect(Collectors.toMap(
+                        ucg -> ucg.getClassGroup().getId(),
+                        ucg -> ucg,
+                        (a, b) -> a)); // keep first if somehow two teachers
+
         return groups.stream()
                 .sorted(Comparator.comparing(ClassGroup::getName, String.CASE_INSENSITIVE_ORDER))
-                .map(g -> AdminMapper.toClassGroupDto(
-                        g, userClassGroupRepository.countByClassGroup_Id(g.getId())))
+                .map(g -> {
+                    long memberCount = userClassGroupRepository.countByClassGroup_Id(g.getId());
+                    UserClassGroup teacherUcg = teacherByGroup.get(g.getId());
+                    Long teacherId = teacherUcg != null ? teacherUcg.getUser().getId() : null;
+                    String teacherName = teacherUcg != null ? teacherUcg.getUser().getFullName() : null;
+                    return AdminMapper.toClassGroupDto(g, memberCount, teacherId, teacherName);
+                })
                 .toList();
     }
 
@@ -71,7 +94,7 @@ public class ClassGroupService {
         ClassGroup group = new ClassGroup();
         group.setName(trimmed);
         ClassGroup saved = classGroupRepository.save(group);
-        return AdminMapper.toClassGroupDto(saved, 0);
+        return AdminMapper.toClassGroupDto(saved, 0, null, null);
     }
 
     @Transactional
@@ -90,7 +113,11 @@ public class ClassGroupService {
         group.setName(trimmed);
         ClassGroup saved = classGroupRepository.save(group);
         long memberCount = userClassGroupRepository.countByClassGroup_Id(saved.getId());
-        return AdminMapper.toClassGroupDto(saved, memberCount);
+        List<UserClassGroup> teachers = userClassGroupRepository.findTeachersByGroupIds(List.of(saved.getId()));
+        UserClassGroup t = teachers.isEmpty() ? null : teachers.get(0);
+        return AdminMapper.toClassGroupDto(saved, memberCount,
+                t != null ? t.getUser().getId() : null,
+                t != null ? t.getUser().getFullName() : null);
     }
 
     /**

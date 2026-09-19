@@ -53,6 +53,16 @@ public interface UserClassGroupRepository extends JpaRepository<UserClassGroup, 
     List<UserClassGroup> findStudentsByClassGroupId(@Param("classGroupId") Long classGroupId);
 
     /**
+     * Bulk fetch of all TEACHER-role memberships for the given group ids — one query
+     * instead of one per group, used by {@code ClassGroupService.listGroups()} to
+     * populate {@code ClassGroupDto.teacherId/teacherName} without N+1.
+     */
+    @Query("select ucg from UserClassGroup ucg join fetch ucg.user "
+            + "where ucg.classGroup.id in :groupIds "
+            + "and ucg.user.role = com.unihub.model.UserRole.TEACHER")
+    List<UserClassGroup> findTeachersByGroupIds(@Param("groupIds") List<Long> groupIds);
+
+    /**
      * Whether the given teacher owns a class group that the given user is a
      * {@code STUDENT} member of — the "does this teacher manage this student" check behind
      * the teacher-scoped password-reset {@code @PreAuthorize}. The role conditions are baked

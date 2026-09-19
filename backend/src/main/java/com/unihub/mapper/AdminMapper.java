@@ -53,11 +53,14 @@ public final class AdminMapper {
         return new ClassGroupRef(group.getId(), group.getName());
     }
 
-    public static ClassGroupDto toClassGroupDto(ClassGroup group, long memberCount) {
+    public static ClassGroupDto toClassGroupDto(ClassGroup group, long memberCount,
+                                                Long teacherId, String teacherName) {
         return new ClassGroupDto(
                 group.getId(),
                 group.getName(),
                 memberCount,
+                teacherId,
+                teacherName,
                 group.getCreatedAt());
     }
 }

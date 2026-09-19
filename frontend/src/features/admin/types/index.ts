@@ -97,6 +97,8 @@ export interface ClassGroupDto {
   id: number;
   name: string;
   memberCount: number;
+  teacherId: number | null;
+  teacherName: string | null;
   createdAt: string;
 }
 

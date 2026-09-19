@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import useGetData from '../../../hooks/useGetData';
 import usePostData from '../../../hooks/usePostData';
 import { apiErrorMessage } from '../../../utils/apiError';
+import { listUsers } from '../services/userService';
 import {
   assignTeacher,
   createClassGroup,
@@ -11,7 +13,7 @@ import {
   revokeTeacher,
 } from '../services/classGroupService';
 import useClassGroupsData, { CLASS_GROUPS_KEY } from './useClassGroupsData';
-import type { ClassGroupDto, ClassGroupNameRequest } from '../types';
+import type { ClassGroupDto, ClassGroupNameRequest, UserSummaryDto } from '../types';
 
 export interface UseClassGroupsSection {
   classGroups: ClassGroupDto[];
@@ -22,8 +24,10 @@ export interface UseClassGroupsSection {
   createPending: boolean;
   editingId: number | null;
   editingName: string;
-  /** Per-group teacher-id input value, keyed by group id. */
-  teacherInputs: Record<number, string>;
+  /** All TEACHER-role accounts, for the assign dropdown. */
+  teachers: UserSummaryDto[];
+  /** Per-group selected teacher id for the assign dropdown, keyed by group id. */
+  selectedTeacherIds: Record<number, number | ''>;
   busyGroupId: number | null;
   onNewNameChange: (value: string) => void;
   onCreate: (event: FormEvent<HTMLFormElement>) => void;
@@ -32,18 +36,11 @@ export interface UseClassGroupsSection {
   onSubmitRename: (event: FormEvent<HTMLFormElement>) => void;
   onCancelRename: () => void;
   onDelete: (group: ClassGroupDto) => void;
-  onTeacherInputChange: (groupId: number, value: string) => void;
+  onSelectedTeacherChange: (groupId: number, teacherId: number | '') => void;
   onAssignTeacher: (groupId: number) => void;
-  onRevokeTeacher: (groupId: number) => void;
+  onRevokeTeacher: (group: ClassGroupDto) => void;
 }
 
-/**
- * Logic for the class-groups section: list via the shared `useClassGroupsData`
- * read hook, plus create / rename / delete / assign-teacher / revoke-teacher
- * mutations via the generic `usePostData`. Every mutation invalidates the shared
- * class-groups query; backend messages (e.g. the 409 "has members" on delete)
- * are surfaced verbatim.
- */
 const useClassGroupsSection = (): UseClassGroupsSection => {
   const queryClient = useQueryClient();
   const { classGroups, isLoading, isError } = useClassGroupsData();
@@ -52,7 +49,19 @@ const useClassGroupsSection = (): UseClassGroupsSection => {
   const [newName, setNewName] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState('');
-  const [teacherInputs, setTeacherInputs] = useState<Record<number, string>>({});
+  const [selectedTeacherIds, setSelectedTeacherIds] = useState<Record<number, number | ''>>({});
+
+  // Fetch all teachers for the assign dropdown.
+  const { data: teacherPage } = useGetData<
+    { content: UserSummaryDto[] },
+    string,
+    UserSummaryDto[]
+  >({
+    queryKey: ['admin', 'users', 'teachers'],
+    queryFn: () => listUsers({ role: 'TEACHER', status: '', classGroupId: null, search: '', page: 0, size: 200 }),
+    transformFn: (page) => page.content,
+  });
+  const teachers = teacherPage ?? [];
 
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: [...CLASS_GROUPS_KEY] });
@@ -63,52 +72,35 @@ const useClassGroupsSection = (): UseClassGroupsSection => {
   const createMutation = usePostData<string, ClassGroupNameRequest, ClassGroupDto>({
     keys: ['admin', 'class-groups', 'create'],
     serviceFn: createClassGroup,
-    onSuccessFn: () => {
-      setNewName('');
-      void invalidate();
-    },
+    onSuccessFn: () => { setNewName(''); void invalidate(); },
     onErrorFn: onError('Could not create the class group.'),
   });
 
-  const renameMutation = usePostData<
-    string,
-    { id: number } & ClassGroupNameRequest,
-    ClassGroupDto
-  >({
+  const renameMutation = usePostData<string, { id: number } & ClassGroupNameRequest, ClassGroupDto>({
     keys: ['admin', 'class-groups', 'rename'],
     serviceFn: renameClassGroup,
-    onSuccessFn: () => {
-      setEditingId(null);
-      setEditingName('');
-      void invalidate();
-    },
+    onSuccessFn: () => { setEditingId(null); setEditingName(''); void invalidate(); },
     onErrorFn: onError('Could not rename the class group.'),
   });
 
   const deleteMutation = usePostData<string, number, void>({
     keys: ['admin', 'class-groups', 'delete'],
     serviceFn: deleteClassGroup,
-    onSuccessFn: () => {
-      void invalidate();
-    },
+    onSuccessFn: () => { void invalidate(); },
     onErrorFn: onError('Could not delete the class group.'),
   });
 
   const assignMutation = usePostData<string, { id: number; userId: number }, void>({
     keys: ['admin', 'class-groups', 'assign-teacher'],
     serviceFn: assignTeacher,
-    onSuccessFn: () => {
-      void invalidate();
-    },
+    onSuccessFn: () => { void invalidate(); },
     onErrorFn: onError('Could not assign the teacher.'),
   });
 
   const revokeMutation = usePostData<string, { id: number; userId: number }, void>({
     keys: ['admin', 'class-groups', 'revoke-teacher'],
     serviceFn: revokeTeacher,
-    onSuccessFn: () => {
-      void invalidate();
-    },
+    onSuccessFn: () => { void invalidate(); },
     onErrorFn: onError('Could not revoke the teacher.'),
   });
 
@@ -119,12 +111,6 @@ const useClassGroupsSection = (): UseClassGroupsSection => {
     (revokeMutation.isPending ? revokeMutation.variables?.id : undefined) ??
     null;
 
-  const parseTeacherId = (groupId: number): number | null => {
-    const raw = teacherInputs[groupId]?.trim();
-    const parsed = raw ? Number(raw) : NaN;
-    return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
-  };
-
   return {
     classGroups,
     isLoading,
@@ -134,17 +120,15 @@ const useClassGroupsSection = (): UseClassGroupsSection => {
     createPending: createMutation.isPending,
     editingId,
     editingName,
-    teacherInputs,
+    teachers,
+    selectedTeacherIds,
     busyGroupId,
     onNewNameChange: setNewName,
     onCreate: (event) => {
       event.preventDefault();
       setActionError(null);
       const name = newName.trim();
-      if (!name) {
-        setActionError('Enter a class group name.');
-        return;
-      }
+      if (!name) { setActionError('Enter a class group name.'); return; }
       createMutation.mutate({ name });
     },
     onStartRename: (group) => {
@@ -157,39 +141,23 @@ const useClassGroupsSection = (): UseClassGroupsSection => {
       event.preventDefault();
       setActionError(null);
       const name = editingName.trim();
-      if (editingId === null || !name) {
-        setActionError('Enter a class group name.');
-        return;
-      }
+      if (editingId === null || !name) { setActionError('Enter a class group name.'); return; }
       renameMutation.mutate({ id: editingId, name });
     },
-    onCancelRename: () => {
-      setEditingId(null);
-      setEditingName('');
-    },
-    onDelete: (group) => {
-      setActionError(null);
-      deleteMutation.mutate(group.id);
-    },
-    onTeacherInputChange: (groupId, value) =>
-      setTeacherInputs((current) => ({ ...current, [groupId]: value })),
+    onCancelRename: () => { setEditingId(null); setEditingName(''); },
+    onDelete: (group) => { setActionError(null); deleteMutation.mutate(group.id); },
+    onSelectedTeacherChange: (groupId, teacherId) =>
+      setSelectedTeacherIds((prev) => ({ ...prev, [groupId]: teacherId })),
     onAssignTeacher: (groupId) => {
       setActionError(null);
-      const userId = parseTeacherId(groupId);
-      if (userId === null) {
-        setActionError('Enter a valid teacher user id.');
-        return;
-      }
-      assignMutation.mutate({ id: groupId, userId });
+      const userId = selectedTeacherIds[groupId];
+      if (!userId) { setActionError('Select a teacher first.'); return; }
+      assignMutation.mutate({ id: groupId, userId: Number(userId) });
     },
-    onRevokeTeacher: (groupId) => {
+    onRevokeTeacher: (group) => {
       setActionError(null);
-      const userId = parseTeacherId(groupId);
-      if (userId === null) {
-        setActionError('Enter a valid teacher user id.');
-        return;
-      }
-      revokeMutation.mutate({ id: groupId, userId });
+      if (!group.teacherId) return;
+      revokeMutation.mutate({ id: group.id, userId: group.teacherId });
     },
   };
 };
