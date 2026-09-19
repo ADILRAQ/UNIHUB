@@ -43,6 +43,19 @@ public class ClassGroupService {
     }
 
     @Transactional(readOnly = true)
+    public ClassGroupDto getGroup(Long id) {
+        ClassGroup group = classGroupRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Class group " + id + " not found"));
+
+        long memberCount = userClassGroupRepository.countByClassGroup_Id(id);
+        List<UserClassGroup> teachers = userClassGroupRepository.findTeachersByGroupIds(List.of(id));
+        UserClassGroup t = teachers.isEmpty() ? null : teachers.get(0);
+        return AdminMapper.toClassGroupDto(group, memberCount,
+                t != null ? t.getUser().getId() : null,
+                t != null ? t.getUser().getFullName() : null);
+    }
+
+    @Transactional(readOnly = true)
     public List<ClassGroupDto> listGroups(AuthenticatedUser caller) {
         List<ClassGroup> groups;
         if ("ADMIN".equals(caller.role())) {

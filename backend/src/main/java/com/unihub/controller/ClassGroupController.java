@@ -42,6 +42,12 @@ public class ClassGroupController {
         return classGroupService.listGroups(caller);
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public ClassGroupDto getGroup(@PathVariable Long id) {
+        return classGroupService.getGroup(id);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")

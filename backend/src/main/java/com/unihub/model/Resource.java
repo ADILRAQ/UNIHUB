@@ -2,6 +2,8 @@ package com.unihub.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,8 +19,11 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 /**
- * A file stored in MinIO and associated with a {@link CourseModule}.
- * The {@link #storageKey} is the MinIO object key — never a filesystem path.
+ * A course resource — either a MinIO-backed file upload ({@link ResourceType#FILE}) or an
+ * external URL bookmark ({@link ResourceType#LINK}).
+ * <p>
+ * For FILE resources: {@code storageKey} holds the MinIO object key; {@code url} is null.
+ * For LINK resources: {@code url} holds the external URL; {@code storageKey} is null.
  */
 @Entity
 @Table(name = "resources")
@@ -39,11 +44,21 @@ public class Resource {
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "content_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private ResourceType type = ResourceType.FILE;
+
+    /** MIME type for FILE resources; null for LINK resources. */
+    @Column(name = "content_type")
     private String contentType;
 
-    @Column(name = "storage_key", nullable = false, unique = true, length = 512)
+    /** MinIO object key for FILE resources; null for LINK resources. */
+    @Column(name = "storage_key", unique = true, length = 512)
     private String storageKey;
+
+    /** External URL for LINK resources; null for FILE resources. */
+    @Column(length = 2048)
+    private String url;
 
     @Column(name = "size_bytes", nullable = false)
     private long sizeBytes;

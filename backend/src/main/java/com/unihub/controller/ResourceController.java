@@ -1,10 +1,12 @@
 package com.unihub.controller;
 
+import com.unihub.dto.CreateLinkResourceRequest;
 import com.unihub.dto.ResourceDto;
 import com.unihub.dto.ResourceSearchResult;
 import com.unihub.security.AuthenticatedUser;
 import com.unihub.service.ResourceService;
 import com.unihub.service.StorageService;
+import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,6 +52,26 @@ public class ResourceController {
                                        @RequestParam("file") MultipartFile file,
                                        @AuthenticationPrincipal AuthenticatedUser caller) {
         return resourceService.uploadResource(moduleId, file, caller.userId(), caller.role());
+    }
+
+    /**
+     * Creates a LINK-type resource (a URL bookmark) attached to a module.
+     * No file is uploaded — the external URL is stored directly.
+     * TEACHER (scoped to their own course) or ADMIN.
+     *
+     * <p>The {@code courseId} path segment is included for URL expressiveness and consistency
+     * with the module hierarchy; access is enforced by the service via the moduleId alone
+     * (the module already carries its course reference).
+     */
+    @PostMapping("/api/courses/{courseId}/modules/{moduleId}/resources/link")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    public ResourceDto addLinkResource(@PathVariable Long courseId,
+                                        @PathVariable Long moduleId,
+                                        @Valid @RequestBody CreateLinkResourceRequest request,
+                                        @AuthenticationPrincipal AuthenticatedUser caller) {
+        return resourceService.addLinkResource(
+                moduleId, request.title(), request.url(), caller.userId(), caller.role());
     }
 
     @GetMapping("/api/modules/{moduleId}/resources")
