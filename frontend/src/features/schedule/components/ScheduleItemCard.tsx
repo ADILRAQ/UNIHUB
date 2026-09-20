@@ -29,38 +29,43 @@ const ScheduleItemCard = ({ item, canManage, onManage }: ScheduleItemCardProps) 
 
   return (
     <article className={`sched-item sched-item--${visual.variant}`}>
-      <div className="sched-item__head">
+      <div className="sched-item__row">
+        <div className="sched-item__time-col">
+          <span className="sched-item__time">{formatTimeRange(item.startTime, item.endTime)}</span>
+        </div>
+
+        <div className="sched-item__body">
+          <h3 className={`sched-item__title${visual.isCancelled ? ' sched-item__title--cancelled' : ''}`}>
+            {item.title}
+          </h3>
+
+          <div className="sched-item__meta">
+            {item.room && <span>Room {item.room}</span>}
+            {item.kind === 'SESSION' && item.classGroupName && <span>{item.classGroupName}</span>}
+            {item.kind === 'EVENT' && item.courseName && <span>{item.courseName}</span>}
+            {item.kind === 'EVENT' && !item.courseName && item.classGroupName && (
+              <span>{item.classGroupName}</span>
+            )}
+          </div>
+
+          {item.status === 'RESCHEDULED' && item.originalDate && (
+            <p className="sched-item__note">
+              Moved from {formatDateLong(parseISODate(item.originalDate))}
+              {item.changeNote ? ` — ${item.changeNote}` : ''}
+            </p>
+          )}
+
+          {item.status === 'CANCELLED' && item.changeNote && (
+            <p className="sched-item__note">Reason: {item.changeNote}</p>
+          )}
+
+          {item.kind === 'EVENT' && item.description && (
+            <p className="sched-item__note">{item.description}</p>
+          )}
+        </div>
+
         <span className={`sched-badge sched-badge--${visual.variant}`}>{visual.badge}</span>
-        <span className="sched-item__time">{formatTimeRange(item.startTime, item.endTime)}</span>
       </div>
-
-      <h3 className={`sched-item__title${visual.isCancelled ? ' sched-item__title--cancelled' : ''}`}>
-        {item.title}
-      </h3>
-
-      <div className="sched-item__meta">
-        {item.room && <span>Room {item.room}</span>}
-        {item.kind === 'SESSION' && item.classGroupName && <span>{item.classGroupName}</span>}
-        {item.kind === 'EVENT' && item.courseName && <span>{item.courseName}</span>}
-        {item.kind === 'EVENT' && !item.courseName && item.classGroupName && (
-          <span>{item.classGroupName}</span>
-        )}
-      </div>
-
-      {item.status === 'RESCHEDULED' && item.originalDate && (
-        <p className="sched-item__note">
-          Moved from {formatDateLong(parseISODate(item.originalDate))}
-          {item.changeNote ? ` — ${item.changeNote}` : ''}
-        </p>
-      )}
-
-      {item.status === 'CANCELLED' && item.changeNote && (
-        <p className="sched-item__note">Reason: {item.changeNote}</p>
-      )}
-
-      {item.kind === 'EVENT' && item.description && (
-        <p className="sched-item__note">{item.description}</p>
-      )}
 
       {(canJoin || canManageThis || isPastSession) && (
         <div className="sched-item__actions">

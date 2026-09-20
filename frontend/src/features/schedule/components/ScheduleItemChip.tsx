@@ -4,10 +4,10 @@ import type { ScheduleItem } from '../types';
 
 interface ScheduleItemChipProps {
   item: ScheduleItem;
-  /** Whether the viewer may cancel/reschedule sessions. */
   canManage: boolean;
-  /** Open the cancel/reschedule dialog for this session. */
   onManage?: (item: ScheduleItem) => void;
+  /** 'week' renders a two-line card-chip with border-left accent; default is the compact month chip. */
+  layout?: 'week';
 }
 
 /**
@@ -16,15 +16,36 @@ interface ScheduleItemChipProps {
  * reschedule dialog, everything else as a static span. Cancelled sessions stay
  * visible with a strikethrough.
  */
-const ScheduleItemChip = ({ item, canManage, onManage }: ScheduleItemChipProps) => {
+const ScheduleItemChip = ({ item, canManage, onManage, layout }: ScheduleItemChipProps) => {
   const visual = itemVisual(item);
   const time = formatTime(item.startTime);
+  const interactive =
+    canManage && visual.isSession && item.status !== 'CANCELLED' && Boolean(onManage);
+
+  if (layout === 'week') {
+    const cls = `sched-chip sched-chip--${visual.variant} sched-chip--week${
+      visual.isCancelled ? ' sched-chip--struck' : ''
+    }${interactive ? ' sched-chip--button' : ''}`;
+    const content = (
+      <>
+        <span className="sched-chip__week-title">{item.title}</span>
+        {time && <span className="sched-chip__week-time">{time}</span>}
+        {visual.variant === 'rescheduled' && (
+          <span className="sched-chip__week-moved">MOVED</span>
+        )}
+      </>
+    );
+    return interactive ? (
+      <button type="button" className={cls} onClick={() => onManage?.(item)}>{content}</button>
+    ) : (
+      <div className={cls}>{content}</div>
+    );
+  }
+
   const label = `${time ? `${time} ` : ''}${item.title}`;
   const className = `sched-chip sched-chip--${visual.variant}${
     visual.isCancelled ? ' sched-chip--struck' : ''
   }`;
-  const interactive =
-    canManage && visual.isSession && item.status !== 'CANCELLED' && Boolean(onManage);
 
   if (interactive) {
     return (

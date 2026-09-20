@@ -1,4 +1,4 @@
-import ScheduleItemCard from './ScheduleItemCard';
+import ScheduleItemChip from './ScheduleItemChip';
 import { formatWeekdayDay } from '../calendar';
 import type { DayBucket } from '../hooks/useCalendar';
 import type { ScheduleItem } from '../types';
@@ -28,11 +28,12 @@ const WeekView = ({ columns, canManage, onManage }: WeekViewProps) => (
               <p className="sched-week__empty">—</p>
             ) : (
               col.items.map((item) => (
-                <ScheduleItemCard
+                <ScheduleItemChip
                   key={`${item.kind}-${item.id}`}
                   item={item}
                   canManage={canManage}
                   onManage={onManage}
+                  layout="week"
                 />
               ))
             )}

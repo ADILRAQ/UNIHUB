@@ -659,19 +659,38 @@
 .sched-item--deadline   { border-left: 4px solid var(--color-warning); }
 .sched-item--event      { border-left: 4px solid var(--color-info); }
 
-.sched-item__head {
+.sched-item__row {
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-4);
 }
 
-.sched-item__time { font-size: var(--text-xs); color: var(--text-muted); }
+.sched-item__time-col {
+  width: 74px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.sched-item__time {
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  display: block;
+}
+
+.sched-item__body {
+  flex-grow: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
 
 .sched-item__title {
   font-weight: var(--font-weight-semibold);
   margin: 0;
-  font-size: var(--text-base);
+  font-size: 15px;
+  color: var(--text-primary);
 }
 
 /* both old (--struck) and new (--cancelled) names for compatibility */
@@ -685,7 +704,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
-  font-size: var(--text-xs);
+  font-size: 12.5px;
   color: var(--text-muted);
 }
 
@@ -701,6 +720,7 @@
   gap: var(--space-2);
   margin-top: var(--space-1);
   flex-wrap: wrap;
+  padding-left: calc(74px + var(--space-4));
 }
 
 /* Today view */
@@ -780,16 +800,21 @@
 /* Month view */
 .sched-month-wrap { overflow-x: auto; }
 
-.sched-month { min-width: 560px; }
+.sched-month {
+  min-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
 .sched-month__head {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  border-bottom: 1px solid var(--border-default);
+  gap: 8px;
 }
 
 .sched-month__head-cell {
-  padding: var(--space-2) var(--space-2);
+  padding: var(--space-1) var(--space-2);
   font-size: var(--text-xs);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
@@ -801,31 +826,27 @@
 .sched-month__row {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  border-bottom: 1px solid var(--border-subtle);
+  gap: 8px;
 }
 
 .sched-month__cell {
-  min-height: 80px;
+  min-height: 96px;
   padding: var(--space-2);
-  border-right: 1px solid var(--border-subtle);
-  vertical-align: top;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
   background: var(--surface-card);
 }
 
-.sched-month__cell:last-child { border-right: none; }
-
 .sched-month__cell--muted { opacity: 0.4; background: var(--surface-bg); }
 
+.sched-month__cell--today {
+  background: var(--color-brand-50);
+  border-color: var(--color-brand-300);
+}
+
 .sched-month__cell--today .sched-month__date {
-  background: var(--color-brand-600);
-  color: white;
-  border-radius: 50%;
-  width: 1.5rem;
-  height: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--text-xs);
+  color: var(--color-brand-600);
+  font-weight: var(--font-weight-bold);
 }
 
 .sched-month__date {
@@ -867,6 +888,32 @@
 .sched-chip--exam       { background: var(--color-danger-light);  color: var(--color-danger-dark); }
 .sched-chip--deadline   { background: var(--color-warning-light); color: var(--color-warning-dark); }
 .sched-chip--event      { background: var(--color-info-light);    color: var(--color-info-dark); }
+
+/* Week-layout chip — two-line card with border-left accent */
+.sched-chip--week {
+  border-left: 3px solid transparent;
+  border-radius: 6px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  white-space: normal;
+  width: 100%;
+  text-align: left;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+}
+.sched-chip--week.sched-chip--session    { border-left-color: var(--color-brand-500); }
+.sched-chip--week.sched-chip--cancelled  { border-left-color: var(--color-neutral-400); }
+.sched-chip--week.sched-chip--rescheduled{ border-left-color: var(--color-warning); }
+.sched-chip--week.sched-chip--exam       { border-left-color: var(--color-danger); }
+.sched-chip--week.sched-chip--deadline   { border-left-color: var(--color-warning); }
+.sched-chip--week.sched-chip--event      { border-left-color: var(--color-info); }
+
+.sched-chip__week-title { font-size: 11.5px; font-weight: 600; display: block; }
+.sched-chip__week-time  { font-size: 10.5px; color: var(--text-muted); display: block; }
+.sched-chip__week-moved { font-size: 9.5px; font-weight: 700; color: var(--color-warning-dark); display: block; text-transform: uppercase; }
 
 /* Dialog (cancel/reschedule & course form) */
 .sched-dialog-overlay {
