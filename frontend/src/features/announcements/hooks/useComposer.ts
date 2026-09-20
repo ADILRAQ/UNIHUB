@@ -2,7 +2,7 @@
  * Logic hook for the announcement composer (create + edit).
  * All state, handlers, and mutations live here; the UI components are thin.
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../auth/AuthContext';
@@ -70,6 +70,13 @@ const useComposer = ({ initialAnnouncement }: UseComposerOptions): UseComposerRe
     transformFn: (d) => d,
     enabled: !!role && role !== 'STUDENT',
   });
+
+  // Auto-select the single group for teachers who belong to exactly one group
+  useEffect(() => {
+    if (!isEditing && classGroupId === null && availableGroups?.length === 1) {
+      setClassGroupId(availableGroups[0].id);
+    }
+  }, [availableGroups, isEditing, classGroupId]);
 
   const { mutate: create, isPending: isCreating } = usePostData<
     string,
