@@ -33,31 +33,70 @@ const TimetablePage = () => {
             <p style={{ margin: '0 20px', fontSize: 13.5, color: '#6B6B7B' }}>No courses yet.</p>
           )}
 
-          <ul style={{ listStyle: 'none', margin: 0, padding: '0 12px 20px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <ul style={{ listStyle: 'none', margin: 0, padding: '0 12px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
             {cm.courses.map((course) => {
               const isActive = cm.selectedCourseId === course.id;
+              const initial = course.name.charAt(0).toUpperCase();
               return (
                 <li key={course.id}>
-                  <button
-                    type="button"
-                    onClick={() => cm.onSelectCourse(course.id)}
+                  <div
                     style={{
-                      width: '100%', textAlign: 'left', cursor: 'pointer', border: 0,
-                      padding: '10px 12px', borderRadius: 9,
-                      background: isActive ? '#EEEDFF' : 'transparent',
-                      color: isActive ? '#4A41C9' : '#45435A',
-                      display: 'flex', flexDirection: 'column', gap: 2,
+                      borderRadius: 12,
+                      border: isActive ? '1.5px solid #6C63FF' : '1px solid #E8E6F5',
+                      background: isActive ? '#F4F3FF' : '#FFFFFF',
+                      boxShadow: isActive ? '0 2px 12px rgba(108,99,255,0.12)' : '0 1px 3px rgba(108,99,255,0.06)',
+                      overflow: 'hidden',
+                      transition: 'box-shadow 0.15s, border-color 0.15s',
                     }}
                   >
-                    <strong style={{ fontSize: 13.5, fontWeight: 600 }}>{course.name}</strong>
-                    <span style={{ fontSize: 12, color: isActive ? '#6C63FF' : '#8D8B9C' }}>{course.classGroupName} · {course.teacherName}</span>
-                  </button>
-                  {cm.canManage && (
-                    <div style={{ display: 'flex', gap: 4, padding: '2px 12px 6px' }}>
-                      <button type="button" onClick={() => cm.onOpenEdit(course)} style={{ height: 28, padding: '0 10px', border: '1px solid #E1DEF2', borderRadius: 7, background: '#FFFFFF', color: '#45435A', fontSize: 11.5, fontWeight: 600, cursor: 'pointer' }}>Edit</button>
-                      <button type="button" onClick={() => cm.onDelete(course)} style={{ height: 28, padding: '0 10px', border: 0, borderRadius: 7, background: '#FFE8E8', color: '#B02F2F', fontSize: 11.5, fontWeight: 600, cursor: 'pointer' }}>Delete</button>
-                    </div>
-                  )}
+                    {/* Clickable area */}
+                    <button
+                      type="button"
+                      onClick={() => cm.onSelectCourse(course.id)}
+                      style={{
+                        width: '100%', textAlign: 'left', cursor: 'pointer',
+                        border: 0, background: 'transparent',
+                        padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10,
+                      }}
+                    >
+                      {/* Avatar */}
+                      <span style={{
+                        flexShrink: 0, width: 34, height: 34, borderRadius: 9,
+                        background: isActive ? '#6C63FF' : '#EEEDFF',
+                        color: isActive ? '#FFFFFF' : '#4A41C9',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 14, fontWeight: 700,
+                      }}>{initial}</span>
+                      <span style={{ flex: 1, minWidth: 0 }}>
+                        <span style={{ display: 'block', fontSize: 13.5, fontWeight: 600, color: isActive ? '#3730A3' : '#1F1B33', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {course.name}
+                        </span>
+                        <span style={{ display: 'block', fontSize: 11.5, color: isActive ? '#6C63FF' : '#8D8B9C', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {course.classGroupName} · {course.teacherName}
+                        </span>
+                      </span>
+                      {/* Chevron */}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isActive ? '#6C63FF' : '#C4C2D4'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                        <path d="m9 6 6 6-6 6"/>
+                      </svg>
+                    </button>
+
+                    {/* Edit / Delete row */}
+                    {cm.canManage && (
+                      <div style={{ display: 'flex', gap: 6, padding: '0 12px 10px', borderTop: '1px solid', borderTopColor: isActive ? '#DDD9FF' : '#F0EEF8' }}>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); cm.onOpenEdit(course); }}
+                          style={{ flex: 1, height: 28, border: '1px solid #E1DEF2', borderRadius: 7, background: '#FFFFFF', color: '#45435A', fontSize: 11.5, fontWeight: 600, cursor: 'pointer', marginTop: 8 }}
+                        >Edit</button>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); cm.onDelete(course); }}
+                          style={{ flex: 1, height: 28, border: 0, borderRadius: 7, background: '#FFE8E8', color: '#B02F2F', fontSize: 11.5, fontWeight: 600, cursor: 'pointer', marginTop: 8 }}
+                        >Delete</button>
+                      </div>
+                    )}
+                  </div>
                 </li>
               );
             })}

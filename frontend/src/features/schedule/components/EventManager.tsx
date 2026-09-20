@@ -8,10 +8,11 @@ interface EventManagerProps {
 }
 
 const TYPE_OPTIONS: { value: EventType; label: string }[] = [
-  { value: 'EXAM', label: 'Exam' },
+  { value: 'EXAM',     label: 'Exam' },
   { value: 'DEADLINE', label: 'Deadline' },
-  { value: 'EVENT', label: 'Event' },
+  { value: 'EVENT',    label: 'Event' },
 ];
+const TYPE_MAP = Object.fromEntries(TYPE_OPTIONS.map((t) => [t.value, t]));
 
 /**
  * One-off events panel (exams / deadlines / events) for this year. Admins may
@@ -138,7 +139,9 @@ const EventManager = ({ isAdmin, manageableCourses }: EventManagerProps) => {
           {e.events.map((ev) => (
             <li key={ev.id} className="sched-tpl">
               <div className="sched-tpl__main">
-                <span className={`sched-badge sched-badge--${ev.type.toLowerCase()}`}>{ev.type}</span>{' '}
+                <span className={`sched-badge sched-badge--${ev.type.toLowerCase()}`}>
+                  {TYPE_MAP[ev.type]?.label ?? ev.type}
+                </span>
                 <strong>{ev.title}</strong>
                 <span className="sched-tpl__range">
                   {formatDateLong(parseISODate(ev.eventDate))} ·{' '}

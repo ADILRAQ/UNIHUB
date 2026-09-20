@@ -34,6 +34,17 @@ export const createYearPlan = (data: {
 export const getQueue = (): Promise<PendingProofItemDto[]> =>
   apiClient.get<PendingProofItemDto[]>('/api/payments/pending-proofs').then((r) => r.data);
 
+export const getProofBlobUrl = async (
+  installmentId: number,
+): Promise<{ url: string; type: string }> => {
+  const response = await apiClient.get(`/api/payments/${installmentId}/proof`, {
+    responseType: 'blob',
+  });
+  const type: string = (response.headers['content-type'] as string) ?? 'application/octet-stream';
+  const url = window.URL.createObjectURL(new Blob([response.data], { type }));
+  return { url, type };
+};
+
 export const downloadProof = async (
   installmentId: number,
   basename: string,

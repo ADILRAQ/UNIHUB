@@ -199,10 +199,20 @@ const AnnouncementsPage = () => {
                 >
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 20 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 9, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                         <span style={{ display: 'inline-flex', alignItems: 'center', height: 22, padding: '0 10px', borderRadius: 999, background: '#EEEDFF', color: '#4A41C9', fontSize: 11.5, fontWeight: 600 }}>
                           {item.classGroupName ?? 'All groups'}
                         </span>
+                        {item.pinned && (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', height: 22, padding: '0 9px', borderRadius: 999, background: '#FFF7E6', color: '#B45309', fontSize: 11.5, fontWeight: 600 }}>
+                            Pinned
+                          </span>
+                        )}
+                        {item.urgent && (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', height: 22, padding: '0 9px', borderRadius: 999, background: '#FEF2F2', color: '#B91C1C', fontSize: 11.5, fontWeight: 600 }}>
+                            Urgent
+                          </span>
+                        )}
                         <span style={{ fontSize: 13, color: '#6B6B7B' }}>
                           {item.authorName} · {new Date(item.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </span>

@@ -1,10 +1,12 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { getProofBlobUrl } from '../services/paymentService';
 import useStudentPayments from '../hooks/useStudentPayments';
 import useAdminPayments from '../hooks/useAdminPayments';
 import usePaymentsPage from '../hooks/usePaymentsPage';
 import usePlanTab from '../hooks/usePlanTab';
 import PageHeader from '../../../components/layout/PageHeader';
-import type { InstallmentDto, CreatePeriodEntry } from '../types';
+import type { InstallmentDto, CreatePeriodEntry, PendingProofItemDto, OverdueStudentDto, PaymentPeriodDto } from '../types';
+import type { ClassGroupDto } from '../../admin/types';
 
 /* ── Helpers ──────────────────────────────────────────────────────────── */
 
@@ -197,7 +199,7 @@ const AdminPaymentsView = () => {
   const {
     activeTab, setActiveTab, queue, isLoadingQueue, isErrorQueue,
     approvingId, rejectingId, rejectReason, setRejectReason, rejectTargetId,
-    openReject, cancelReject, approveItem, confirmReject, downloadProof,
+    openReject, cancelReject, approveItem, confirmReject,
     overdueList, isLoadingOverdue, classGroups, selectedGroupId, setSelectedGroupId,
     yearPlans, isLoadingPlans, createYearPlan, isCreatingPlan, planError,
   } = useAdminPayments();
@@ -216,8 +218,7 @@ const AdminPaymentsView = () => {
           rejectTargetId={rejectTargetId} rejectReason={rejectReason}
           setRejectReason={setRejectReason}
           onApprove={approveItem} onOpenReject={openReject}
-          onCancelReject={cancelReject} onConfirmReject={confirmReject}
-          onDownloadProof={downloadProof} />
+          onCancelReject={cancelReject} onConfirmReject={confirmReject} />
       )}
       {activeTab === 'overdue' && (
         <OverdueTab overdueList={overdueList} isLoading={isLoadingOverdue}
@@ -235,23 +236,104 @@ const AdminPaymentsView = () => {
 /* ── Queue tab ─────────────────────────────────────────────────────── */
 
 interface QueueTabProps {
-  queue: ReturnType<typeof useAdminPayments>['queue'];
+  queue: PendingProofItemDto[];
   isLoading: boolean; isError: boolean;
   approvingId: number | null; rejectingId: number | null;
   rejectTargetId: number | null; rejectReason: string;
   setRejectReason: (v: string) => void;
   onApprove: (id: number) => void; onOpenReject: (id: number) => void;
   onCancelReject: () => void; onConfirmReject: () => void;
-  onDownloadProof: (id: number, filename: string) => Promise<void>;
 }
 
-const QueueTab = ({ queue, isLoading, isError, approvingId, rejectingId, rejectTargetId, rejectReason, setRejectReason, onApprove, onOpenReject, onCancelReject, onConfirmReject, onDownloadProof }: QueueTabProps) => {
+type PreviewState = { url: string; type: string; item: PendingProofItemDto };
+
+const QueueTab = ({ queue, isLoading, isError, approvingId, rejectingId, rejectTargetId, rejectReason, setRejectReason, onApprove, onOpenReject, onCancelReject, onConfirmReject }: QueueTabProps) => {
+  const [preview, setPreview] = useState<PreviewState | null>(null);
+  const [loadingProofId, setLoadingProofId] = useState<number | null>(null);
+
+  const openPreview = async (item: PendingProofItemDto) => {
+    setLoadingProofId(item.installmentId);
+    try {
+      const result = await getProofBlobUrl(item.installmentId);
+      setPreview({ ...result, item });
+    } finally {
+      setLoadingProofId(null);
+    }
+  };
+
+  const closePreview = () => {
+    if (preview) window.URL.revokeObjectURL(preview.url);
+    setPreview(null);
+  };
+
+  useEffect(() => () => { if (preview) window.URL.revokeObjectURL(preview.url); }, []);
+
   if (isLoading) return <p style={{ margin: 0, fontSize: 14, color: '#6B6B7B' }}>Loading queue…</p>;
   if (isError) return <p style={{ margin: 0, fontSize: 14, color: '#B91C1C' }}>Failed to load queue.</p>;
   if (queue.length === 0) return <p style={{ margin: 0, fontSize: 14, color: '#6B6B7B' }}>No proofs awaiting validation.</p>;
 
   return (
-    <div style={{ background: '#FFFFFF', border: '1px solid #EDEBF8', borderRadius: 14, overflow: 'hidden' }}>
+    <>
+      {preview && (
+        <div onClick={closePreview} style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(15,10,40,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: '#FFFFFF', borderRadius: 16, boxShadow: '0 32px 80px rgba(0,0,0,0.3)', width: '100%', maxWidth: 560, overflow: 'hidden' }}>
+
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 22px', borderBottom: '1px solid #F0EEFA' }}>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: '#1F1B33' }}>{preview.item.studentName}</div>
+                <div style={{ fontSize: 12.5, color: '#6B6B7B', marginTop: 3 }}>{preview.item.classGroup} · Installment {preview.item.installmentNumber} · {formatAmount(preview.item.amount)}</div>
+              </div>
+              <button type="button" onClick={closePreview} style={{ width: 32, height: 32, border: '1px solid #E1DEF2', borderRadius: 8, background: '#FFFFFF', color: '#45435A', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>×</button>
+            </div>
+
+            {/* Proof image */}
+            <div style={{ background: '#F7F6FC', display: 'flex', alignItems: 'center', justifyContent: 'center', maxHeight: '55vh', overflow: 'auto' }}>
+              {preview.type.includes('pdf')
+                ? <embed src={preview.url} type="application/pdf" style={{ width: '100%', height: '55vh' }} />
+                : <img src={preview.url} alt="Payment proof" style={{ display: 'block', maxWidth: '100%', maxHeight: '55vh', objectFit: 'contain' }} />
+              }
+            </div>
+
+            {/* Actions */}
+            <div style={{ padding: '16px 22px', borderTop: '1px solid #F0EEFA', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {rejectTargetId === preview.item.installmentId ? (
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <input
+                    type="text" placeholder="Rejection reason…" value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)} autoFocus
+                    style={{ flexGrow: 1, height: 40, boxSizing: 'border-box', border: '1px solid #F7A9A9', borderRadius: 8, padding: '0 12px', fontSize: 13.5, color: '#1F1B33', background: '#FFFFFF', outline: 'none', fontFamily: 'inherit' }}
+                  />
+                  <button type="button" disabled={!rejectReason.trim() || rejectingId != null} onClick={onConfirmReject} style={{ height: 40, padding: '0 14px', border: 0, borderRadius: 8, background: '#B02F2F', color: '#FFFFFF', fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                    {rejectingId === preview.item.installmentId ? 'Rejecting…' : 'Confirm reject'}
+                  </button>
+                  <button type="button" onClick={onCancelReject} style={{ height: 40, padding: '0 14px', border: '1px solid #E1DEF2', borderRadius: 8, background: '#FFFFFF', color: '#45435A', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button
+                    type="button"
+                    disabled={approvingId === preview.item.installmentId || rejectingId === preview.item.installmentId}
+                    onClick={() => onApprove(preview.item.installmentId)}
+                    style={{ flex: 1, height: 42, border: 0, borderRadius: 10, background: '#0F8F5F', color: '#FFFFFF', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    {approvingId === preview.item.installmentId ? 'Approving…' : 'Approve'}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={approvingId === preview.item.installmentId || rejectingId === preview.item.installmentId}
+                    onClick={() => onOpenReject(preview.item.installmentId)}
+                    style={{ flex: 1, height: 42, border: '1px solid #F3D3D3', borderRadius: 10, background: '#FFF5F5', color: '#B02F2F', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    Reject
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      <div style={{ background: '#FFFFFF', border: '1px solid #EDEBF8', borderRadius: 14, overflow: 'hidden' }}>
       <table style={{ borderCollapse: 'collapse', width: '100%' }}>
         <thead>
           <tr style={{ borderBottom: '1px solid #F0EEFA' }}>
@@ -271,7 +353,9 @@ const QueueTab = ({ queue, isLoading, isError, approvingId, rejectingId, rejectT
                 <td style={{ padding: '12px 16px', fontSize: 12.5, color: '#6B6B7B' }}>{new Date(item.submittedAt).toLocaleString()}</td>
                 <td style={{ padding: '12px 16px' }}>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    <button type="button" onClick={() => onDownloadProof(item.installmentId, `proof-${item.studentName}-installment-${item.installmentNumber}`)} style={{ height: 32, padding: '0 10px', border: '1px solid #E1DEF2', borderRadius: 7, background: '#FFFFFF', color: '#45435A', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>View proof</button>
+                    <button type="button" disabled={loadingProofId === item.installmentId} onClick={() => openPreview(item)} style={{ height: 32, padding: '0 10px', border: '1px solid #E1DEF2', borderRadius: 7, background: '#FFFFFF', color: '#45435A', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>
+                      {loadingProofId === item.installmentId ? 'Loading…' : 'View proof'}
+                    </button>
                     <button type="button" disabled={approvingId === item.installmentId || rejectingId === item.installmentId} onClick={() => onApprove(item.installmentId)} style={{ height: 32, padding: '0 10px', border: 0, borderRadius: 7, background: '#EAFBF3', color: '#0F8F5F', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>{approvingId === item.installmentId ? 'Approving…' : 'Approve'}</button>
                     <button type="button" disabled={approvingId === item.installmentId || rejectingId === item.installmentId} onClick={() => onOpenReject(item.installmentId)} style={{ height: 32, padding: '0 10px', border: 0, borderRadius: 7, background: '#FFE8E8', color: '#B02F2F', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>Reject</button>
                   </div>
@@ -293,15 +377,16 @@ const QueueTab = ({ queue, isLoading, isError, approvingId, rejectingId, rejectT
         </tbody>
       </table>
     </div>
+    </>
   );
 };
 
 /* ── Overdue tab ─────────────────────────────────────────────────────── */
 
 interface OverdueTabProps {
-  overdueList: ReturnType<typeof useAdminPayments>['overdueList'];
+  overdueList: OverdueStudentDto[];
   isLoading: boolean;
-  classGroups: ReturnType<typeof useAdminPayments>['classGroups'];
+  classGroups: ClassGroupDto[];
   selectedGroupId: number | undefined;
   onGroupChange: (id: number | undefined) => void;
 }
@@ -340,7 +425,7 @@ const OverdueTab = ({ overdueList, isLoading, classGroups, selectedGroupId, onGr
 /* ── Year plan tab ─────────────────────────────────────────────────── */
 
 interface PlanTabProps {
-  yearPlans: Record<string, ReturnType<typeof useAdminPayments>['yearPlans'][string]>;
+  yearPlans: Record<string, PaymentPeriodDto[]>;
   isLoading: boolean;
   onCreatePlan: (data: { academicYear: string; periods: CreatePeriodEntry[] }) => void;
   isCreating: boolean;
