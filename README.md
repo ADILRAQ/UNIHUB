@@ -45,7 +45,8 @@ flowchart LR
 ```bash
 git clone https://github.com/ADILRAQ/UNIHUB.git
 cd UNIHUB
-cp .env.example .env          # fill in secrets (defaults work for local dev)
+# Create .env at the project root — see "Environment variables" below for the full list.
+# Defaults in that table work for local dev with docker compose.
 docker compose up --build     # starts api + postgres + minio + frontend
 ```
 
@@ -63,12 +64,13 @@ To stop: `docker compose down` (add `-v` to also drop volumes / reset the databa
 
 ## Demo credentials
 
-The base accounts below are seeded from environment variables (`.env.example`).
-When running with `SPRING_PROFILES_ACTIVE=dev` (the default in `docker compose up`),
-`DemoDataSeeder` also seeds a full demo dataset on first boot — courses, sessions,
-announcements, resources, assignments, payments — covering every app feature.
+The base accounts below are seeded from the `ADMIN_*`, `TEACHER_*`, and `STUDENT_*`
+environment variables. When running with `SPRING_PROFILES_ACTIVE=dev` (the default in
+`docker compose up`), `DemoDataSeeder` also seeds a full demo dataset on first boot —
+courses, sessions, announcements, resources, assignments, payments — covering every app
+feature.
 
-**Base accounts** (seeded from `.env.example`):
+**Base accounts** (seeded on first boot):
 
 | Role | Email | Password |
 |------|-------|----------|
@@ -89,7 +91,9 @@ announcements, resources, assignments, payments — covering every app feature.
 
 ## Environment variables
 
-See `.env.example` for the full list. Required in production:
+Create a `.env` file at the project root (gitignored — never commit it).
+For local dev the defaults below work as-is; production requires real secrets.
+Required in production:
 
 | Variable | Purpose |
 |----------|---------|
@@ -143,7 +147,7 @@ mvn spring-boot:run
 
 ```bash
 cd frontend
-cp .env.example .env    # sets VITE_API_URL=http://localhost:8080
+echo "VITE_API_URL=http://localhost:8080" > .env
 npm install
 npm run dev
 ```
@@ -173,7 +177,6 @@ UNIHUB/
 │       ├── hooks/        generic TanStack Query hooks
 │       └── router.tsx    route definitions
 ├── docker-compose.yml
-├── .env.example
 ├── CONTRIBUTING.md
 └── CLAUDE.md              project constitution / locked technical decisions
 ```

@@ -12,7 +12,6 @@ UNIHUB/
 ├── backend/          Spring Boot 3 (Java 21, Maven) API
 ├── frontend/         React + TypeScript + Vite app
 ├── docker-compose.yml   Orchestrates postgres + minio + api + frontend
-├── .env.example      Documents every root-level environment variable
 ├── README.md         Setup, architecture diagram, project structure
 ├── CLAUDE.md         Project constitution (stack, workflow rules, locked decisions)
 └── CONTRIBUTING.md   This file
@@ -76,8 +75,8 @@ docs: update README setup steps
 Secrets, API keys, and credentials must **always** live in a local `.env` file
 (gitignored) and be injected as environment variables. They must **never** be
 hardcoded in source files, config files, or committed to the repository — this is a
-hard project rule with no exceptions. `.env.example` documents every variable a
-contributor needs, with placeholder values only.
+hard project rule with no exceptions. See the "Environment variables" section in
+README.md for the full list of required variables with local-dev defaults.
 
 ## Adding a database migration
 

@@ -21,8 +21,8 @@ dist/
 
 # ---- Env files (secrets) ----
 .env
+.env.example
 .env.*.local
-!.env.example
 
 # ---- Project-local Claude settings (per-user, not shared) ----
 .claude/settings.local.json
