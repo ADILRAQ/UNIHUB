@@ -184,7 +184,7 @@ const AssignmentsTab = ({
 
   const handleCreate = () => {
     if (!newTitle.trim() || !newDueAt) return;
-    createAssignment({ title: newTitle.trim(), description: newDescription.trim() || undefined, dueAt: newDueAt });
+    createAssignment({ title: newTitle.trim(), description: newDescription.trim() || undefined, dueAt: new Date(newDueAt).toISOString() });
     setNewTitle(''); setNewDescription(''); setNewDueAt('');
     setShowNewAssignment(false);
   };

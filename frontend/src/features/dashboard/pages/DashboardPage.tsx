@@ -381,7 +381,7 @@ const DashboardPage = () => {
                     <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: '#FFFFFF' }}>NEXT SESSION</span>
                     <span style={{ fontSize: 15.5, fontWeight: 600, color: '#FFFFFF' }}>
                       {nextSession
-                        ? `${nextSession.courseName} · ${new Date(nextSession.sessionDate).toLocaleDateString('en-US', { weekday: 'long' })} ${nextSession.startTime}–${nextSession.endTime} · Room ${nextSession.room}`
+                        ? `${nextSession.courseName} · ${new Date(nextSession.sessionDate).toLocaleDateString('en-US', { weekday: 'long' })} ${nextSession.startTime.slice(0, 5)}–${nextSession.endTime.slice(0, 5)}${nextSession.room ? ` · Room ${nextSession.room}` : ''}`
                         : 'No upcoming sessions'}
                     </span>
                   </div>
