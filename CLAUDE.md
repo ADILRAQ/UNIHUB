@@ -7,7 +7,7 @@ recaps for missed classes, and tuition payment tracking (3 installments with pro
 validation). End-of-year student project.
 
 Stack: Spring Boot 3 (Java 21, Maven) + React (TypeScript, Vite) + PostgreSQL + MinIO,
-fully dockerized, CI/CD with GitHub Actions → Render/Railway.
+fully dockerized, CI with GitHub Actions, auto-deployed to Railway.
 
 ## Jira is the source of truth
 - Project **UNIH**: https://raqiouiadil852.atlassian.net/browse/UNIH
@@ -77,7 +77,7 @@ fully dockerized, CI/CD with GitHub Actions → Render/Railway.
 - CI: GitHub Actions on every push/PR — **build-only** (`mvn verify`, `npm ci && npm
   run lint && npm run build`). No test suite required in v1; if tests are added they
   run automatically.
-- CD: merge to `main` → build Docker images → auto-deploy to Render/Railway.
+- CD: merge to `main` → Railway builds the Docker images and auto-deploys (GitHub integration).
 
 ### Product scope guards
 - No attendance tracking. No notifications/emails. No online payment processing.

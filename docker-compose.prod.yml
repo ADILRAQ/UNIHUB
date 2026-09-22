@@ -3,7 +3,7 @@
 #   cp .env .env.prod            # fill in real values
 #   docker compose -f docker-compose.prod.yml --env-file .env.prod up --build
 #
-# This file is NOT the live deployment target; Render/Railway deploys from the same
+# This file is NOT the live deployment target; Railway deploys from the same
 # images built here but manages its own networking and secrets.
 
 services:
