@@ -12,7 +12,7 @@ Tracked in Jira project **UNIH**: https://raqiouiadil852.atlassian.net/browse/UN
 |-------|-----------|
 | Backend | Spring Boot 3, Java 21, Maven, PostgreSQL, Flyway, MinIO |
 | Frontend | React 18, TypeScript, Vite, TanStack Query |
-| Infra | Docker, GitHub Actions CI/CD → Render |
+| Infra | Docker, GitHub Actions CI, Railway (auto-deploy on merge to `main`) |
 
 ## Architecture
 
@@ -91,16 +91,33 @@ feature.
 
 ## Environment variables
 
-Create a `.env` file at the project root (gitignored — never commit it).
-For local dev the defaults below work as-is; production requires real secrets.
-Required in production:
+Create a `.env` file at the project root (gitignored — never commit it). `docker compose`
+reads it and passes the values to the containers. The example values below reproduce the
+demo credentials above; production (Railway) must use real secrets set as service variables.
 
-| Variable | Purpose |
-|----------|---------|
-| `POSTGRES_PASSWORD` | PostgreSQL password |
-| `JWT_SECRET` | HMAC-SHA256 secret (≥ 32 chars) |
-| `MINIO_ROOT_USER` | MinIO access key |
-| `MINIO_ROOT_PASSWORD` | MinIO secret key |
+| Variable | Example (local dev) | Purpose |
+|----------|---------------------|---------|
+| `POSTGRES_USER` | `unihub` | PostgreSQL user (compose also passes it to the API as `DB_USER`) |
+| `POSTGRES_PASSWORD` | `unihub` | PostgreSQL password (`DB_PASSWORD`) |
+| `POSTGRES_DB` | `unihub` | Database name (`DB_NAME`) |
+| `MINIO_ROOT_USER` | `minioadmin` | MinIO access key (`MINIO_ACCESS_KEY`) |
+| `MINIO_ROOT_PASSWORD` | `minioadmin` | MinIO secret key (`MINIO_SECRET_KEY`) |
+| `JWT_SECRET` | any string ≥ 32 chars | HMAC-SHA256 signing secret |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_FULL_NAME` | `admin@unihub.local` / `changeme-admin` / `Admin` | Admin account seeded on first boot |
+| `TEACHER_EMAIL` / `TEACHER_PASSWORD` / `TEACHER_FULL_NAME` | `teacher@unihub.local` / `changeme-teacher` / `Alice Martin` | Base teacher account (optional) |
+| `STUDENT_EMAIL` / `STUDENT_PASSWORD` / `STUDENT_FULL_NAME` | `student@unihub.local` / `changeme-student` / `Bob Dupont` | Base student account (optional) |
+
+Optional, with defaults in `application.yml`:
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `SPRING_PROFILES_ACTIVE` | `dev` | `dev` also seeds the demo dataset; use `prod` in production |
+| `JWT_EXPIRATION_HOURS` | `16` | Access-token lifetime |
+| `SEED_CLASS_GROUP` | `L3 Info A` | Class group of the base student account |
+| `DB_HOST` / `DB_PORT` | `localhost` / `5432` | Database location (set by compose) |
+| `MINIO_ENDPOINT` / `MINIO_BUCKET` | `http://localhost:9000` / `unihub` | Object storage location and bucket (created on startup) |
+| `FRONTEND_URL` | — | **prod only:** allowed CORS origin (the deployed frontend URL) |
+| `VITE_API_URL` | `http://localhost:8080` | Frontend build-time API base URL |
 
 ## Features
 
@@ -112,22 +129,27 @@ Required in production:
   submission with late-flag computation; resubmission replaces.
 - **Session Recaps** — recording URL + sanitized notes per past session, linked resources
   and assignments.
-- **Payments** — 3 tuition installments per academic year; proof-image upload by students;
-  admin approve/reject queue; overdue derived from due date.
+- **Payments** — 3 sequential tuition installments per academic year and per class group
+  (amounts in MAD); students upload a proof image/PDF for the current installment; teachers
+  and admins approve or reject from a queue, and approval unlocks the next installment;
+  overdue derived from the due date (department timezone `Africa/Casablanca`).
+- **Admin console** — single-user creation, CSV bulk import with temporary passwords
+  (forced change at first login), user and class-group management. Teachers can create,
+  import and manage students in any class group.
 
 ## Epics (Jira UNIH-1…9)
 
-| Epic | Domain | Status |
-|------|--------|--------|
-| UNIH-1 | Project scaffold & CI | Done |
-| UNIH-2 | Auth & user management | Done |
-| UNIH-3 | Announcements backend | Done |
-| UNIH-4 | Announcements frontend | Done |
-| UNIH-5 | Calendar & scheduling backend | Done |
-| UNIH-6 | Resources & assignments backend | Done |
-| UNIH-7 | Payments backend | Done |
-| UNIH-8 | Notifications | Descoped for v1 |
-| UNIH-9 | Deployment & polish | In progress |
+| Epic | Domain | Status | Report |
+|------|--------|--------|--------|
+| UNIH-1 | Project foundation & infrastructure | Done | [epic-01](docs/reports/epic-01-foundation-and-infrastructure.md) |
+| UNIH-2 | Authentication & user management | Done | [epic-02](docs/reports/epic-02-authentication-and-user-management.md) |
+| UNIH-3 | Announcements & communication | Done | [epic-03](docs/reports/epic-03-announcements-and-communication.md) |
+| UNIH-4 | Calendar & scheduling | Done | [epic-04](docs/reports/epic-04-scheduling-and-calendar.md) |
+| UNIH-5 | Course resources management | Done | [epic-05](docs/reports/epic-05-course-resources.md) |
+| UNIH-6 | Missed class recovery (session recaps) | Done | [epic-06](docs/reports/epic-06-session-recaps.md) |
+| UNIH-7 | Payments tracking (3 installments) | Done | [epic-07](docs/reports/epic-07-payments-tracking.md) |
+| UNIH-8 | Notifications & reminders | Descoped for v1 | — |
+| UNIH-9 | Deployment, docs & delivery | Done except the live smoke pass (UNIH-46) | [epic-09](docs/reports/epic-09-deployment-docs-delivery.md) |
 
 ## Alternative: run without Docker
 
@@ -176,7 +198,9 @@ UNIHUB/
 │       ├── features/     one folder per domain
 │       ├── hooks/        generic TanStack Query hooks
 │       └── router.tsx    route definitions
-├── docker-compose.yml
+├── docs/reports/         one report per delivered epic
+├── docker-compose.yml       local dev stack
+├── docker-compose.prod.yml  production images, for local verification
 ├── CONTRIBUTING.md
 └── CLAUDE.md              project constitution / locked technical decisions
 ```
