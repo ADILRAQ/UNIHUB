@@ -22,6 +22,7 @@ import com.unihub.repository.UserClassGroupRepository;
 import com.unihub.repository.UserRepository;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -79,6 +80,14 @@ public class PaymentService {
         this.storageService = storageService;
     }
 
+    // ponytail: department timezone hardcoded (server containers run in UTC); make it config if
+    // the app ever serves another region.
+    private static final ZoneId DEPARTMENT_ZONE = ZoneId.of("Africa/Casablanca");
+
+    private static LocalDate today() {
+        return LocalDate.now(DEPARTMENT_ZONE);
+    }
+
     /** Academic years run September 1 to August 31. */
     private static final int ACADEMIC_YEAR_START_MONTH = 9;
 
@@ -90,7 +99,7 @@ public class PaymentService {
 
     /** Plans can be created for the current academic year and the next one only. */
     private static List<String> plannableYears() {
-        LocalDate today = LocalDate.now();
+        LocalDate today = today();
         return List.of(academicYearOf(today), academicYearOf(today.plusYears(1)));
     }
 
@@ -209,7 +218,7 @@ public class PaymentService {
         // Students only see the current academic year; past years stay visible to admins.
         return installmentRepository
                 .findByStudentIdAndPeriodAcademicYearOrderByPeriodPeriodOrderAsc(
-                        studentId, academicYearOf(LocalDate.now()))
+                        studentId, academicYearOf(today()))
                 .stream()
                 .map(this::toInstallmentDto)
                 .toList();
@@ -438,7 +447,7 @@ public class PaymentService {
                 .stream()
                 .collect(Collectors.groupingBy(PaymentPeriod::getAcademicYear));
 
-        String currentYear = academicYearOf(LocalDate.now());
+        String currentYear = academicYearOf(today());
         for (Map.Entry<String, List<PaymentPeriod>> entry : byYear.entrySet()) {
             String year = entry.getKey();
             if (year.compareTo(currentYear) < 0) {
@@ -496,7 +505,7 @@ public class PaymentService {
     }
 
     private InstallmentDto toInstallmentDto(StudentInstallment si) {
-        boolean overdue = si.getPeriod().getDueDate().isBefore(LocalDate.now())
+        boolean overdue = si.getPeriod().getDueDate().isBefore(today())
                 && (si.getStatus() == InstallmentStatus.UNPAID
                         || si.getStatus() == InstallmentStatus.REJECTED);
         return new InstallmentDto(

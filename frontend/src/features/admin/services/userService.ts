@@ -56,6 +56,7 @@ export const listUsers = ({
         status: status || undefined,
         classGroupId: classGroupId ?? undefined,
         search: search.trim() || undefined,
+        all: true, // admin console: teachers see every student (admin parity)
         page,
         size,
       },

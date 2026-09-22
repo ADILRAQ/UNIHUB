@@ -23,9 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Class-group administration: CRUD plus teacher assignment. A {@code TEACHER}-role row in
- * {@code user_class_groups} <em>is</em> that teacher's import-rights grant for the group
- * (read later by UNIH-19's import), so assigning/revoking a teacher here directly controls
- * who may import students into the group.
+ * {@code user_class_groups} marks the teacher's own groups (their dashboard scope); it no
+ * longer limits which groups a teacher may import students into.
  */
 @Service
 public class ClassGroupService {

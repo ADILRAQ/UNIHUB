@@ -7,9 +7,6 @@ import type { ClassGroupDto, ClassGroupNameRequest } from '../types';
  * generic `useGetData` / `usePostData` wrappers.
  */
 
-export const listClassGroups = (): Promise<ClassGroupDto[]> =>
-  apiClient.get<ClassGroupDto[]>('/api/class-groups').then((response) => response.data);
-
 /** Every class group, even for a teacher (default list is scoped to the teacher's own groups). */
 export const listAllClassGroups = (): Promise<ClassGroupDto[]> =>
   apiClient

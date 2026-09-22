@@ -6,7 +6,7 @@ import { useState, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import useGetData from '../../../hooks/useGetData';
 import usePostData from '../../../hooks/usePostData';
-import { listAllClassGroups } from '../../admin/services/classGroupService';
+import useClassGroupsData from '../../admin/hooks/useClassGroupsData';
 import { apiErrorMessage } from '../../../utils/apiError';
 import * as paymentService from '../services/paymentService';
 import type {
@@ -85,11 +85,7 @@ const useAdminPayments = (): UseAdminPaymentsReturn => {
     enabled: activeTab === 'overdue',
   });
 
-  const { data: classGroups } = useGetData<ClassGroupDto[], string, ClassGroupDto[]>({
-    queryKey: ['classGroups', 'list', 'all'],
-    queryFn: listAllClassGroups,
-    transformFn: (d) => d,
-  });
+  const { classGroups } = useClassGroupsData();
 
   const { data: yearPlansData, isLoading: isLoadingPlans } = useGetData<
     Record<string, PaymentPeriodDto[]>,
@@ -198,7 +194,7 @@ const useAdminPayments = (): UseAdminPaymentsReturn => {
     downloadProof: paymentService.downloadProof,
     overdueList: overdueList ?? [],
     isLoadingOverdue,
-    classGroups: classGroups ?? [],
+    classGroups,
     selectedGroupId,
     setSelectedGroupId,
     yearPlans: yearPlansData ?? {},

@@ -22,8 +22,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Class-group management. List is open to ADMIN and TEACHER (teacher sees only their own
- * groups); write operations (create, rename, delete, teacher assignment) remain ADMIN-only.
+ * Class-group management, open to ADMIN and TEACHER (admin parity). A teacher's list defaults
+ * to their own groups; {@code ?all=true} returns every group.
  * Business logic lives in {@link ClassGroupService}.
  */
 @Tag(name = "User Management")

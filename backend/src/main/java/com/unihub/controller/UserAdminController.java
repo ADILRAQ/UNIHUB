@@ -72,9 +72,10 @@ public class UserAdminController {
             @RequestParam(required = false) UserStatus status,
             @RequestParam(required = false) Long classGroupId,
             @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "false") boolean all,
             @PageableDefault(size = 20) Pageable pageable,
             @AuthenticationPrincipal AuthenticatedUser caller) {
-        return userAdminService.listUsers(role, status, classGroupId, search, pageable, caller);
+        return userAdminService.listUsers(role, status, classGroupId, search, all, pageable, caller);
     }
 
     @GetMapping("/{id}")
@@ -92,8 +93,8 @@ public class UserAdminController {
 
     /**
      * Regenerates a temporary password for a user, shown once in the response. Overrides the
-     * class-level ADMIN-only rule: an ADMIN may reset anyone, while a TEACHER may reset only a
-     * STUDENT they share a class group with (checked by {@code @classGroupAccess.managesStudent}).
+     * class-level ADMIN-only rule: an ADMIN may reset anyone, while a TEACHER may reset any
+     * STUDENT (admin parity; checked by {@code @classGroupAccess.managesStudent}).
      */
     @PatchMapping("/{id}/reset-password")
     @PreAuthorize("hasRole('ADMIN') or (hasRole('TEACHER') and @classGroupAccess.managesStudent(authentication, #id))")
