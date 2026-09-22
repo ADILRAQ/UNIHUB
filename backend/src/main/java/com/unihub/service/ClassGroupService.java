@@ -56,9 +56,9 @@ public class ClassGroupService {
     }
 
     @Transactional(readOnly = true)
-    public List<ClassGroupDto> listGroups(AuthenticatedUser caller) {
+    public List<ClassGroupDto> listGroups(AuthenticatedUser caller, boolean all) {
         List<ClassGroup> groups;
-        if ("ADMIN".equals(caller.role())) {
+        if (all || "ADMIN".equals(caller.role())) {
             groups = classGroupRepository.findAll();
         } else {
             List<Long> groupIds = userClassGroupRepository.findOwnedGroupIds(

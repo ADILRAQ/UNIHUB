@@ -6,7 +6,7 @@ import { useState, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import useGetData from '../../../hooks/useGetData';
 import usePostData from '../../../hooks/usePostData';
-import { listClassGroups } from '../../admin/services/classGroupService';
+import { listAllClassGroups } from '../../admin/services/classGroupService';
 import { apiErrorMessage } from '../../../utils/apiError';
 import * as paymentService from '../services/paymentService';
 import type {
@@ -86,8 +86,8 @@ const useAdminPayments = (): UseAdminPaymentsReturn => {
   });
 
   const { data: classGroups } = useGetData<ClassGroupDto[], string, ClassGroupDto[]>({
-    queryKey: ['classGroups', 'list'],
-    queryFn: listClassGroups,
+    queryKey: ['classGroups', 'list', 'all'],
+    queryFn: listAllClassGroups,
     transformFn: (d) => d,
   });
 
