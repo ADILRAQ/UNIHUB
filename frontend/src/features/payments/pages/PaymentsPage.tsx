@@ -278,12 +278,14 @@ const QueueTab = ({ queue, isLoading, isError, approvingId, rejectingId, rejectT
     }
   };
 
-  const closePreview = () => {
-    if (preview) window.URL.revokeObjectURL(preview.url);
-    setPreview(null);
-  };
+  const closePreview = () => setPreview(null);
 
-  useEffect(() => () => { if (preview) window.URL.revokeObjectURL(preview.url); }, []);
+  // Revoke each blob URL when it's replaced, closed, or the tab unmounts.
+  useEffect(() => {
+    if (!preview) return;
+    const { url } = preview;
+    return () => window.URL.revokeObjectURL(url);
+  }, [preview]);
 
   if (isLoading) return <p style={{ margin: 0, fontSize: 14, color: '#6B6B7B' }}>Loading queue…</p>;
   if (isError) return <p style={{ margin: 0, fontSize: 14, color: '#B91C1C' }}>Failed to load queue.</p>;
