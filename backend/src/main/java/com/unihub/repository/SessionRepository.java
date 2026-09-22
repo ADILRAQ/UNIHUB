@@ -2,6 +2,7 @@ package com.unihub.repository;
 
 import com.unihub.model.Session;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -46,14 +47,19 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
     Optional<Long> findClassGroupIdBySessionId(@Param("sessionId") Long sessionId);
 
     /**
-     * All sessions for a course whose date is strictly before {@code today}, ordered newest
-     * first. Used by the {@code GET /api/courses/{courseId}/sessions?past=true} endpoint.
+     * All sessions for a course that have already ended, ordered newest first.
+     * A session is past when its date is before today, OR its date is today and its
+     * end time is at or before the current time.
      * The {@code course} association is eagerly joined so session-to-course navigation in the
      * mapping step does not trigger additional queries.
      */
-    @Query("select s from Session s join fetch s.course c where c.id = :courseId and s.sessionDate < :today order by s.sessionDate desc")
+    @Query("select s from Session s join fetch s.course c "
+            + "where c.id = :courseId "
+            + "and (s.sessionDate < :today or (s.sessionDate = :today and s.endTime <= :now)) "
+            + "order by s.sessionDate desc, s.endTime desc")
     List<Session> findPastSessionsByCourseId(@Param("courseId") Long courseId,
-                                             @Param("today") LocalDate today);
+                                             @Param("today") LocalDate today,
+                                             @Param("now") LocalTime now);
 
     // -------------------------------------------------------------------------
     // Dashboard: next upcoming session per caller scope
