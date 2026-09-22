@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -117,15 +118,21 @@ public class PaymentService {
 
         // Save periods
         List<PaymentPeriod> savedPeriods = new ArrayList<>();
-        for (CreatePeriodRequest.PeriodEntry entry : entries) {
-            PaymentPeriod period = new PaymentPeriod();
-            period.setAcademicYear(academicYear);
-            period.setClassGroup(group);
-            period.setLabel(entry.label());
-            period.setAmount(entry.amount());
-            period.setDueDate(entry.dueDate());
-            period.setPeriodOrder(entry.periodOrder());
-            savedPeriods.add(periodRepository.save(period));
+        try {
+            for (CreatePeriodRequest.PeriodEntry entry : entries) {
+                PaymentPeriod period = new PaymentPeriod();
+                period.setAcademicYear(academicYear);
+                period.setClassGroup(group);
+                period.setLabel(entry.label());
+                period.setAmount(entry.amount());
+                period.setDueDate(entry.dueDate());
+                period.setPeriodOrder(entry.periodOrder());
+                savedPeriods.add(periodRepository.save(period));
+            }
+        } catch (DataIntegrityViolationException ex) {
+            // Lost a race on the (year, group, order) unique key after the pre-check — same 409.
+            throw new ConflictException("A plan for " + group.getName() + " in "
+                    + academicYear + " already exists.");
         }
 
         // Sort by period order
