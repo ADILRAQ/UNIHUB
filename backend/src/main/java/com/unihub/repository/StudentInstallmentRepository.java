@@ -2,6 +2,7 @@ package com.unihub.repository;
 
 import com.unihub.model.InstallmentStatus;
 import com.unihub.model.StudentInstallment;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,13 +23,15 @@ public interface StudentInstallmentRepository extends JpaRepository<StudentInsta
     List<StudentInstallment> findByStudentIdAndPeriodAcademicYear(Long studentId, String academicYear);
 
     /**
-     * All installments that are overdue (due date is in the past) and not yet PAID.
+     * All installments that are overdue (due date before {@code today}) and not yet PAID.
+     * {@code today} is passed in (department timezone) rather than using the DB's CURRENT_DATE,
+     * so it matches the per-installment overdue flag computed in {@code PaymentService}.
      */
     @Query("SELECT si FROM StudentInstallment si "
-            + "WHERE si.period.dueDate < CURRENT_DATE "
+            + "WHERE si.period.dueDate < :today "
             + "AND si.status IN ("
             + "  com.unihub.model.InstallmentStatus.UNPAID,"
             + "  com.unihub.model.InstallmentStatus.REJECTED"
             + ")")
-    List<StudentInstallment> findOverdue();
+    List<StudentInstallment> findOverdue(@Param("today") LocalDate today);
 }

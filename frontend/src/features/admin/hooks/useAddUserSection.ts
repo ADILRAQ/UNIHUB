@@ -5,7 +5,7 @@ import usePostData from '../../../hooks/usePostData';
 import { useToast } from '../../../components/ui/Toast';
 import { apiErrorMessage } from '../../../utils/apiError';
 import { createUser } from '../services/userService';
-import useClassGroupsData from './useClassGroupsData';
+import useClassGroupsData from '../../../hooks/useClassGroupsData';
 import type { ClassGroupDto, CreatableRole, CreateUserRequest, CreatedUserDto } from '../types';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

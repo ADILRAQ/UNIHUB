@@ -6,13 +6,16 @@ import usePaymentsPage from '../hooks/usePaymentsPage';
 import usePlanTab from '../hooks/usePlanTab';
 import PageHeader from '../../../components/layout/PageHeader';
 import type { InstallmentDto, CreateYearPlanPayload, PendingProofItemDto, OverdueStudentDto, PaymentPeriodDto } from '../types';
-import type { ClassGroupDto } from '../../admin/types';
+import type { ClassGroupDto } from '../../../api/types';
 
 /* ── Helpers ──────────────────────────────────────────────────────────── */
 
-const MAD = new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD', minimumFractionDigits: 0, maximumFractionDigits: 2 });
+const MAD_WHOLE = new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD', maximumFractionDigits: 0 });
+const MAD_CENTS = new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD', minimumFractionDigits: 2 });
 
-const formatAmount = (amount: number): string => MAD.format(amount); // e.g. "1.500 MAD"
+// "1.500 MAD" for whole amounts, "1.500,50 MAD" when there are cents.
+const formatAmount = (amount: number): string =>
+  (Number.isInteger(amount) ? MAD_WHOLE : MAD_CENTS).format(amount);
 
 const daysLabel = (dueDate: string): string => {
   const now = new Date(); now.setHours(0, 0, 0, 0);

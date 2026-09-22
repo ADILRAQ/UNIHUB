@@ -6,7 +6,7 @@ import { useState, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import useGetData from '../../../hooks/useGetData';
 import usePostData from '../../../hooks/usePostData';
-import useClassGroupsData from '../../admin/hooks/useClassGroupsData';
+import useClassGroupsData from '../../../hooks/useClassGroupsData';
 import { apiErrorMessage } from '../../../utils/apiError';
 import * as paymentService from '../services/paymentService';
 import type {
@@ -15,7 +15,7 @@ import type {
   PaymentPeriodDto,
   CreateYearPlanPayload,
 } from '../types';
-import type { ClassGroupDto } from '../../admin/types';
+import type { ClassGroupDto } from '../../../api/types';
 
 export type AdminPaymentsTab = 'queue' | 'overdue' | 'plan';
 

@@ -384,7 +384,7 @@ public class PaymentService {
 
     @Transactional(readOnly = true)
     public List<OverdueStudentDto> getOverdueInstallments(Long classGroupId) {
-        List<StudentInstallment> overdue = installmentRepository.findOverdue();
+        List<StudentInstallment> overdue = installmentRepository.findOverdue(today());
 
         // Group by student
         Map<Long, List<StudentInstallment>> byStudent = overdue.stream()
