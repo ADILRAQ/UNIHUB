@@ -55,11 +55,17 @@ const useImportSection = (): UseImportSection => {
   const [serverError, setServerError] = useState<string | null>(null);
   const [result, setResult] = useState<ImportResultResponse | null>(null);
 
+  const clearInput = () => {
+    if (inputRef.current) inputRef.current.value = '';
+  };
+
   const { mutate, isPending } = usePostData<string, File, ImportResultResponse>({
     keys: ['admin', 'users', 'import'],
     serviceFn: importUsers,
     onSuccessFn: (importResult) => {
       setResult(importResult);
+      setFile(null);
+      clearInput();
       if (importResult.successCount > 0) {
         void queryClient.invalidateQueries({ queryKey: ['admin', 'users', 'list'] });
       }
@@ -68,15 +74,19 @@ const useImportSection = (): UseImportSection => {
       setServerError(apiErrorMessage(error, 'Could not import the file. Please try again.')),
   });
 
-  const selectFile = (picked: File | undefined) => {
+  // ponytail: never clears `result` — it holds one-time temporary passwords, replaced only
+  // by the next import.
+  const selectFile = (picked: File | undefined, error?: string) => {
     setDragging(false);
     setServerError(null);
-    setResult(null);
     setFile(null);
     setRejectedName(null);
     setFileError(null);
     if (!picked) return;
-    if (!/\.csv$/i.test(picked.name)) {
+    if (error) {
+      setRejectedName(picked.name);
+      setFileError(error);
+    } else if (!/\.csv$/i.test(picked.name)) {
       setRejectedName(picked.name);
       setFileError('Only .csv files are supported');
     } else if (picked.size > MAX_BYTES) {
@@ -85,10 +95,6 @@ const useImportSection = (): UseImportSection => {
     } else {
       setFile(picked);
     }
-  };
-
-  const clearInput = () => {
-    if (inputRef.current) inputRef.current.value = '';
   };
 
   const status: DropzoneStatus = file
@@ -108,20 +114,26 @@ const useImportSection = (): UseImportSection => {
     isPending,
     serverError,
     result,
-    onFileChange: (event) => selectFile(event.target.files?.[0]),
+    onFileChange: (event) => {
+      selectFile(event.target.files?.[0]);
+      clearInput();
+    },
     onDragOver: (event) => {
       event.preventDefault();
       if (!isPending) setDragging(true);
     },
     onDragLeave: (event) => {
       event.preventDefault();
+      // dragleave also fires when moving onto a child element; only reset on a real exit.
+      if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
       setDragging(false);
     },
     onDrop: (event) => {
       event.preventDefault();
       if (isPending) return;
       clearInput();
-      selectFile(event.dataTransfer.files[0]);
+      const { files } = event.dataTransfer;
+      selectFile(files[0], files.length > 1 ? 'Drop one file at a time' : undefined);
     },
     onBrowse: () => inputRef.current?.click(),
     onRemove: () => {
@@ -134,7 +146,6 @@ const useImportSection = (): UseImportSection => {
         return;
       }
       setServerError(null);
-      setResult(null);
       mutate(file);
     },
     onDownloadTemplate: () =>

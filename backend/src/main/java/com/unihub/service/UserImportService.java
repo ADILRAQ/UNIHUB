@@ -153,6 +153,15 @@ public class UserImportService {
         }
     }
 
+    /** Drops the UTF-8 byte-order mark Excel's "CSV UTF-8" export puts before the first header. */
+    private static BufferedReader skipBom(BufferedReader reader) throws IOException {
+        reader.mark(1);
+        if (reader.read() != '\uFEFF') {
+            reader.reset();
+        }
+        return reader;
+    }
+
     private List<CSVRecord> parseRecords(MultipartFile file) {
         CSVFormat format = CSVFormat.DEFAULT.builder()
                 .setHeader()
@@ -163,7 +172,7 @@ public class UserImportService {
 
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
-             CSVParser parser = format.parse(reader)) {
+             CSVParser parser = format.parse(skipBom(reader))) {
 
             List<String> headers = parser.getHeaderNames();
             for (String required : REQUIRED_HEADERS) {

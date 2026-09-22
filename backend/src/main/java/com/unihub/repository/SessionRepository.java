@@ -47,7 +47,7 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
     Optional<Long> findClassGroupIdBySessionId(@Param("sessionId") Long sessionId);
 
     /**
-     * All sessions for a course that have already ended, ordered newest first.
+     * All non-cancelled sessions for a course that have already ended, ordered newest first.
      * A session is past when its date is before today, OR its date is today and its
      * end time is at or before the current time.
      * The {@code course} association is eagerly joined so session-to-course navigation in the
@@ -55,6 +55,7 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
      */
     @Query("select s from Session s join fetch s.course c "
             + "where c.id = :courseId "
+            + "and s.status <> com.unihub.model.SessionStatus.CANCELLED "
             + "and (s.sessionDate < :today or (s.sessionDate = :today and s.endTime <= :now)) "
             + "order by s.sessionDate desc, s.endTime desc")
     List<Session> findPastSessionsByCourseId(@Param("courseId") Long courseId,
@@ -72,11 +73,12 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
      */
     @Query("select s from Session s join fetch s.course c "
             + "where c.classGroup.id in :groupIds "
-            + "and s.sessionDate >= :today "
+            + "and (s.sessionDate > :today or (s.sessionDate = :today and s.endTime > :now)) "
             + "and s.status <> com.unihub.model.SessionStatus.CANCELLED "
             + "order by s.sessionDate asc, s.startTime asc")
     List<Session> findNextForGroups(@Param("groupIds") Collection<Long> groupIds,
                                     @Param("today") LocalDate today,
+                                    @Param("now") LocalTime now,
                                     Pageable pageable);
 
     /**
@@ -86,11 +88,12 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
      */
     @Query("select s from Session s join fetch s.course c "
             + "where c.teacher.id = :teacherId "
-            + "and s.sessionDate >= :today "
+            + "and (s.sessionDate > :today or (s.sessionDate = :today and s.endTime > :now)) "
             + "and s.status <> com.unihub.model.SessionStatus.CANCELLED "
             + "order by s.sessionDate asc, s.startTime asc")
     List<Session> findNextForTeacher(@Param("teacherId") Long teacherId,
                                      @Param("today") LocalDate today,
+                                     @Param("now") LocalTime now,
                                      Pageable pageable);
 
     /**
@@ -98,8 +101,10 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
      * caller passes {@code PageRequest.of(0, 1)} to retrieve only one row.
      */
     @Query("select s from Session s join fetch s.course c "
-            + "where s.sessionDate >= :today "
+            + "where (s.sessionDate > :today or (s.sessionDate = :today and s.endTime > :now)) "
             + "and s.status <> com.unihub.model.SessionStatus.CANCELLED "
             + "order by s.sessionDate asc, s.startTime asc")
-    List<Session> findNextForAdmin(@Param("today") LocalDate today, Pageable pageable);
+    List<Session> findNextForAdmin(@Param("today") LocalDate today,
+                                   @Param("now") LocalTime now,
+                                   Pageable pageable);
 }

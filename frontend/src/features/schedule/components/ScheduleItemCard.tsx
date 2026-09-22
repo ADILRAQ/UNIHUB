@@ -20,12 +20,19 @@ interface ScheduleItemCardProps {
  */
 const ScheduleItemCard = ({ item, canManage, onManage }: ScheduleItemCardProps) => {
   const visual = itemVisual(item);
-  const canJoin = visual.isSession && !visual.isCancelled && Boolean(item.meetLink);
   const canManageThis =
     canManage && visual.isSession && item.status !== 'CANCELLED' && Boolean(onManage);
   const now = new Date();
-  const localToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-  const isPastSession = visual.isSession && !visual.isCancelled && item.date < localToday;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const localToday = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  const localNow = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  // ponytail: browser clock, matches the server's Africa/Casablanca rule for users in Morocco;
+  // send an `ended` flag from the API if users elsewhere ever matter.
+  const hasEnded =
+    item.date < localToday ||
+    (item.date === localToday && item.endTime !== null && item.endTime <= localNow);
+  const isPastSession = visual.isSession && !visual.isCancelled && hasEnded;
+  const canJoin = visual.isSession && !visual.isCancelled && !hasEnded && Boolean(item.meetLink);
 
   return (
     <article className={`sched-item sched-item--${visual.variant}`}>

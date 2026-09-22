@@ -123,7 +123,7 @@ const ImportSection = () => {
                     Ready to import · {fileSize}
                   </>
                 ) : (
-                  fileError
+                  <span role="alert">{fileError}</span>
                 )}
               </div>
             </div>
@@ -156,7 +156,11 @@ const ImportSection = () => {
         )}
       </div>
 
-      {serverError && <p className="admin-error">{serverError}</p>}
+      {serverError && (
+        <p className="admin-error" role="alert">
+          {serverError}
+        </p>
+      )}
 
       {result && (
         <div className="admin-import__result">
