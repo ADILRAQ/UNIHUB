@@ -113,7 +113,8 @@ public class SessionRecapService {
 
     /**
      * Returns all past sessions for a course with a {@code hasRecap} flag on each.
-     * "Past" means {@code session_date < today}. The caller's authorization is already
+     * "Past" means the session has ended (in the department timezone) and was not cancelled.
+     * The caller's authorization is already
      * guaranteed by the controller's {@code @PreAuthorize}.
      *
      * @param courseId the course to list

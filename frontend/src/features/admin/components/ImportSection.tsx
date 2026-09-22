@@ -114,7 +114,10 @@ const ImportSection = () => {
             </div>
             <div className="dropzone__file-info">
               <div className="dropzone__file-name">{fileName}</div>
-              <div className={`dropzone__file-meta dropzone__file-meta--${status}`}>
+              <div
+                className={`dropzone__file-meta dropzone__file-meta--${status}`}
+                role={status === 'error' ? 'alert' : undefined}
+              >
                 {status === 'selected' ? (
                   <>
                     <svg width="13" height="13" strokeWidth="2.4" {...svgProps}>

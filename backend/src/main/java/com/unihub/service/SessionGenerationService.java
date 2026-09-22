@@ -1,5 +1,6 @@
 package com.unihub.service;
 
+import com.unihub.config.DepartmentZone;
 import com.unihub.exception.BadRequestException;
 import com.unihub.exception.ConflictException;
 import com.unihub.exception.ResourceNotFoundException;
@@ -76,7 +77,7 @@ public class SessionGenerationService {
      */
     @Transactional
     public List<Session> regenerateSessions(ScheduleTemplate template) {
-        return sync(template, LocalDate.now());
+        return sync(template, LocalDate.now(DepartmentZone.ZONE));
     }
 
     /**

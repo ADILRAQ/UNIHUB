@@ -1,5 +1,6 @@
 package com.unihub.service;
 
+import com.unihub.config.DepartmentZone;
 import com.unihub.dto.NextSessionDto;
 import com.unihub.dto.RescheduleSessionRequest;
 import com.unihub.dto.SessionDto;
@@ -9,6 +10,7 @@ import com.unihub.repository.SessionRepository;
 import com.unihub.repository.UserClassGroupRepository;
 import com.unihub.security.AuthenticatedUser;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
@@ -76,17 +78,18 @@ public class SessionService {
      */
     @Transactional(readOnly = true)
     public Optional<NextSessionDto> getNextSession(AuthenticatedUser caller) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(DepartmentZone.ZONE);
+        LocalTime now = LocalTime.now(DepartmentZone.ZONE);
         PageRequest one = PageRequest.of(0, 1);
 
         List<Session> results = switch (caller.role()) {
-            case ROLE_ADMIN -> sessionRepository.findNextForAdmin(today, one);
-            case ROLE_TEACHER -> sessionRepository.findNextForTeacher(caller.userId(), today, one);
+            case ROLE_ADMIN -> sessionRepository.findNextForAdmin(today, now, one);
+            case ROLE_TEACHER -> sessionRepository.findNextForTeacher(caller.userId(), today, now, one);
             default -> {
                 List<Long> groupIds = userClassGroupRepository.findGroupIdsByUserId(caller.userId());
                 yield groupIds.isEmpty()
                         ? List.of()
-                        : sessionRepository.findNextForGroups(groupIds, today, one);
+                        : sessionRepository.findNextForGroups(groupIds, today, now, one);
             }
         };
 

@@ -64,7 +64,7 @@ public class SessionRecapController {
 
     /**
      * Lists sessions for a course filtered by the {@code past} flag.
-     * When {@code past=true} returns sessions whose date is before today, ordered
+     * When {@code past=true} returns non-cancelled sessions that have already ended, ordered
      * newest-first, each with a {@code hasRecap} indicator.
      *
      * <p>The {@code past} parameter is required; callers that omit it get a 400 from
