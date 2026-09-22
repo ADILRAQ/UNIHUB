@@ -46,21 +46,38 @@ const StudentPaymentsView = () => {
   if (isLoading) return <p style={{ margin: 0, fontSize: 14, color: '#6B6B7B' }}>Loading…</p>;
   if (isError) return <p style={{ margin: 0, fontSize: 14, color: '#B91C1C' }}>Failed to load payments.</p>;
 
+  if (installments.length === 0) {
+    return (
+      <div className="empty-state" style={{ background: '#FFFFFF', border: '1px dashed #DCD9EE', borderRadius: 12 }}>
+        <div style={{ width: 56, height: 56, borderRadius: 999, background: '#F5F4FA', color: '#8D8B9C', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="2" y="5" width="20" height="14" rx="2" />
+            <line x1="2" y1="10" x2="22" y2="10" />
+            <line x1="6" y1="15" x2="10" y2="15" />
+          </svg>
+        </div>
+        <h2 className="empty-state__title">No payment plan yet</h2>
+        <p className="empty-state__body">
+          The administration has not set up the tuition installments for your class group yet.
+          Once it is configured, your 3 installments and their due dates will appear here.
+        </p>
+      </div>
+    );
+  }
+
   const total = installments.reduce((sum, ins) => sum + ins.amount, 0);
   const paidCount = installments.filter((ins) => ins.status === 'PAID').length;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {installments.length > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#FFFFFF', border: '1px solid #EDEBF8', borderRadius: 12, padding: '14px 20px' }}>
-          <span style={{ fontSize: 14, color: '#45435A', fontWeight: 500 }}>
-            {formatAmount(total)} total · {installments.length} installments
-          </span>
-          <span style={{ fontSize: 13.5, color: paidCount === installments.length ? '#0F8F5F' : '#45435A', fontWeight: 600 }}>
-            {paidCount} of {installments.length} paid
-          </span>
-        </div>
-      )}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#FFFFFF', border: '1px solid #EDEBF8', borderRadius: 12, padding: '14px 20px' }}>
+        <span style={{ fontSize: 14, color: '#45435A', fontWeight: 500 }}>
+          {formatAmount(total)} total · {installments.length} installments
+        </span>
+        <span style={{ fontSize: 13.5, color: paidCount === installments.length ? '#0F8F5F' : '#45435A', fontWeight: 600 }}>
+          {paidCount} of {installments.length} paid
+        </span>
+      </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 20 }}>
         {installments.map((ins) => {
           const isUploading = uploadingId === ins.id;
@@ -261,12 +278,14 @@ const QueueTab = ({ queue, isLoading, isError, approvingId, rejectingId, rejectT
     }
   };
 
-  const closePreview = () => {
-    if (preview) window.URL.revokeObjectURL(preview.url);
-    setPreview(null);
-  };
+  const closePreview = () => setPreview(null);
 
-  useEffect(() => () => { if (preview) window.URL.revokeObjectURL(preview.url); }, []);
+  // Revoke each blob URL when it's replaced, closed, or the tab unmounts.
+  useEffect(() => {
+    if (!preview) return;
+    const { url } = preview;
+    return () => window.URL.revokeObjectURL(url);
+  }, [preview]);
 
   if (isLoading) return <p style={{ margin: 0, fontSize: 14, color: '#6B6B7B' }}>Loading queue…</p>;
   if (isError) return <p style={{ margin: 0, fontSize: 14, color: '#B91C1C' }}>Failed to load queue.</p>;
