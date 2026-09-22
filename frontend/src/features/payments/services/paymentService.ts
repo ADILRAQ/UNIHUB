@@ -4,7 +4,7 @@ import type {
   PaymentPeriodDto,
   PendingProofItemDto,
   OverdueStudentDto,
-  CreatePeriodEntry,
+  CreateYearPlanPayload,
 } from '../types';
 
 export const getMyInstallments = (): Promise<InstallmentDto[]> =>
@@ -25,10 +25,7 @@ export const getYearPlans = (): Promise<Record<string, PaymentPeriodDto[]>> =>
     .get<Record<string, PaymentPeriodDto[]>>('/api/payments/periods')
     .then((r) => r.data);
 
-export const createYearPlan = (data: {
-  academicYear: string;
-  periods: CreatePeriodEntry[];
-}): Promise<void> =>
+export const createYearPlan = (data: CreateYearPlanPayload): Promise<void> =>
   apiClient.post('/api/payments/periods', data).then(() => undefined);
 
 export const getQueue = (): Promise<PendingProofItemDto[]> =>

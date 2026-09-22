@@ -7,6 +7,8 @@ export interface PaymentPeriodDto {
   amount: number;
   dueDate: string; // "YYYY-MM-DD"
   periodOrder: number;
+  classGroupId: number;
+  classGroupName: string;
 }
 
 export type InstallmentStatus =
@@ -53,6 +55,13 @@ export interface CreatePeriodEntry {
   amount: number;
   dueDate: string;
   periodOrder: number;
+}
+
+/** Body of POST /api/payments/periods — one plan per class group per academic year. */
+export interface CreateYearPlanPayload {
+  academicYear: string;
+  classGroupId: number;
+  periods: CreatePeriodEntry[];
 }
 
 /** Richer pending-proof item returned by GET /api/payments/pending-proofs. */

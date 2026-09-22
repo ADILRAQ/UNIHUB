@@ -5,7 +5,7 @@ import useAdminPayments from '../hooks/useAdminPayments';
 import usePaymentsPage from '../hooks/usePaymentsPage';
 import usePlanTab from '../hooks/usePlanTab';
 import PageHeader from '../../../components/layout/PageHeader';
-import type { InstallmentDto, CreatePeriodEntry, PendingProofItemDto, OverdueStudentDto, PaymentPeriodDto } from '../types';
+import type { InstallmentDto, CreateYearPlanPayload, PendingProofItemDto, OverdueStudentDto, PaymentPeriodDto } from '../types';
 import type { ClassGroupDto } from '../../admin/types';
 
 /* ── Helpers ──────────────────────────────────────────────────────────── */
@@ -243,7 +243,7 @@ const AdminPaymentsView = () => {
           onGroupChange={setSelectedGroupId} />
       )}
       {activeTab === 'plan' && (
-        <PlanTab yearPlans={yearPlans} isLoading={isLoadingPlans}
+        <PlanTab yearPlans={yearPlans} isLoading={isLoadingPlans} classGroups={classGroups}
           onCreatePlan={createYearPlan} isCreating={isCreatingPlan} planError={planError} />
       )}
     </div>
@@ -446,47 +446,65 @@ const OverdueTab = ({ overdueList, isLoading, classGroups, selectedGroupId, onGr
 interface PlanTabProps {
   yearPlans: Record<string, PaymentPeriodDto[]>;
   isLoading: boolean;
-  onCreatePlan: (data: { academicYear: string; periods: CreatePeriodEntry[] }) => void;
+  classGroups: ClassGroupDto[];
+  onCreatePlan: (data: CreateYearPlanPayload, onCreated?: () => void) => void;
   isCreating: boolean;
   planError: string | null;
 }
 
-const PlanTab = ({ yearPlans, isLoading, onCreatePlan, isCreating, planError }: PlanTabProps) => {
-  const { academicYear, rows, formError, setAcademicYear, updateRow, handleSubmit } = usePlanTab(onCreatePlan);
+const PlanTab = ({ yearPlans, isLoading, classGroups, onCreatePlan, isCreating, planError }: PlanTabProps) => {
+  const {
+    groupedPlans, academicYear, classGroupId, rows, formError,
+    setAcademicYear, setClassGroupId, updateRow, handleSubmit,
+  } = usePlanTab(yearPlans, onCreatePlan);
 
   const inputStyle: React.CSSProperties = { height: 38, boxSizing: 'border-box', border: '1px solid #E1DEF2', borderRadius: 8, padding: '0 10px', fontSize: 13.5, color: '#1F1B33', background: '#FFFFFF', outline: 'none', fontFamily: 'inherit', width: '100%' };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {isLoading && <p style={{ margin: 0, fontSize: 14, color: '#6B6B7B' }}>Loading plans…</p>}
-      {!isLoading && Object.keys(yearPlans).length === 0 && <p style={{ margin: 0, fontSize: 14, color: '#6B6B7B' }}>No year plans configured yet.</p>}
-      {Object.entries(yearPlans).map(([year, periods]) => (
-        <div key={year}>
-          <h3 style={{ margin: '0 0 12px', fontSize: 15, fontWeight: 700, color: '#1F1B33' }}>Academic year: {year}</h3>
-          <div style={{ background: '#FFFFFF', border: '1px solid #EDEBF8', borderRadius: 14, overflow: 'hidden' }}>
-            <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-              <thead><tr style={{ borderBottom: '1px solid #F0EEFA' }}>
-                {['Label', 'Amount', 'Due date'].map((h, i) => <th key={i} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12.5, fontWeight: 600, color: '#6B6B7B' }}>{h}</th>)}
-              </tr></thead>
-              <tbody>
-                {periods.map((p) => (
-                  <tr key={p.id} style={{ borderBottom: '1px solid #F5F4FA' }}>
-                    <td style={{ padding: '12px 16px', fontSize: 13.5, color: '#1F1B33' }}>{p.label}</td>
-                    <td style={{ padding: '12px 16px', fontSize: 13.5, color: '#1F1B33', fontWeight: 600 }}>{formatAmount(p.amount)}</td>
-                    <td style={{ padding: '12px 16px', fontSize: 13.5, color: '#45435A' }}>{p.dueDate}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      {!isLoading && groupedPlans.length === 0 && <p style={{ margin: 0, fontSize: 14, color: '#6B6B7B' }}>No payment plans configured yet.</p>}
+      {groupedPlans.map(({ year, groups }) => (
+        <div key={year} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#1F1B33' }}>Academic year: {year}</h3>
+          {groups.map((g) => (
+            <div key={g.classGroupId}>
+              <h4 style={{ margin: '0 0 8px', fontSize: 13.5, fontWeight: 600, color: '#45435A' }}>{g.classGroupName}</h4>
+              <div style={{ background: '#FFFFFF', border: '1px solid #EDEBF8', borderRadius: 14, overflow: 'hidden' }}>
+                <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+                  <thead><tr style={{ borderBottom: '1px solid #F0EEFA' }}>
+                    {['Label', 'Amount', 'Due date'].map((h, i) => <th key={i} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12.5, fontWeight: 600, color: '#6B6B7B' }}>{h}</th>)}
+                  </tr></thead>
+                  <tbody>
+                    {g.periods.map((p) => (
+                      <tr key={p.id} style={{ borderBottom: '1px solid #F5F4FA' }}>
+                        <td style={{ padding: '12px 16px', fontSize: 13.5, color: '#1F1B33' }}>{p.label}</td>
+                        <td style={{ padding: '12px 16px', fontSize: 13.5, color: '#1F1B33', fontWeight: 600 }}>{formatAmount(p.amount)}</td>
+                        <td style={{ padding: '12px 16px', fontSize: 13.5, color: '#45435A' }}>{p.dueDate}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
         </div>
       ))}
 
       <div style={{ background: '#FFFFFF', border: '1px solid #EDEBF8', borderRadius: 14, padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#1F1B33' }}>Create new year plan</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <label style={{ fontSize: 13, fontWeight: 600, color: '#45435A' }}>Academic year</label>
-          <input type="text" placeholder="e.g. 2025-2026" value={academicYear} onChange={(e) => setAcademicYear(e.target.value)} style={{ ...inputStyle, width: 200 }} />
+        <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#1F1B33' }}>Create plan</h3>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label htmlFor="plan-academic-year" style={{ fontSize: 13, fontWeight: 600, color: '#45435A' }}>Academic year</label>
+            <input id="plan-academic-year" type="text" placeholder="e.g. 2025-2026" value={academicYear} onChange={(e) => setAcademicYear(e.target.value)} style={{ ...inputStyle, width: 200 }} />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label htmlFor="plan-class-group" style={{ fontSize: 13, fontWeight: 600, color: '#45435A' }}>Class group</label>
+            <select id="plan-class-group" value={classGroupId} onChange={(e) => setClassGroupId(e.target.value)} style={{ ...inputStyle, width: 240, cursor: 'pointer' }}>
+              <option value="">Select a class group</option>
+              {classGroups.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+            </select>
+          </div>
         </div>
         {rows.map((row, i) => (
           <div key={i} style={{ display: 'grid', gridTemplateColumns: '24px 1fr 120px 150px', gap: 8, alignItems: 'center' }}>
@@ -500,7 +518,7 @@ const PlanTab = ({ yearPlans, isLoading, onCreatePlan, isCreating, planError }: 
           <div role="alert" style={{ background: '#FEF2F2', border: '1px solid #F7A9A9', borderRadius: 10, padding: '10px 14px', fontSize: 13.5, color: '#B91C1C' }}>{formError ?? planError}</div>
         )}
         <button type="button" disabled={isCreating} onClick={handleSubmit} style={{ alignSelf: 'flex-start', height: 40, padding: '0 18px', border: 0, borderRadius: 9, background: isCreating ? '#8A84E8' : '#5A4FE0', color: '#FFFFFF', fontSize: 13.5, fontWeight: 600, cursor: isCreating ? 'not-allowed' : 'pointer' }}>
-          {isCreating ? 'Creating…' : 'Create year plan'}
+          {isCreating ? 'Creating…' : 'Create plan'}
         </button>
       </div>
     </div>
