@@ -1,5 +1,5 @@
 import useGetData from '../../../hooks/useGetData';
-import { listClassGroups } from '../services/classGroupService';
+import { listAllClassGroups } from '../services/classGroupService';
 import type { ClassGroupDto } from '../types';
 
 /** Shared query key for the class-groups list, so mutations can invalidate it. */
@@ -19,7 +19,7 @@ export interface UseClassGroupsData {
 const useClassGroupsData = (): UseClassGroupsData => {
   const { data, isLoading, isError } = useGetData<ClassGroupDto[], string, ClassGroupDto[]>({
     queryKey: [...CLASS_GROUPS_KEY],
-    queryFn: listClassGroups,
+    queryFn: listAllClassGroups,
     transformFn: (groups) => groups,
   });
 

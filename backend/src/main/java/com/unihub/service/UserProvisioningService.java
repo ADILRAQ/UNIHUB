@@ -8,12 +8,9 @@ import com.unihub.exception.ResourceNotFoundException;
 import com.unihub.model.ClassGroup;
 import com.unihub.model.UserRole;
 import com.unihub.repository.ClassGroupRepository;
-import com.unihub.repository.UserClassGroupRepository;
 import com.unihub.repository.UserRepository;
 import com.unihub.security.AuthenticatedUser;
 import com.unihub.security.TempPasswordGenerator;
-import java.util.HashSet;
-import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -39,7 +36,6 @@ public class UserProvisioningService {
 
     private final ClassGroupRepository classGroupRepository;
     private final UserRepository userRepository;
-    private final UserClassGroupRepository userClassGroupRepository;
     private final UserImportPersistenceService persistenceService;
     private final TempPasswordGenerator tempPasswordGenerator;
 
@@ -52,13 +48,11 @@ public class UserProvisioningService {
 
     public UserProvisioningService(ClassGroupRepository classGroupRepository,
                                    UserRepository userRepository,
-                                   UserClassGroupRepository userClassGroupRepository,
                                    UserImportPersistenceService persistenceService,
                                    TempPasswordGenerator tempPasswordGenerator,
                                    @Lazy PaymentService paymentService) {
         this.classGroupRepository = classGroupRepository;
         this.userRepository = userRepository;
-        this.userClassGroupRepository = userClassGroupRepository;
         this.persistenceService = persistenceService;
         this.tempPasswordGenerator = tempPasswordGenerator;
         this.paymentService = paymentService;
@@ -104,9 +98,8 @@ public class UserProvisioningService {
      * <ul>
      *   <li><strong>ADMIN</strong> — may create a STUDENT or TEACHER; {@code classGroupId} is
      *       optional (a provided one must exist, else 404).</li>
-     *   <li><strong>TEACHER</strong> — may create only a STUDENT, and only into a class group
-     *       they own; anything else is a 403. An unknown/unowned group id is a 403 (not a 404)
-     *       so group existence is never probed by a caller who couldn't use the group anyway.</li>
+     *   <li><strong>TEACHER</strong> — may create only a STUDENT, into any class group (admin
+     *       parity); {@code classGroupId} is required (403 without it), unknown id is a 404.</li>
      * </ul>
      * Creating an ADMIN via this endpoint is rejected (400): admin accounts are not
      * self-service provisioned.
@@ -119,27 +112,18 @@ public class UserProvisioningService {
 
         boolean isTeacher = UserRole.TEACHER.name().equals(caller.role());
         if (isTeacher) {
-            // Teacher scoping, checked before any group lookup — mirrors the import's per-row
-            // rules (teachers create only students, only into a group they own).
+            // Teachers create only students, into any class group — mirrors the import's rules.
             if (role != UserRole.STUDENT) {
                 throw new AccessDeniedException("Teachers can only create students.");
             }
             if (request.classGroupId() == null) {
-                throw new AccessDeniedException(
-                        "You must create the student into one of your class groups.");
-            }
-            Set<Long> ownedGroupIds = new HashSet<>(
-                    userClassGroupRepository.findOwnedGroupIds(caller.userId(), UserRole.TEACHER));
-            if (!ownedGroupIds.contains(request.classGroupId())) {
-                throw new AccessDeniedException(
-                        "You are not permitted to create users in this class group.");
+                throw new AccessDeniedException("You must choose a class group for the student.");
             }
         }
 
         ClassGroup group = null;
         if (request.classGroupId() != null) {
-            // A teacher only reaches here with an id they own (so it exists); an admin may pass
-            // any id, and a genuinely unknown one is a 404.
+            // A genuinely unknown id is a 404.
             group = classGroupRepository.findById(request.classGroupId())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "Class group " + request.classGroupId() + " not found"));

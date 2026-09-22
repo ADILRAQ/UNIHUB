@@ -41,8 +41,8 @@ public class ClassGroupController {
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public List<ClassGroupDto> listGroups(@AuthenticationPrincipal AuthenticatedUser caller,
                                           @RequestParam(defaultValue = "false") boolean all) {
-        // all=true: every group, even for a teacher (payment plans, admin parity). Default stays
-        // owned-only because user provisioning only accepts a teacher's own groups.
+        // all=true: every group, even for a teacher (admin console + payments, admin parity).
+        // Default stays owned-only for the teacher dashboard ("my groups").
         return classGroupService.listGroups(caller, all);
     }
 

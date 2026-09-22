@@ -8,7 +8,6 @@ import com.unihub.exception.ConflictException;
 import com.unihub.model.ClassGroup;
 import com.unihub.model.UserRole;
 import com.unihub.repository.ClassGroupRepository;
-import com.unihub.repository.UserClassGroupRepository;
 import com.unihub.security.AuthenticatedUser;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,7 +23,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,11 +36,8 @@ import org.springframework.web.multipart.MultipartFile;
  * {@link UserImportPersistenceService}, so a bad row never rolls back the good ones.
  *
  * <p><strong>Permission scoping.</strong> An ADMIN may import any role into any existing
- * group. A TEACHER may import only STUDENTs, and only into groups they own (a
- * {@code TEACHER}-role membership row). A whole-request 403 is reserved for a teacher who
- * owns zero groups at all (no possible valid target); a batch that merely mixes valid and
- * out-of-scope rows yields per-row errors for the out-of-scope rows while the valid ones
- * still import.
+ * group. A TEACHER may import only STUDENTs, into any existing group (admin parity);
+ * non-student rows from a teacher are per-row errors while the valid ones still import.
  */
 @Service
 public class UserImportService {
@@ -54,14 +49,11 @@ public class UserImportService {
             Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
     private final ClassGroupRepository classGroupRepository;
-    private final UserClassGroupRepository userClassGroupRepository;
     private final UserProvisioningService provisioningService;
 
     public UserImportService(ClassGroupRepository classGroupRepository,
-                             UserClassGroupRepository userClassGroupRepository,
                              UserProvisioningService provisioningService) {
         this.classGroupRepository = classGroupRepository;
-        this.userClassGroupRepository = userClassGroupRepository;
         this.provisioningService = provisioningService;
     }
 
@@ -72,20 +64,6 @@ public class UserImportService {
 
         boolean isTeacher = UserRole.TEACHER.name().equals(caller.role());
 
-        // Whole-request 403: a teacher who owns no groups has no possible valid target row.
-        // Scoping keys on class-group IDs (not names): the permission decision is made
-        // against the same resolved group that will actually be written, so a case-variant
-        // group name (e.g. "math" vs an owned "Math") can never dodge the check.
-        Set<Long> teacherOwnedGroupIds = null;
-        if (isTeacher) {
-            teacherOwnedGroupIds = new HashSet<>(
-                    userClassGroupRepository.findOwnedGroupIds(caller.userId(), UserRole.TEACHER));
-            if (teacherOwnedGroupIds.isEmpty()) {
-                throw new AccessDeniedException(
-                        "You are not assigned to any class group and cannot import users.");
-            }
-        }
-
         List<CSVRecord> records = parseRecords(file);
 
         List<CreatedUserDto> created = new ArrayList<>();
@@ -95,14 +73,13 @@ public class UserImportService {
         Set<String> seenEmails = new HashSet<>();
 
         for (CSVRecord record : records) {
-            processRow(record, isTeacher, teacherOwnedGroupIds, seenEmails, created, errors);
+            processRow(record, isTeacher, seenEmails, created, errors);
         }
 
         return new ImportResultResponse(created.size(), errors.size(), created, errors);
     }
 
-    private void processRow(CSVRecord record, boolean isTeacher,
-                            Set<Long> teacherOwnedGroupIds, Set<String> seenEmails,
+    private void processRow(CSVRecord record, boolean isTeacher, Set<String> seenEmails,
                             List<CreatedUserDto> created, List<ImportErrorDto> errors) {
         long line = record.getRecordNumber();
         String name = get(record, "name");
@@ -153,15 +130,6 @@ public class UserImportService {
             return;
         }
         ClassGroup resolvedGroup = group.get();
-
-        // 4. Teacher group scoping — checked against the RESOLVED group's id, so the
-        //    permission decision and the group actually written are the same group (a
-        //    case-variant name cannot resolve to a group the teacher doesn't own).
-        if (isTeacher && !teacherOwnedGroupIds.contains(resolvedGroup.getId())) {
-            errors.add(new ImportErrorDto(line, email,
-                    "not permitted to import into '" + groupName + "'"));
-            return;
-        }
 
         // 5. In-batch duplicate guard (case-insensitive) so two rows with the same email can't
         //    both be created within a single import. The DB-level duplicate check lives in the
