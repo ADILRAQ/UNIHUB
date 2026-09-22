@@ -10,7 +10,9 @@ import type { ClassGroupDto } from '../../admin/types';
 
 /* ── Helpers ──────────────────────────────────────────────────────────── */
 
-const formatAmount = (amount: number): string => `${amount.toLocaleString('fr-DZ')} DA`;
+const MAD = new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD', minimumFractionDigits: 0, maximumFractionDigits: 2 });
+
+const formatAmount = (amount: number): string => MAD.format(amount); // e.g. "1.500 MAD"
 
 const daysLabel = (dueDate: string): string => {
   const now = new Date(); now.setHours(0, 0, 0, 0);
