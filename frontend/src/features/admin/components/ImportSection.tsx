@@ -114,10 +114,7 @@ const ImportSection = () => {
             </div>
             <div className="dropzone__file-info">
               <div className="dropzone__file-name">{fileName}</div>
-              <div
-                className={`dropzone__file-meta dropzone__file-meta--${status}`}
-                role={status === 'error' ? 'alert' : undefined}
-              >
+              <div className={`dropzone__file-meta dropzone__file-meta--${status}`}>
                 {status === 'selected' ? (
                   <>
                     <svg width="13" height="13" strokeWidth="2.4" {...svgProps}>
@@ -126,7 +123,7 @@ const ImportSection = () => {
                     Ready to import · {fileSize}
                   </>
                 ) : (
-                  fileError
+                  <span role="alert">{fileError}</span>
                 )}
               </div>
             </div>
@@ -159,7 +156,11 @@ const ImportSection = () => {
         )}
       </div>
 
-      {serverError && <p className="admin-error">{serverError}</p>}
+      {serverError && (
+        <p className="admin-error" role="alert">
+          {serverError}
+        </p>
+      )}
 
       {result && (
         <div className="admin-import__result">

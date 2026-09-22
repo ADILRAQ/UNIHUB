@@ -146,7 +146,6 @@ const useImportSection = (): UseImportSection => {
         return;
       }
       setServerError(null);
-      setResult(null);
       mutate(file);
     },
     onDownloadTemplate: () =>
