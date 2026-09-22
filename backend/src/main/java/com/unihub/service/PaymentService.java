@@ -46,6 +46,8 @@ import org.springframework.web.multipart.MultipartFile;
  *       (academic year, class group). The service creates UNPAID (order 1) and LOCKED
  *       (orders 2 and 3) installments for every STUDENT member of that group only.</li>
  *   <li>A student with no class group gets no installments.</li>
+ *   <li>Academic years run Sept 1 – Aug 31 ("2026-2027"). Plans can only be created for the
+ *       current or next year; students only see the current year's installments.</li>
  *   <li>Students upload a proof when their current installment is UNPAID or REJECTED.</li>
  *   <li>Admin approves or rejects; approval auto-unlocks the next installment.</li>
  *   <li>{@link #generateInstallmentsForNewStudent} is called by the user creation flow for
@@ -77,6 +79,21 @@ public class PaymentService {
         this.storageService = storageService;
     }
 
+    /** Academic years run September 1 to August 31. */
+    private static final int ACADEMIC_YEAR_START_MONTH = 9;
+
+    /** The academic year containing {@code date}, e.g. 2026-09-22 and 2027-08-31 → "2026-2027". */
+    static String academicYearOf(LocalDate date) {
+        int start = date.getMonthValue() >= ACADEMIC_YEAR_START_MONTH ? date.getYear() : date.getYear() - 1;
+        return start + "-" + (start + 1);
+    }
+
+    /** Plans can be created for the current academic year and the next one only. */
+    private static List<String> plannableYears() {
+        LocalDate today = LocalDate.now();
+        return List.of(academicYearOf(today), academicYearOf(today.plusYears(1)));
+    }
+
     // =========================================================================
     // Admin: period plan creation
     // =========================================================================
@@ -92,6 +109,10 @@ public class PaymentService {
     public List<PaymentPeriodDto> createYearPlan(String academicYear,
                                                    Long classGroupId,
                                                    List<CreatePeriodRequest.PeriodEntry> entries) {
+        List<String> allowedYears = plannableYears();
+        if (!allowedYears.contains(academicYear)) {
+            throw new BadRequestException("Academic year must be one of " + allowedYears + ".");
+        }
         if (entries == null || entries.size() != 3) {
             throw new BadRequestException("A payment plan must contain exactly 3 period entries.");
         }
@@ -185,7 +206,10 @@ public class PaymentService {
 
     @Transactional(readOnly = true)
     public List<InstallmentDto> getMyInstallments(Long studentId) {
-        return installmentRepository.findByStudentIdOrderByPeriodPeriodOrderAsc(studentId)
+        // Students only see the current academic year; past years stay visible to admins.
+        return installmentRepository
+                .findByStudentIdAndPeriodAcademicYearOrderByPeriodPeriodOrderAsc(
+                        studentId, academicYearOf(LocalDate.now()))
                 .stream()
                 .map(this::toInstallmentDto)
                 .toList();
@@ -414,8 +438,12 @@ public class PaymentService {
                 .stream()
                 .collect(Collectors.groupingBy(PaymentPeriod::getAcademicYear));
 
+        String currentYear = academicYearOf(LocalDate.now());
         for (Map.Entry<String, List<PaymentPeriod>> entry : byYear.entrySet()) {
             String year = entry.getKey();
+            if (year.compareTo(currentYear) < 0) {
+                continue; // past years never apply to a new student ("YYYY-YYYY" sorts chronologically)
+            }
             List<StudentInstallment> existing =
                     installmentRepository.findByStudentIdAndPeriodAcademicYear(studentId, year);
             if (!existing.isEmpty()) {

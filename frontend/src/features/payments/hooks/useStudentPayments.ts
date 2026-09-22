@@ -8,11 +8,14 @@ import useGetData from '../../../hooks/useGetData';
 import usePostData from '../../../hooks/usePostData';
 import { useToast } from '../../../components/ui/Toast';
 import * as paymentService from '../services/paymentService';
+import { academicYearOf } from '../academicYear';
 import type { InstallmentDto } from '../types';
 
 const INSTALLMENTS_KEY = ['payments', 'me'] as const;
 
 interface UseStudentPaymentsReturn {
+  /** Current academic year; the API only returns this year's installments. */
+  academicYear: string;
   installments: InstallmentDto[];
   isLoading: boolean;
   isError: boolean;
@@ -78,6 +81,7 @@ const useStudentPayments = (): UseStudentPaymentsReturn => {
   };
 
   return {
+    academicYear: academicYearOf(new Date()),
     installments: data ?? [],
     isLoading,
     isError,

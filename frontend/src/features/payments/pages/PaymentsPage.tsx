@@ -41,7 +41,7 @@ const badge = (status: InstallmentDto['status']) => {
 /* ── Student view ──────────────────────────────────────────────────── */
 
 const StudentPaymentsView = () => {
-  const { installments, isLoading, isError, uploadingId, uploadFeedback, uploadProof } = useStudentPayments();
+  const { academicYear, installments, isLoading, isError, uploadingId, uploadFeedback, uploadProof } = useStudentPayments();
 
   if (isLoading) return <p style={{ margin: 0, fontSize: 14, color: '#6B6B7B' }}>Loading…</p>;
   if (isError) return <p style={{ margin: 0, fontSize: 14, color: '#B91C1C' }}>Failed to load payments.</p>;
@@ -58,7 +58,7 @@ const StudentPaymentsView = () => {
         </div>
         <h2 className="empty-state__title">No payment plan yet</h2>
         <p className="empty-state__body">
-          The administration has not set up the tuition installments for your class group yet.
+          The administration has not set up the {academicYear} tuition installments for your class group yet.
           Once it is configured, your 3 installments and their due dates will appear here.
         </p>
       </div>
@@ -72,7 +72,7 @@ const StudentPaymentsView = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#FFFFFF', border: '1px solid #EDEBF8', borderRadius: 12, padding: '14px 20px' }}>
         <span style={{ fontSize: 14, color: '#45435A', fontWeight: 500 }}>
-          {formatAmount(total)} total · {installments.length} installments
+          {academicYear} · {formatAmount(total)} total · {installments.length} installments
         </span>
         <span style={{ fontSize: 13.5, color: paidCount === installments.length ? '#0F8F5F' : '#45435A', fontWeight: 600 }}>
           {paidCount} of {installments.length} paid
@@ -454,7 +454,7 @@ interface PlanTabProps {
 
 const PlanTab = ({ yearPlans, isLoading, classGroups, onCreatePlan, isCreating, planError }: PlanTabProps) => {
   const {
-    groupedPlans, academicYear, classGroupId, rows, formError,
+    groupedPlans, yearOptions, academicYear, classGroupId, rows, formError,
     setAcademicYear, setClassGroupId, updateRow, handleSubmit,
   } = usePlanTab(yearPlans, onCreatePlan);
 
@@ -496,7 +496,9 @@ const PlanTab = ({ yearPlans, isLoading, classGroups, onCreatePlan, isCreating, 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label htmlFor="plan-academic-year" style={{ fontSize: 13, fontWeight: 600, color: '#45435A' }}>Academic year</label>
-            <input id="plan-academic-year" type="text" placeholder="e.g. 2025-2026" value={academicYear} onChange={(e) => setAcademicYear(e.target.value)} style={{ ...inputStyle, width: 200 }} />
+            <select id="plan-academic-year" value={academicYear} onChange={(e) => setAcademicYear(e.target.value)} style={{ ...inputStyle, width: 200, cursor: 'pointer' }}>
+              {yearOptions.map((y) => <option key={y} value={y}>{y}</option>)}
+            </select>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label htmlFor="plan-class-group" style={{ fontSize: 13, fontWeight: 600, color: '#45435A' }}>Class group</label>

@@ -10,7 +10,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface StudentInstallmentRepository extends JpaRepository<StudentInstallment, Long> {
 
-    List<StudentInstallment> findByStudentIdOrderByPeriodPeriodOrderAsc(Long studentId);
+    List<StudentInstallment> findByStudentIdAndPeriodAcademicYearOrderByPeriodPeriodOrderAsc(
+            Long studentId, String academicYear);
 
     List<StudentInstallment> findByStatusOrderBySubmittedAtAsc(InstallmentStatus status);
 

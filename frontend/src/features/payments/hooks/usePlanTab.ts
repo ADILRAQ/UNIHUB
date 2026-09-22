@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { plannableYears } from '../academicYear';
 import type { CreateYearPlanPayload, PaymentPeriodDto } from '../types';
 
 type PlanRow = { label: string; amount: string; dueDate: string };
@@ -26,6 +27,7 @@ export interface YearGroupPlans {
 
 export interface UsePlanTab {
   groupedPlans: YearGroupPlans[];
+  yearOptions: string[];
   academicYear: string;
   classGroupId: string;
   rows: PlanRow[];
@@ -45,7 +47,8 @@ const usePlanTab = (
   yearPlans: Record<string, PaymentPeriodDto[]>,
   onCreatePlan: (data: CreateYearPlanPayload, onCreated?: () => void) => void,
 ): UsePlanTab => {
-  const [academicYear, setAcademicYear] = useState('');
+  const yearOptions = useMemo(() => plannableYears(), []);
+  const [academicYear, setAcademicYear] = useState(yearOptions[0]);
   const [classGroupId, setClassGroupId] = useState('');
   const [rows, setRows] = useState<PlanRow[]>(EMPTY_ROWS);
   const [formError, setFormError] = useState<string | null>(null);
@@ -77,7 +80,7 @@ const usePlanTab = (
   };
 
   const resetForm = () => {
-    setAcademicYear('');
+    setAcademicYear(yearOptions[0]);
     setClassGroupId('');
     setRows(EMPTY_ROWS());
     setFormError(null);
@@ -85,10 +88,6 @@ const usePlanTab = (
 
   const handleSubmit = () => {
     setFormError(null);
-    if (!academicYear.trim()) {
-      setFormError('Academic year is required.');
-      return;
-    }
     if (!classGroupId) {
       setFormError('Class group is required.');
       return;
@@ -110,7 +109,7 @@ const usePlanTab = (
     }
     onCreatePlan(
       {
-        academicYear: academicYear.trim(),
+        academicYear,
         classGroupId: Number(classGroupId),
         periods: rows.map((row, i) => ({
           label: row.label.trim(),
@@ -125,6 +124,7 @@ const usePlanTab = (
 
   return {
     groupedPlans,
+    yearOptions,
     academicYear,
     classGroupId,
     rows,
