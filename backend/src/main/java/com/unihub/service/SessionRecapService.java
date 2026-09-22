@@ -1,5 +1,6 @@
 package com.unihub.service;
 
+import com.unihub.config.DepartmentZone;
 import com.unihub.dto.SessionRecapDto;
 import com.unihub.dto.SessionRecapUpdateRequest;
 import com.unihub.dto.SessionSummaryDto;
@@ -13,6 +14,7 @@ import com.unihub.repository.ResourceRepository;
 import com.unihub.repository.SessionRepository;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -119,7 +121,8 @@ public class SessionRecapService {
      */
     @Transactional(readOnly = true)
     public List<SessionSummaryDto> getPastSessions(Long courseId) {
-        List<Session> sessions = sessionRepository.findPastSessionsByCourseId(courseId, LocalDate.now());
+        List<Session> sessions = sessionRepository.findPastSessionsByCourseId(
+                courseId, LocalDate.now(DepartmentZone.ZONE), LocalTime.now(DepartmentZone.ZONE));
         return sessions.stream()
                 .map(SessionRecapService::toSummaryDto)
                 .toList();

@@ -1,5 +1,6 @@
 package com.unihub.service;
 
+import com.unihub.config.DepartmentZone;
 import com.unihub.dto.CreatePeriodRequest;
 import com.unihub.dto.InstallmentDto;
 import com.unihub.dto.OverdueStudentDto;
@@ -22,7 +23,6 @@ import com.unihub.repository.UserClassGroupRepository;
 import com.unihub.repository.UserRepository;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -80,12 +80,8 @@ public class PaymentService {
         this.storageService = storageService;
     }
 
-    // ponytail: department timezone hardcoded (server containers run in UTC); make it config if
-    // the app ever serves another region.
-    private static final ZoneId DEPARTMENT_ZONE = ZoneId.of("Africa/Casablanca");
-
     private static LocalDate today() {
-        return LocalDate.now(DEPARTMENT_ZONE);
+        return LocalDate.now(DepartmentZone.ZONE);
     }
 
     /** Academic years run September 1 to August 31. */
