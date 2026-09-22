@@ -9,6 +9,8 @@ import java.time.LocalDate;
 public record PaymentPeriodDto(
         Long id,
         String academicYear,
+        Long classGroupId,
+        String classGroupName,
         String label,
         BigDecimal amount,
         LocalDate dueDate,
