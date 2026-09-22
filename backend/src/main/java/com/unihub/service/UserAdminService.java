@@ -54,16 +54,25 @@ public class UserAdminService {
      * pagination. Returns the self-owned {@link PagedResponse} envelope, never a raw
      * Spring {@code Page}.
      *
-     * <p>When {@code caller} is a TEACHER, the result is automatically scoped to STUDENT
-     * accounts in the class groups that teacher owns; the {@code role} filter is ignored
-     * (always forced to STUDENT) and the {@code classGroupId} filter is honoured only if
+     * <p>When {@code caller} is a TEACHER, the {@code role} filter is always forced to STUDENT.
+     * With {@code all=true} (admin console, admin parity) every student is visible and the
+     * {@code status}/{@code classGroupId} filters apply as-is; otherwise (teacher dashboard) the
+     * result is scoped to the teacher's own groups and {@code classGroupId} is honoured only if
      * the caller owns that group.
      */
     @Transactional(readOnly = true)
     public PagedResponse<UserSummaryDto> listUsers(UserRole role, UserStatus status,
                                                    Long classGroupId, String search,
-                                                   Pageable pageable,
+                                                   boolean all, Pageable pageable,
                                                    AuthenticatedUser caller) {
+        if ("TEACHER".equals(caller.role()) && all) {
+            Specification<User> spec = Specification.allOf(
+                    UserSpecifications.hasRole(UserRole.STUDENT),
+                    UserSpecifications.hasStatus(status),
+                    UserSpecifications.inClassGroup(classGroupId),
+                    UserSpecifications.matchesSearch(search));
+            return PagedResponse.from(userRepository.findAll(spec, pageable), AdminMapper::toSummary);
+        }
         if ("TEACHER".equals(caller.role())) {
             List<Long> ownedGroupIds = userClassGroupRepository.findOwnedGroupIds(
                     caller.userId(), UserRole.TEACHER);

@@ -9,19 +9,22 @@ import com.unihub.dto.ProofQueueItemDto;
 import com.unihub.exception.BadRequestException;
 import com.unihub.exception.ConflictException;
 import com.unihub.exception.ResourceNotFoundException;
+import com.unihub.model.ClassGroup;
 import com.unihub.model.InstallmentStatus;
 import com.unihub.model.PaymentPeriod;
 import com.unihub.model.StudentInstallment;
 import com.unihub.model.User;
 import com.unihub.model.UserClassGroup;
-import com.unihub.model.UserRole;
+import com.unihub.repository.ClassGroupRepository;
 import com.unihub.repository.PaymentPeriodRepository;
 import com.unihub.repository.StudentInstallmentRepository;
 import com.unihub.repository.UserClassGroupRepository;
 import com.unihub.repository.UserRepository;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,22 +32,28 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Payment period management and student installment lifecycle (UNIH-40).
+ * Payment period management and student installment lifecycle (UNIH-40, UNIH-47).
  *
  * <p>Key rules:
  * <ul>
- *   <li>Admin creates 3 periods per academic year; the service creates UNPAID (order 1) and
- *       LOCKED (orders 2 and 3) installments for every existing active STUDENT.</li>
+ *   <li>A payment plan belongs to one class group: admin creates 3 periods per
+ *       (academic year, class group). The service creates UNPAID (order 1) and LOCKED
+ *       (orders 2 and 3) installments for every STUDENT member of that group only.</li>
+ *   <li>A student with no class group gets no installments.</li>
+ *   <li>Academic years run Sept 1 – Aug 31 ("2026-2027"). Plans can only be created for the
+ *       current or next year; students only see the current year's installments.</li>
  *   <li>Students upload a proof when their current installment is UNPAID or REJECTED.</li>
  *   <li>Admin approves or rejects; approval auto-unlocks the next installment.</li>
  *   <li>{@link #generateInstallmentsForNewStudent} is called by the user creation flow for
- *       newly provisioned students.</li>
+ *       newly provisioned students, after their group membership is committed; it applies
+ *       the plans of the student's class group.</li>
  * </ul>
  */
 @Service
@@ -54,27 +63,65 @@ public class PaymentService {
     private final StudentInstallmentRepository installmentRepository;
     private final UserRepository userRepository;
     private final UserClassGroupRepository userClassGroupRepository;
+    private final ClassGroupRepository classGroupRepository;
     private final StorageService storageService;
 
     public PaymentService(PaymentPeriodRepository periodRepository,
                           StudentInstallmentRepository installmentRepository,
                           UserRepository userRepository,
                           UserClassGroupRepository userClassGroupRepository,
+                          ClassGroupRepository classGroupRepository,
                           StorageService storageService) {
         this.periodRepository = periodRepository;
         this.installmentRepository = installmentRepository;
         this.userRepository = userRepository;
         this.userClassGroupRepository = userClassGroupRepository;
+        this.classGroupRepository = classGroupRepository;
         this.storageService = storageService;
+    }
+
+    // ponytail: department timezone hardcoded (server containers run in UTC); make it config if
+    // the app ever serves another region.
+    private static final ZoneId DEPARTMENT_ZONE = ZoneId.of("Africa/Casablanca");
+
+    private static LocalDate today() {
+        return LocalDate.now(DEPARTMENT_ZONE);
+    }
+
+    /** Academic years run September 1 to August 31. */
+    private static final int ACADEMIC_YEAR_START_MONTH = 9;
+
+    /** The academic year containing {@code date}, e.g. 2026-09-22 and 2027-08-31 → "2026-2027". */
+    static String academicYearOf(LocalDate date) {
+        int start = date.getMonthValue() >= ACADEMIC_YEAR_START_MONTH ? date.getYear() : date.getYear() - 1;
+        return start + "-" + (start + 1);
+    }
+
+    /** Plans can be created for the current academic year and the next one only. */
+    private static List<String> plannableYears() {
+        LocalDate today = today();
+        return List.of(academicYearOf(today), academicYearOf(today.plusYears(1)));
     }
 
     // =========================================================================
     // Admin: period plan creation
     // =========================================================================
 
+    /**
+     * Creates the 3-period plan of one class group for an academic year, then generates
+     * installments for that group's STUDENT members only.
+     *
+     * @throws ResourceNotFoundException if the class group does not exist (404)
+     * @throws ConflictException if the group already has a plan for that year (409)
+     */
     @Transactional
     public List<PaymentPeriodDto> createYearPlan(String academicYear,
+                                                   Long classGroupId,
                                                    List<CreatePeriodRequest.PeriodEntry> entries) {
+        List<String> allowedYears = plannableYears();
+        if (!allowedYears.contains(academicYear)) {
+            throw new BadRequestException("Academic year must be one of " + allowedYears + ".");
+        }
         if (entries == null || entries.size() != 3) {
             throw new BadRequestException("A payment plan must contain exactly 3 period entries.");
         }
@@ -86,36 +133,48 @@ public class PaymentService {
             throw new BadRequestException("Period orders must be exactly 1, 2, and 3.");
         }
 
-        // Check for conflicts
+        ClassGroup group = classGroupRepository.findById(classGroupId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Class group " + classGroupId + " not found"));
+
+        // Check for conflicts: one plan per (year, group)
         for (CreatePeriodRequest.PeriodEntry entry : entries) {
-            if (periodRepository.existsByAcademicYearAndPeriodOrder(
-                    academicYear, entry.periodOrder())) {
-                throw new ConflictException("Period order " + entry.periodOrder()
-                        + " already exists for academic year " + academicYear + ".");
+            if (periodRepository.existsByAcademicYearAndClassGroup_IdAndPeriodOrder(
+                    academicYear, classGroupId, entry.periodOrder())) {
+                throw new ConflictException("A plan for " + group.getName() + " in "
+                        + academicYear + " already exists.");
             }
         }
 
         // Save periods
         List<PaymentPeriod> savedPeriods = new ArrayList<>();
-        for (CreatePeriodRequest.PeriodEntry entry : entries) {
-            PaymentPeriod period = new PaymentPeriod();
-            period.setAcademicYear(academicYear);
-            period.setLabel(entry.label());
-            period.setAmount(entry.amount());
-            period.setDueDate(entry.dueDate());
-            period.setPeriodOrder(entry.periodOrder());
-            savedPeriods.add(periodRepository.save(period));
+        try {
+            for (CreatePeriodRequest.PeriodEntry entry : entries) {
+                PaymentPeriod period = new PaymentPeriod();
+                period.setAcademicYear(academicYear);
+                period.setClassGroup(group);
+                period.setLabel(entry.label());
+                period.setAmount(entry.amount());
+                period.setDueDate(entry.dueDate());
+                period.setPeriodOrder(entry.periodOrder());
+                savedPeriods.add(periodRepository.save(period));
+            }
+        } catch (DataIntegrityViolationException ex) {
+            // Lost a race on the (year, group, order) unique key after the pre-check — same 409.
+            throw new ConflictException("A plan for " + group.getName() + " in "
+                    + academicYear + " already exists.");
         }
 
         // Sort by period order
-        savedPeriods.sort((a, b) -> Integer.compare(a.getPeriodOrder(), b.getPeriodOrder()));
+        savedPeriods.sort(Comparator.comparingInt(PaymentPeriod::getPeriodOrder));
 
-        // Create installments for all existing STUDENT users
-        List<User> allStudents = userRepository.findAll().stream()
-                .filter(u -> u.getRole() == UserRole.STUDENT)
+        // Create installments for the STUDENT members of this group only
+        List<User> groupStudents = userClassGroupRepository.findStudentsByClassGroupId(classGroupId)
+                .stream()
+                .map(UserClassGroup::getUser)
                 .toList();
 
-        for (User student : allStudents) {
+        for (User student : groupStudents) {
             List<StudentInstallment> existing =
                     installmentRepository.findByStudentIdAndPeriodAcademicYear(
                             student.getId(), academicYear);
@@ -132,15 +191,18 @@ public class PaymentService {
     // Admin: read plans
     // =========================================================================
 
+    /**
+     * All periods keyed by academic year (newest first). Within a year, periods are ordered by
+     * class group name, then period order, so each group's plan is contiguous.
+     */
     @Transactional(readOnly = true)
     public Map<String, List<PaymentPeriodDto>> getYearPlans() {
-        List<PaymentPeriod> all = periodRepository.findAll();
+        List<PaymentPeriod> all = periodRepository.findAllWithClassGroup();
         Map<String, List<PaymentPeriodDto>> result = new LinkedHashMap<>();
         all.stream()
-                .sorted((a, b) -> {
-                    int yearCmp = b.getAcademicYear().compareTo(a.getAcademicYear());
-                    return yearCmp != 0 ? yearCmp : Integer.compare(a.getPeriodOrder(), b.getPeriodOrder());
-                })
+                .sorted(Comparator.comparing(PaymentPeriod::getAcademicYear, Comparator.reverseOrder())
+                        .thenComparing(p -> p.getClassGroup().getName())
+                        .thenComparingInt(PaymentPeriod::getPeriodOrder))
                 .forEach(p -> result
                         .computeIfAbsent(p.getAcademicYear(), k -> new ArrayList<>())
                         .add(toPeriodDto(p)));
@@ -153,7 +215,10 @@ public class PaymentService {
 
     @Transactional(readOnly = true)
     public List<InstallmentDto> getMyInstallments(Long studentId) {
-        return installmentRepository.findByStudentIdOrderByPeriodPeriodOrderAsc(studentId)
+        // Students only see the current academic year; past years stay visible to admins.
+        return installmentRepository
+                .findByStudentIdAndPeriodAcademicYearOrderByPeriodPeriodOrderAsc(
+                        studentId, academicYearOf(today()))
                 .stream()
                 .map(this::toInstallmentDto)
                 .toList();
@@ -319,7 +384,7 @@ public class PaymentService {
 
     @Transactional(readOnly = true)
     public List<OverdueStudentDto> getOverdueInstallments(Long classGroupId) {
-        List<StudentInstallment> overdue = installmentRepository.findOverdue();
+        List<StudentInstallment> overdue = installmentRepository.findOverdue(today());
 
         // Group by student
         Map<Long, List<StudentInstallment>> byStudent = overdue.stream()
@@ -361,7 +426,9 @@ public class PaymentService {
     // =========================================================================
 
     /**
-     * Creates installments for a newly provisioned student for all existing payment periods.
+     * Creates installments for a newly provisioned student from their class group's payment
+     * plans (every academic year that group has a plan for). The student's group is their
+     * first membership; a student with no class group gets no installments.
      * For each academic year: period order 1 gets UNPAID, orders 2 and 3 get LOCKED.
      * No-op if the student already has installments for a given year (idempotent).
      */
@@ -369,12 +436,23 @@ public class PaymentService {
     public void generateInstallmentsForNewStudent(Long studentId) {
         User student = requireUser(studentId);
 
-        // Group all periods by academic year
-        Map<String, List<PaymentPeriod>> byYear = periodRepository.findAll().stream()
+        List<UserClassGroup> memberships = userClassGroupRepository.findByUser_Id(studentId);
+        if (memberships.isEmpty()) {
+            return; // no class group -> no plan applies
+        }
+        Long classGroupId = memberships.get(0).getClassGroup().getId();
+
+        // Group this class group's periods by academic year
+        Map<String, List<PaymentPeriod>> byYear = periodRepository.findByClassGroup_Id(classGroupId)
+                .stream()
                 .collect(Collectors.groupingBy(PaymentPeriod::getAcademicYear));
 
+        String currentYear = academicYearOf(today());
         for (Map.Entry<String, List<PaymentPeriod>> entry : byYear.entrySet()) {
             String year = entry.getKey();
+            if (year.compareTo(currentYear) < 0) {
+                continue; // past years never apply to a new student ("YYYY-YYYY" sorts chronologically)
+            }
             List<StudentInstallment> existing =
                     installmentRepository.findByStudentIdAndPeriodAcademicYear(studentId, year);
             if (!existing.isEmpty()) {
@@ -382,7 +460,7 @@ public class PaymentService {
             }
 
             List<PaymentPeriod> periods = entry.getValue().stream()
-                    .sorted((a, b) -> Integer.compare(a.getPeriodOrder(), b.getPeriodOrder()))
+                    .sorted(Comparator.comparingInt(PaymentPeriod::getPeriodOrder))
                     .toList();
             createInstallmentsForStudentAndPeriods(student, periods);
         }
@@ -418,6 +496,8 @@ public class PaymentService {
         return new PaymentPeriodDto(
                 p.getId(),
                 p.getAcademicYear(),
+                p.getClassGroup().getId(),
+                p.getClassGroup().getName(),
                 p.getLabel(),
                 p.getAmount(),
                 p.getDueDate(),
@@ -425,7 +505,7 @@ public class PaymentService {
     }
 
     private InstallmentDto toInstallmentDto(StudentInstallment si) {
-        boolean overdue = si.getPeriod().getDueDate().isBefore(LocalDate.now())
+        boolean overdue = si.getPeriod().getDueDate().isBefore(today())
                 && (si.getStatus() == InstallmentStatus.UNPAID
                         || si.getStatus() == InstallmentStatus.REJECTED);
         return new InstallmentDto(

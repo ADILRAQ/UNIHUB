@@ -92,15 +92,8 @@ export interface ResetPasswordResponse {
   temporaryPassword: string;
 }
 
-/** A class group (`GET /api/class-groups`). */
-export interface ClassGroupDto {
-  id: number;
-  name: string;
-  memberCount: number;
-  teacherId: number | null;
-  teacherName: string | null;
-  createdAt: string;
-}
+/** Moved to the shared API types (used by several features); re-exported for admin code. */
+export type { ClassGroupDto } from '../../../api/types';
 
 /** Request body for create / rename class-group endpoints. */
 export interface ClassGroupNameRequest {

@@ -7,9 +7,6 @@ import type { ClassGroupDto, ClassGroupNameRequest } from '../types';
  * generic `useGetData` / `usePostData` wrappers.
  */
 
-export const listClassGroups = (): Promise<ClassGroupDto[]> =>
-  apiClient.get<ClassGroupDto[]>('/api/class-groups').then((response) => response.data);
-
 export const createClassGroup = (body: ClassGroupNameRequest): Promise<ClassGroupDto> =>
   apiClient.post<ClassGroupDto>('/api/class-groups', body).then((response) => response.data);
 

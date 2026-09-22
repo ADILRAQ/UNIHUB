@@ -5,7 +5,7 @@ import useGetData from '../../../hooks/useGetData';
 import usePostData from '../../../hooks/usePostData';
 import { apiErrorMessage } from '../../../utils/apiError';
 import { listUsers, resetUserPassword, updateUserStatus } from '../services/userService';
-import useClassGroupsData from './useClassGroupsData';
+import useClassGroupsData from '../../../hooks/useClassGroupsData';
 import type {
   ClassGroupDto,
   PagedResponse,

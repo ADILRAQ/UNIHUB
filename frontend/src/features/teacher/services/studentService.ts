@@ -15,7 +15,7 @@ export const listStudents = (): Promise<PagedResponse<UserSummaryDto>> =>
 
 /**
  * Creates a new student account. Teachers may only create STUDENT accounts
- * in their own class groups (enforced server-side).
+ * (any class group; enforced server-side).
  */
 export const createStudent = (body: CreateUserRequest): Promise<CreatedUserDto> =>
   apiClient.post<CreatedUserDto>('/api/users', body).then((r) => r.data);

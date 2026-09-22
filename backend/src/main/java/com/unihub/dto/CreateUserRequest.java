@@ -11,8 +11,8 @@ import jakarta.validation.constraints.NotNull;
  * this DTO never carries a password.
  *
  * <p>{@code classGroupId} is optional at the type level but constrained by authorization:
- * an ADMIN may omit it (a user with no cohort yet), whereas a TEACHER must supply one of
- * their own groups. It is validated (existence / ownership) in the service, not here.
+ * an ADMIN may omit it (a user with no cohort yet), whereas a TEACHER must supply one (any
+ * group). It is validated (existence) in the service, not here.
  */
 public record CreateUserRequest(
         @NotBlank String fullName,

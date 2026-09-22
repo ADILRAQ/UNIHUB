@@ -12,7 +12,7 @@ import {
   renameClassGroup,
   revokeTeacher,
 } from '../services/classGroupService';
-import useClassGroupsData, { CLASS_GROUPS_KEY } from './useClassGroupsData';
+import useClassGroupsData, { CLASS_GROUPS_KEY } from '../../../hooks/useClassGroupsData';
 import type { ClassGroupDto, ClassGroupNameRequest, UserSummaryDto } from '../types';
 
 export interface UseClassGroupsSection {

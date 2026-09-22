@@ -2,9 +2,12 @@ package com.unihub.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -16,9 +19,9 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 /**
- * One tuition installment slot for a given academic year (order 1, 2, or 3).
- * Admin creates three {@code PaymentPeriod} rows per year; the system then generates
- * one {@link StudentInstallment} row per active student for each period.
+ * One tuition installment slot for a given academic year and class group (order 1, 2, or 3).
+ * Admin creates three {@code PaymentPeriod} rows per (year, class group); the system then
+ * generates one {@link StudentInstallment} row per STUDENT member of that group for each period.
  */
 @Entity
 @Table(name = "payment_periods")
@@ -34,6 +37,10 @@ public class PaymentPeriod {
 
     @Column(name = "academic_year", nullable = false, length = 20)
     private String academicYear;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "class_group_id", nullable = false)
+    private ClassGroup classGroup;
 
     @Column(nullable = false)
     private String label;

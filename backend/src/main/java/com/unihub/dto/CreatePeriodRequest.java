@@ -11,10 +11,12 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Request body for creating a full academic-year payment plan (exactly 3 periods).
+ * Request body for creating a full academic-year payment plan for one class group
+ * (exactly 3 periods).
  */
 public record CreatePeriodRequest(
         @NotBlank String academicYear,
+        @NotNull Long classGroupId,
         @NotNull @Valid List<PeriodEntry> periods
 ) {
 

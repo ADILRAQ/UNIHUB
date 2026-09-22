@@ -6,15 +6,16 @@ import { useState, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import useGetData from '../../../hooks/useGetData';
 import usePostData from '../../../hooks/usePostData';
-import { listClassGroups } from '../../admin/services/classGroupService';
+import useClassGroupsData from '../../../hooks/useClassGroupsData';
+import { apiErrorMessage } from '../../../utils/apiError';
 import * as paymentService from '../services/paymentService';
 import type {
   PendingProofItemDto,
   OverdueStudentDto,
   PaymentPeriodDto,
-  CreatePeriodEntry,
+  CreateYearPlanPayload,
 } from '../types';
-import type { ClassGroupDto } from '../../admin/types';
+import type { ClassGroupDto } from '../../../api/types';
 
 export type AdminPaymentsTab = 'queue' | 'overdue' | 'plan';
 
@@ -48,7 +49,8 @@ interface UseAdminPaymentsReturn {
   /* Year plans */
   yearPlans: Record<string, PaymentPeriodDto[]>;
   isLoadingPlans: boolean;
-  createYearPlan: (data: { academicYear: string; periods: CreatePeriodEntry[] }) => void;
+  /** Creates a class group's plan; `onCreated` runs only on success (e.g. to reset the form). */
+  createYearPlan: (data: CreateYearPlanPayload, onCreated?: () => void) => void;
   isCreatingPlan: boolean;
   planError: string | null;
 }
@@ -83,11 +85,7 @@ const useAdminPayments = (): UseAdminPaymentsReturn => {
     enabled: activeTab === 'overdue',
   });
 
-  const { data: classGroups } = useGetData<ClassGroupDto[], string, ClassGroupDto[]>({
-    queryKey: ['classGroups', 'list'],
-    queryFn: listClassGroups,
-    transformFn: (d) => d,
-  });
+  const { classGroups } = useClassGroupsData();
 
   const { data: yearPlansData, isLoading: isLoadingPlans } = useGetData<
     Record<string, PaymentPeriodDto[]>,
@@ -136,7 +134,7 @@ const useAdminPayments = (): UseAdminPaymentsReturn => {
 
   const { mutate: createPlanMutate, isPending: isCreatingPlan } = usePostData<
     string,
-    { academicYear: string; periods: CreatePeriodEntry[] },
+    CreateYearPlanPayload,
     void
   >({
     keys: ['payments', 'create-plan'],
@@ -146,12 +144,14 @@ const useAdminPayments = (): UseAdminPaymentsReturn => {
       void queryClient.invalidateQueries({ queryKey: [...PLANS_KEY] });
     },
     onErrorFn: (err) => {
-      const msg: string =
-        (err?.response?.data?.message as string | undefined) ??
-        'Failed to create year plan.';
-      setPlanError(msg);
+      setPlanError(apiErrorMessage(err, 'Failed to create plan.'));
     },
   });
+
+  const createYearPlan = (data: CreateYearPlanPayload, onCreated?: () => void) => {
+    setPlanError(null);
+    createPlanMutate(data, { onSuccess: () => onCreated?.() });
+  };
 
   const approveItem = (installmentId: number) => {
     pendingApproveRef.current = installmentId;
@@ -194,12 +194,12 @@ const useAdminPayments = (): UseAdminPaymentsReturn => {
     downloadProof: paymentService.downloadProof,
     overdueList: overdueList ?? [],
     isLoadingOverdue,
-    classGroups: classGroups ?? [],
+    classGroups,
     selectedGroupId,
     setSelectedGroupId,
     yearPlans: yearPlansData ?? {},
     isLoadingPlans,
-    createYearPlan: createPlanMutate,
+    createYearPlan,
     isCreatingPlan,
     planError,
   };

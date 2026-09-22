@@ -84,7 +84,7 @@ public class PaymentController {
     // =========================================================================
 
     /**
-     * Returns all payment periods grouped by academic year.
+     * Returns all payment periods grouped by academic year; each period carries its class group.
      */
     @GetMapping("/periods")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
@@ -93,8 +93,9 @@ public class PaymentController {
     }
 
     /**
-     * Creates a payment plan for an academic year (exactly 3 periods).
-     * Also generates installments for all existing active students.
+     * Creates a class group's payment plan for an academic year (exactly 3 periods).
+     * Also generates installments for that group's existing students.
+     * 404 if the class group does not exist; 409 if that group already has a plan for the year.
      */
     @PostMapping("/periods")
     @ResponseStatus(HttpStatus.CREATED)
@@ -102,7 +103,8 @@ public class PaymentController {
     public List<PaymentPeriodDto> createYearPlan(
             @Valid @RequestBody CreatePeriodRequest request,
             @AuthenticationPrincipal AuthenticatedUser caller) {
-        return paymentService.createYearPlan(request.academicYear(), request.periods());
+        return paymentService.createYearPlan(
+                request.academicYear(), request.classGroupId(), request.periods());
     }
 
     /**
