@@ -17,21 +17,21 @@ const SubmissionsTable = ({ rows, onDownload }: SubmissionsTableProps) => {
   }
 
   return (
-    <div className="res-submissions-table">
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
+    <div className="table-card">
+      <table className="data-table">
         <thead>
           <tr>
-            <th style={{ textAlign: 'left', padding: '0.35rem 0.5rem' }}>Student</th>
-            <th style={{ textAlign: 'left', padding: '0.35rem 0.5rem' }}>Status</th>
-            <th style={{ textAlign: 'left', padding: '0.35rem 0.5rem' }}>Submitted at</th>
+            <th>Student</th>
+            <th>Status</th>
+            <th>Submitted at</th>
             <th />
           </tr>
         </thead>
         <tbody>
           {rows.map((row) => (
             <tr key={row.studentId}>
-              <td style={{ padding: '0.35rem 0.5rem' }}>{row.studentName}</td>
-              <td style={{ padding: '0.35rem 0.5rem' }}>
+              <td>{row.studentName}</td>
+              <td>
                 <span
                   className={`res-badge${
                     row.status === 'SUBMITTED'
@@ -44,16 +44,16 @@ const SubmissionsTable = ({ rows, onDownload }: SubmissionsTableProps) => {
                   {statusLabel[row.status]}
                 </span>
               </td>
-              <td style={{ padding: '0.35rem 0.5rem' }}>
+              <td>
                 {row.submission
                   ? new Date(row.submission.submittedAt).toLocaleString()
                   : '—'}
               </td>
-              <td style={{ padding: '0.35rem 0.5rem' }}>
+              <td>
                 {row.submission && (
                   <button
                     type="button"
-                    className="res-btn res-btn--sm res-btn--ghost"
+                    className="btn btn--sm btn--ghost"
                     onClick={() =>
                       onDownload(row.submission!.id, row.submission!.originalName)
                     }

@@ -28,7 +28,7 @@ const EventManager = ({ isAdmin, manageableCourses }: EventManagerProps) => {
       <div className="sched-panel__head">
         <h3 className="sched-panel__title">Exams, deadlines & events</h3>
         {!e.formOpen && (
-          <button type="button" className="sched-btn sched-btn--primary" onClick={e.onOpenCreate}>
+          <button type="button" className="btn btn--soft btn--sm" onClick={e.onOpenCreate}>
             Add event
           </button>
         )}
@@ -118,10 +118,10 @@ const EventManager = ({ isAdmin, manageableCourses }: EventManagerProps) => {
           </label>
           {e.error && <p className="sched-error">{e.error}</p>}
           <div className="sched-form__actions">
-            <button type="submit" className="sched-btn sched-btn--primary" disabled={e.isSaving}>
+            <button type="submit" className="btn btn--primary" disabled={e.isSaving}>
               {e.isSaving ? 'Saving…' : e.isEditing ? 'Save changes' : 'Add event'}
             </button>
-            <button type="button" className="sched-btn" onClick={e.onCloseForm} disabled={e.isSaving}>
+            <button type="button" className="btn" onClick={e.onCloseForm} disabled={e.isSaving}>
               Cancel
             </button>
           </div>
@@ -150,12 +150,12 @@ const EventManager = ({ isAdmin, manageableCourses }: EventManagerProps) => {
                 </span>
               </div>
               <div className="sched-tpl__actions">
-                <button type="button" className="sched-btn sched-btn--sm" onClick={() => e.onOpenEdit(ev)}>
+                <button type="button" className="btn btn--sm" onClick={() => e.onOpenEdit(ev)}>
                   Edit
                 </button>
                 <button
                   type="button"
-                  className="sched-btn sched-btn--sm sched-btn--danger"
+                  className="btn btn--sm btn--danger"
                   onClick={() => e.onDelete(ev)}
                 >
                   Delete

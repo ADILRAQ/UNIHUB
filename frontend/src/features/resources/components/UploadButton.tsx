@@ -38,7 +38,7 @@ const UploadButton = ({
       />
       <button
         type="button"
-        className="res-btn res-btn--sm res-btn--primary"
+        className="btn btn--sm btn--primary"
         disabled={isUploading}
         onClick={() => inputRef.current?.click()}
       >

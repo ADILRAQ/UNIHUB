@@ -8,7 +8,7 @@ import useGetData from '../../../hooks/useGetData';
 import usePostData from '../../../hooks/usePostData';
 import { useToast } from '../../../components/ui/Toast';
 import * as paymentService from '../services/paymentService';
-import { academicYearOf } from '../academicYear';
+import { academicYearOf } from '../../../utils/academicYear';
 import type { InstallmentDto } from '../types';
 
 const INSTALLMENTS_KEY = ['payments', 'me'] as const;

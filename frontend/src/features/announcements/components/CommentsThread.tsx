@@ -13,12 +13,11 @@ interface Props {
 const getInitials = (name: string) =>
   name.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
-const AVATAR_COLORS = ['#EEEDFF:#4A41C9', '#FFE8E8:#B02F2F', '#E8F5FF:#1D4ED8', '#E8FFF0:#065F46'];
-const avatarStyle = (name: string) => {
-  const idx = name.charCodeAt(0) % AVATAR_COLORS.length;
-  const [bg, color] = AVATAR_COLORS[idx].split(':');
-  return { bg, color };
-};
+const avatarStyle = {
+  width: 34, height: 34, flexShrink: 0, borderRadius: 'var(--radius-full)',
+  background: 'var(--orange-100)', color: 'var(--orange-700)',
+  display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 600,
+} as const;
 
 const formatTime = (iso: string): string => {
   const diff = Date.now() - new Date(iso).getTime();
@@ -46,6 +45,7 @@ const CommentsThread = ({ announcementId, currentUserId, currentUserRole }: Prop
     isLoading,
     isError,
     canDelete,
+    leavingIds,
   } = useComments({ announcementId, currentUserId, currentUserRole });
 
   const myInitials = user ? getInitials(user.fullName) : '?';
@@ -56,59 +56,50 @@ const CommentsThread = ({ announcementId, currentUserId, currentUserRole }: Prop
         <>
           {[0, 1].map(i => (
             <div key={i} style={{ display: 'flex', gap: 12 }}>
-              <div className="skeleton" style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0 }} />
-              <div className="skeleton" style={{ flexGrow: 1, height: 70, borderRadius: 12 }} />
+              <div className="skeleton" style={{ width: 34, height: 34, borderRadius: 'var(--radius-full)', flexShrink: 0 }} />
+              <div className="skeleton" style={{ flexGrow: 1, height: 70, borderRadius: 'var(--radius-md)' }} />
             </div>
           ))}
         </>
       )}
 
       {isError && (
-        <p style={{ margin: 0, fontSize: 13.5, color: '#B91C1C' }}>Failed to load comments.</p>
+        <p className="alert" role="alert">Failed to load comments.</p>
       )}
 
       {!isLoading && !isError && comments.length === 0 && (
-        <p style={{ margin: 0, fontSize: 14, color: '#6B6B7B' }}>No comments yet. Be the first!</p>
+        <p className="fade-in" style={{ margin: 0, fontSize: 14, color: 'var(--ink-500)' }}>No comments yet. Be the first!</p>
       )}
 
       {comments.map((comment) => {
-        const av = avatarStyle(comment.authorName);
         return (
-          <div key={comment.id} style={{ display: 'flex', gap: 12 }}>
-            <div
-              style={{
-                width: 34, height: 34, flexShrink: 0, borderRadius: '50%',
-                background: av.bg, color: av.color,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 12, fontWeight: 700,
-              }}
-            >
-              {getInitials(comment.authorName)}
-            </div>
+          // New comments slide in on mount; deleted ones fade out until the refetch drops them.
+          <div key={comment.id} className={leavingIds.has(comment.id) ? 'leave-up' : 'enter-up'} style={{ display: 'flex', gap: 12 }}>
+            <div style={avatarStyle}>{getInitials(comment.authorName)}</div>
             <div
               style={{
                 flexGrow: 1, minWidth: 0,
-                background: '#FFFFFF', border: '1px solid #EDEBF8',
-                borderRadius: 12, padding: '14px 16px',
+                background: 'var(--cream-100)',
+                borderRadius: 'var(--radius-lg)', padding: '12px 16px',
                 display: 'flex', flexDirection: 'column', gap: 6,
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 13.5, fontWeight: 600, color: '#1F1B33' }}>{comment.authorName}</span>
-                  <span style={{ fontSize: 12, color: '#8D8B9C' }}>{formatTime(comment.createdAt)}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-900)' }}>{comment.authorName}</span>
+                  <span style={{ fontSize: 12, color: 'var(--ink-500)' }}>{formatTime(comment.createdAt)}</span>
                 </div>
                 {canDelete(comment) && (
                   <button
                     type="button"
+                    className="btn btn--ghost btn--sm"
                     onClick={() => onDelete(comment.id)}
-                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 12, color: '#8D8B9C' }}
                   >
                     Delete
                   </button>
                 )}
               </div>
-              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: '#45435A' }}>{comment.content}</p>
+              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: 'var(--ink-700)' }}>{comment.content}</p>
             </div>
           </div>
         );
@@ -116,17 +107,15 @@ const CommentsThread = ({ announcementId, currentUserId, currentUserRole }: Prop
 
       {totalPages > 1 && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button type="button" onClick={onPrevPage} disabled={page === 0} style={{ fontSize: 13, color: '#4A41C9', background: 'none', border: 'none', cursor: 'pointer', opacity: page === 0 ? 0.4 : 1 }}>← Prev</button>
-          <span style={{ fontSize: 12.5, color: '#6B6B7B' }}>Page {page + 1} / {totalPages}</span>
-          <button type="button" onClick={onNextPage} disabled={page >= totalPages - 1} style={{ fontSize: 13, color: '#4A41C9', background: 'none', border: 'none', cursor: 'pointer', opacity: page >= totalPages - 1 ? 0.4 : 1 }}>Next →</button>
+          <button type="button" className="btn btn--sm" onClick={onPrevPage} disabled={page === 0}>Previous</button>
+          <span style={{ fontSize: 12, color: 'var(--ink-500)' }}>Page {page + 1} / {totalPages}</span>
+          <button type="button" className="btn btn--sm" onClick={onNextPage} disabled={page >= totalPages - 1}>Next</button>
         </div>
       )}
 
       {/* New comment form */}
       <div style={{ display: 'flex', gap: 12, paddingTop: 6 }}>
-        <div style={{ width: 34, height: 34, flexShrink: 0, borderRadius: '50%', background: '#EEEDFF', color: '#4A41C9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700 }}>
-          {myInitials}
-        </div>
+        <div style={avatarStyle}>{myInitials}</div>
         <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
           <textarea
             rows={3}
@@ -134,13 +123,15 @@ const CommentsThread = ({ announcementId, currentUserId, currentUserRole }: Prop
             value={newComment}
             onChange={e => onCommentChange(e.target.value)}
             maxLength={2000}
-            style={{ width: '100%', boxSizing: 'border-box', resize: 'vertical', border: '1px solid #E1DEF2', borderRadius: 10, padding: '12px 14px', fontSize: 14, color: '#1F1B33', background: '#FFFFFF', outline: 'none', fontFamily: 'inherit' }}
+            aria-label="Add a comment"
+            className="textarea"
           />
           <button
             type="button"
             onClick={onSubmit}
             disabled={isSubmitting || !newComment.trim()}
-            style={{ alignSelf: 'flex-end', height: 40, padding: '0 18px', border: 0, borderRadius: 9, background: isSubmitting || !newComment.trim() ? '#8A84E8' : '#5A4FE0', color: '#FFFFFF', fontSize: 13.5, fontWeight: 600, cursor: isSubmitting || !newComment.trim() ? 'not-allowed' : 'pointer' }}
+            className="btn btn--primary"
+            style={{ alignSelf: 'flex-end' }}
           >
             {isSubmitting ? 'Posting…' : 'Post comment'}
           </button>

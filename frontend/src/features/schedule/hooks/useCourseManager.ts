@@ -128,7 +128,8 @@ const useCourseManager = (): UseCourseManager => {
   });
 
   const selectedCourse = useMemo(
-    () => courses?.find((c) => c.id === selectedCourseId) ?? null,
+    // Nothing picked yet (or the picked course was deleted): default to the first course.
+    () => courses?.find((c) => c.id === selectedCourseId) ?? courses?.[0] ?? null,
     [courses, selectedCourseId],
   );
 
@@ -164,7 +165,7 @@ const useCourseManager = (): UseCourseManager => {
     isLoading,
     isError,
     canManage,
-    selectedCourseId,
+    selectedCourseId: selectedCourse?.id ?? null,
     selectedCourse,
     onSelectCourse: setSelectedCourseId,
     formOpen,

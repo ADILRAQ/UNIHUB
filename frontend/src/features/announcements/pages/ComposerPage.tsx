@@ -13,14 +13,14 @@ const EditComposer = ({ id }: { id: number }) => {
   const { announcement, isLoading, isError } = useAnnouncementDetail(id);
 
   if (isLoading) {
-    return <p className="ann-feed__state">Loading&hellip;</p>;
+    return <div className="page-body"><div className="skeleton" style={{ height: 320 }} /></div>;
   }
 
   if (isError || !announcement) {
     return (
-      <p className="ann-feed__state ann-feed__state--error">
-        Announcement not found or you do not have permission to edit it.
-      </p>
+      <div className="page-body">
+        <p className="alert" role="alert">Announcement not found or you do not have permission to edit it.</p>
+      </div>
     );
   }
 

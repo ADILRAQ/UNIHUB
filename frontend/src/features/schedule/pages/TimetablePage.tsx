@@ -3,119 +3,87 @@ import CourseForm from '../components/CourseForm';
 import TemplateManager from '../components/TemplateManager';
 import EventManager from '../components/EventManager';
 import PageHeader from '../../../components/layout/PageHeader';
+import { courseColorVars } from '../../../utils/courseColor';
 
 const TimetablePage = () => {
   const cm = useCourseManager();
 
   return (
     <>
-      <PageHeader title="Timetable" />
-      <main style={{ flexGrow: 1, display: 'flex', overflowY: 'hidden', gap: 0 }}>
-        {/* Course list panel */}
-        <div style={{ width: 280, flexShrink: 0, borderRight: '1px solid #E8E6F5', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 20px 14px', gap: 8 }}>
-            <span style={{ fontSize: 14.5, fontWeight: 700, color: '#1F1B33' }}>Courses</span>
-            {cm.canManage && (
-              <button
-                type="button"
-                onClick={cm.onOpenCreate}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px', border: 0, borderRadius: 8, background: '#5A4FE0', color: '#FFFFFF', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5.5v13M5.5 12h13"/></svg>
-                New course
-              </button>
-            )}
-          </div>
+      <PageHeader
+        title="Timetable"
+        subtitle="Courses, weekly slots, exams and deadlines"
+        actions={cm.canManage ? <button type="button" className="btn btn--primary" onClick={cm.onOpenCreate}>New course</button> : undefined}
+      />
+      <div style={{ flexGrow: 1, display: 'flex', minHeight: 0 }}>
+        {/* Course list */}
+        <nav aria-label="Courses" style={{ width: 280, flexShrink: 0, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+          <div className="sidebar-section-label" style={{ paddingLeft: 24 }}>Courses</div>
 
-          {cm.isLoading && <p style={{ margin: '0 20px', fontSize: 13.5, color: '#6B6B7B' }}>Loading courses…</p>}
-          {cm.isError && <p style={{ margin: '0 20px', fontSize: 13.5, color: '#B91C1C' }}>Couldn&apos;t load courses.</p>}
+          {cm.isLoading && <div className="skeleton" style={{ height: 160, margin: '0 16px' }} />}
+          {cm.isError && <p className="alert" style={{ margin: '0 16px' }}>Couldn&apos;t load courses.</p>}
           {!cm.isLoading && !cm.isError && cm.courses.length === 0 && (
-            <p style={{ margin: '0 20px', fontSize: 13.5, color: '#6B6B7B' }}>No courses yet.</p>
+            <p style={{ margin: '0 24px', fontSize: 13, color: 'var(--ink-500)' }}>No courses yet.</p>
           )}
 
-          <ul style={{ listStyle: 'none', margin: 0, padding: '0 12px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <ul style={{ listStyle: 'none', margin: 0, padding: '0 16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
             {cm.courses.map((course) => {
               const isActive = cm.selectedCourseId === course.id;
-              const initial = course.name.charAt(0).toUpperCase();
               return (
                 <li key={course.id}>
-                  <div
-                    style={{
-                      borderRadius: 12,
-                      border: isActive ? '1.5px solid #6C63FF' : '1px solid #E8E6F5',
-                      background: isActive ? '#F4F3FF' : '#FFFFFF',
-                      boxShadow: isActive ? '0 2px 12px rgba(108,99,255,0.12)' : '0 1px 3px rgba(108,99,255,0.06)',
-                      overflow: 'hidden',
-                      transition: 'box-shadow 0.15s, border-color 0.15s',
-                    }}
+                  <button
+                    type="button"
+                    aria-current={isActive ? 'true' : undefined}
+                    onClick={() => cm.onSelectCourse(course.id)}
+                    className={`tt-course${isActive ? ' tt-course--active' : ''}`}
+                    style={courseColorVars(course.id)}
                   >
-                    {/* Clickable area */}
-                    <button
-                      type="button"
-                      onClick={() => cm.onSelectCourse(course.id)}
-                      style={{
-                        width: '100%', textAlign: 'left', cursor: 'pointer',
-                        border: 0, background: 'transparent',
-                        padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10,
-                      }}
-                    >
-                      {/* Avatar */}
-                      <span style={{
-                        flexShrink: 0, width: 34, height: 34, borderRadius: 9,
-                        background: isActive ? '#6C63FF' : '#EEEDFF',
-                        color: isActive ? '#FFFFFF' : '#4A41C9',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 14, fontWeight: 700,
-                      }}>{initial}</span>
-                      <span style={{ flex: 1, minWidth: 0 }}>
-                        <span style={{ display: 'block', fontSize: 13.5, fontWeight: 600, color: isActive ? '#3730A3' : '#1F1B33', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {course.name}
-                        </span>
-                        <span style={{ display: 'block', fontSize: 11.5, color: isActive ? '#6C63FF' : '#8D8B9C', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {course.classGroupName} · {course.teacherName}
-                        </span>
-                      </span>
-                      {/* Chevron */}
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isActive ? '#6C63FF' : '#C4C2D4'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                        <path d="m9 6 6 6-6 6"/>
-                      </svg>
-                    </button>
-
-                    {/* Edit / Delete row */}
-                    {cm.canManage && (
-                      <div style={{ display: 'flex', gap: 6, padding: '0 12px 10px', borderTop: '1px solid', borderTopColor: isActive ? '#DDD9FF' : '#F0EEF8' }}>
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); cm.onOpenEdit(course); }}
-                          style={{ flex: 1, height: 28, border: '1px solid #E1DEF2', borderRadius: 7, background: '#FFFFFF', color: '#45435A', fontSize: 11.5, fontWeight: 600, cursor: 'pointer', marginTop: 8 }}
-                        >Edit</button>
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); cm.onDelete(course); }}
-                          style={{ flex: 1, height: 28, border: 0, borderRadius: 7, background: '#FFE8E8', color: '#B02F2F', fontSize: 11.5, fontWeight: 600, cursor: 'pointer', marginTop: 8 }}
-                        >Delete</button>
-                      </div>
-                    )}
-                  </div>
+                    <span className="tt-course__avatar">{course.name.charAt(0).toUpperCase()}</span>
+                    <span className="tt-course__text">
+                      <span className="tt-course__name">{course.name}</span>
+                      <span className="tt-course__meta">{course.classGroupName} · {course.teacherName}</span>
+                    </span>
+                    <svg className="tt-course__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="m9 6 6 6-6 6" />
+                    </svg>
+                  </button>
                 </li>
               );
             })}
           </ul>
-        </div>
+        </nav>
 
-        {/* Detail panel */}
-        <div style={{ flexGrow: 1, overflowY: 'auto', padding: '28px 32px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+        {/* Detail */}
+        <div className="page-body" style={{ flexGrow: 1, overflowY: 'auto' }}>
           {cm.selectedCourse ? (
             <>
-              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#1F1B33', letterSpacing: '-0.01em' }}>{cm.selectedCourse.name}</h2>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                <div>
+                  <h2 className="section-title">{cm.selectedCourse.name}</h2>
+                  <p style={{ margin: 0, fontSize: 13, color: 'var(--ink-500)' }}>
+                    {cm.selectedCourse.classGroupName} · {cm.selectedCourse.teacherName}
+                  </p>
+                </div>
+                {cm.canManage && (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button type="button" className="btn btn--sm" onClick={() => cm.selectedCourse && cm.onOpenEdit(cm.selectedCourse)}>Edit course</button>
+                    <button type="button" className="btn btn--sm btn--danger" onClick={() => cm.selectedCourse && cm.onDelete(cm.selectedCourse)}>Delete</button>
+                  </div>
+                )}
+              </div>
               <TemplateManager courseId={cm.selectedCourse.id} />
             </>
           ) : (
-            <p style={{ margin: 0, fontSize: 14, color: '#6B6B7B' }}>Select a course to manage its timetable.</p>
+            <div className="empty-state">
+              <h2 className="empty-state__title">No courses yet</h2>
+              <p className="empty-state__body">
+                {cm.canManage ? 'Create a course with New course, then add its weekly slots here.' : 'Courses you teach will appear here.'}
+              </p>
+            </div>
           )}
           <EventManager isAdmin={cm.canManage} manageableCourses={cm.courses} />
         </div>
-      </main>
+      </div>
 
       {cm.formOpen && (
         <CourseForm

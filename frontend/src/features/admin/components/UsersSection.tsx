@@ -31,7 +31,6 @@ const UsersSection = () => {
 
   return (
     <section className="admin-section">
-      <h2 className="admin-section__title">Users</h2>
 
       {resetResult && (
         <div className="admin-stack">
@@ -40,7 +39,7 @@ const UsersSection = () => {
             email={resetResult.email}
             password={resetResult.temporaryPassword}
           />
-          <button type="button" className="admin-button" onClick={onDismissReset}>
+          <button type="button" className="btn" onClick={onDismissReset}>
             Dismiss
           </button>
         </div>
@@ -51,9 +50,7 @@ const UsersSection = () => {
           <span>Role</span>
           <select
             value={filters.role}
-            onChange={(event) =>
-              onRoleFilterChange(event.target.value as typeof filters.role)
-            }
+            onChange={(event) => onRoleFilterChange(event.target.value as typeof filters.role)}
           >
             <option value="">All</option>
             <option value="STUDENT">Student</option>
@@ -66,9 +63,7 @@ const UsersSection = () => {
           <span>Status</span>
           <select
             value={filters.status}
-            onChange={(event) =>
-              onStatusFilterChange(event.target.value as typeof filters.status)
-            }
+            onChange={(event) => onStatusFilterChange(event.target.value as typeof filters.status)}
           >
             <option value="">All</option>
             <option value="ACTIVE">Active</option>
@@ -103,12 +98,12 @@ const UsersSection = () => {
               onChange={(event) => onSearchInputChange(event.target.value)}
             />
           </label>
-          <button type="submit" className="admin-button">
+          <button type="submit" className="btn">
             Search
           </button>
         </form>
 
-        <button type="button" className="admin-button admin-button--ghost" onClick={onClearFilters}>
+        <button type="button" className="btn" onClick={onClearFilters}>
           Clear
         </button>
       </div>
@@ -138,7 +133,7 @@ const UsersSection = () => {
                   <th>Email</th>
                   <th>Role</th>
                   <th>Status</th>
-                  <th aria-label="Actions" />
+                  <th><span className="sr-only">Actions</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -147,33 +142,35 @@ const UsersSection = () => {
                   return (
                     <tr key={user.id}>
                       <td>{user.id}</td>
-                      <td>{user.fullName}</td>
+                      <td className="admin-table__name" title={user.fullName}>
+                        {user.fullName}
+                      </td>
                       <td>{user.email}</td>
-                      <td>{user.role}</td>
+                      <td>{user.role.charAt(0) + user.role.slice(1).toLowerCase()}</td>
                       <td>
-                        <span
-                          className={`admin-badge admin-badge--${user.status.toLowerCase()}`}
-                        >
+                        <span className={`admin-badge admin-badge--${user.status.toLowerCase()}`}>
                           {user.status}
                         </span>
                       </td>
-                      <td className="admin-table__actions">
-                        <button
-                          type="button"
-                          className="admin-button admin-button--sm"
-                          onClick={() => onToggleStatus(user)}
-                          disabled={busy}
-                        >
-                          {user.status === 'ACTIVE' ? 'Deactivate' : 'Reactivate'}
-                        </button>
-                        <button
-                          type="button"
-                          className="admin-button admin-button--sm"
-                          onClick={() => onResetPassword(user)}
-                          disabled={busy}
-                        >
-                          Reset password
-                        </button>
+                      <td>
+                        <div className="admin-table__actions">
+                          <button
+                            type="button"
+                            className={`btn btn--sm${user.status === 'ACTIVE' ? ' btn--danger' : ''}`}
+                            onClick={() => onToggleStatus(user)}
+                            disabled={busy}
+                          >
+                            {user.status === 'ACTIVE' ? 'Deactivate' : 'Reactivate'}
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn--sm"
+                            onClick={() => onResetPassword(user)}
+                            disabled={busy}
+                          >
+                            Reset password
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -185,7 +182,7 @@ const UsersSection = () => {
           <div className="admin-pagination">
             <button
               type="button"
-              className="admin-button admin-button--sm"
+              className="btn btn--sm"
               onClick={onPrevPage}
               disabled={page <= 0}
             >
@@ -197,7 +194,7 @@ const UsersSection = () => {
             </span>
             <button
               type="button"
-              className="admin-button admin-button--sm"
+              className="btn btn--sm"
               onClick={onNextPage}
               disabled={page + 1 >= totalPages}
             >

@@ -42,7 +42,7 @@ export const getCourseResourcesForRecap = async (
   const resourceArrays = await Promise.all(
     modules.map((m) =>
       apiClient
-        .get<Array<{ id: number; name: string; contentType: string }>>(
+        .get<Array<{ id: number; name: string; contentType: string | null }>>(
           `/api/modules/${m.id}/resources`,
         )
         .then((r) => r.data),

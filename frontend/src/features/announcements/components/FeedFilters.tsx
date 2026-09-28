@@ -10,17 +10,17 @@ interface Props {
 }
 
 const FeedFilters = ({ filters, onFilterChange }: Props) => (
-  <div className="ann-filters">
+  <div className="tabs">
     <button
       type="button"
-      className={`ann-filter-btn${filters.urgent ? ' ann-filter-btn--active' : ''}`}
+      className={`tab${filters.urgent ? ' tab--active' : ''}`}
       onClick={() => onFilterChange({ urgent: !filters.urgent || undefined })}
     >
       Urgent only
     </button>
     <button
       type="button"
-      className={`ann-filter-btn${filters.unread ? ' ann-filter-btn--active' : ''}`}
+      className={`tab${filters.unread ? ' tab--active' : ''}`}
       onClick={() => onFilterChange({ unread: !filters.unread || undefined })}
     >
       Unread only

@@ -34,7 +34,7 @@ const ResourceItem = ({
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            style={{ marginRight: 5, verticalAlign: 'middle', color: '#4A41C9' }}
+            style={{ marginRight: 5, verticalAlign: 'middle', color: 'var(--orange-700)' }}
           >
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
@@ -52,7 +52,7 @@ const ResourceItem = ({
             href={resource.url ?? '#'}
             target="_blank"
             rel="noopener noreferrer"
-            className="res-btn res-btn--sm res-btn--ghost"
+            className="btn btn--sm btn--ghost"
             style={{ textDecoration: 'none' }}
           >
             Open link
@@ -60,7 +60,7 @@ const ResourceItem = ({
         ) : (
           <button
             type="button"
-            className="res-btn res-btn--sm res-btn--ghost"
+            className="btn btn--sm btn--ghost"
             onClick={() => onDownload(resource.id, resource.name)}
           >
             Download
@@ -69,7 +69,7 @@ const ResourceItem = ({
         {canDelete && (
           <button
             type="button"
-            className="res-btn res-btn--sm res-btn--danger"
+            className="btn btn--sm btn--danger"
             onClick={() => onDelete(resource.id)}
           >
             Delete

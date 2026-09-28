@@ -88,10 +88,10 @@ const CourseForm = ({
         </div>
 
         <footer className="sched-dialog__footer">
-          <button type="button" className="sched-btn" onClick={onCloseForm} disabled={isSaving}>
+          <button type="button" className="btn" onClick={onCloseForm} disabled={isSaving}>
             Cancel
           </button>
-          <button type="submit" className="sched-btn sched-btn--primary" disabled={isSaving}>
+          <button type="submit" className="btn btn--primary" disabled={isSaving}>
             {isSaving ? 'Saving…' : isEditing ? 'Save changes' : 'Create course'}
           </button>
         </footer>

@@ -4,43 +4,22 @@ import AddUserSection from '../components/AddUserSection';
 import ImportSection from '../components/ImportSection';
 import ClassGroupsSection from '../components/ClassGroupsSection';
 import PageHeader from '../../../components/layout/PageHeader';
+import Tabs from '../../../components/ui/Tabs';
 
 const AdminPage = () => {
   const { tabs, activeTab, onSelectTab } = useAdminPage();
 
   return (
     <>
-      <PageHeader title="Admin Console" />
-      <main style={{ flexGrow: 1, padding: '28px 32px', overflowY: 'auto' }}>
-        <nav style={{ display: 'flex', gap: 8, marginBottom: 28 }} aria-label="Admin sections">
-          {tabs.map((tab) => {
-            const active = activeTab === tab.key;
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                aria-current={active ? 'page' : undefined}
-                onClick={() => onSelectTab(tab.key)}
-                style={{
-                  height: 40, padding: '0 16px',
-                  border: `1px solid ${active ? '#4A41C9' : '#E1DEF2'}`,
-                  borderRadius: 9,
-                  background: active ? '#EEEDFF' : '#FFFFFF',
-                  color: active ? '#4A41C9' : '#45435A',
-                  fontSize: 13.5, fontWeight: 600, cursor: 'pointer',
-                }}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-        </nav>
+      <PageHeader title="People" subtitle="Accounts, class groups and bulk onboarding" />
+      <div className="page-body">
+        <Tabs tabs={tabs} active={activeTab} onSelect={onSelectTab} label="People sections" />
 
         {activeTab === 'users' && <UsersSection />}
         {activeTab === 'add-user' && <AddUserSection />}
         {activeTab === 'import' && <ImportSection />}
         {activeTab === 'class-groups' && <ClassGroupsSection />}
-      </main>
+      </div>
     </>
   );
 };

@@ -3,7 +3,10 @@
  * Fetches the announcement and fires a mark-read call on mount.
  */
 import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '../../auth/AuthContext';
+import { useToast } from '../../../components/ui/Toast';
 import useGetData from '../../../hooks/useGetData';
 import usePostData from '../../../hooks/usePostData';
 import * as announcementService from '../services/announcementService';
@@ -13,10 +16,20 @@ interface UseAnnouncementDetailReturn {
   announcement: AnnouncementDto | undefined;
   isLoading: boolean;
   isError: boolean;
+  /** Author or admin: may edit, delete, pin and flag urgent. */
+  canManage: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
+  isDeleting: boolean;
+  onTogglePin: () => void;
+  onToggleUrgent: () => void;
 }
 
 const useAnnouncementDetail = (id: number): UseAnnouncementDetailReturn => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const toast = useToast();
   const markedRef = useRef(false);
 
   const { data: announcement, isLoading, isError } = useGetData<
@@ -47,7 +60,48 @@ const useAnnouncementDetail = (id: number): UseAnnouncementDetailReturn => {
     }
   }, [id, markRead]);
 
-  return { announcement, isLoading, isError };
+  const invalidate = () => {
+    void queryClient.invalidateQueries({ queryKey: ['announcements'] });
+  };
+
+  const { mutate: remove, isPending: isDeleting } = usePostData<string, number, void>({
+    keys: ['announcements', 'delete'],
+    serviceFn: announcementService.deleteAnnouncement,
+    onSuccessFn: () => {
+      toast.success('Announcement deleted.');
+      invalidate();
+      navigate('/announcements');
+    },
+    onErrorFn: (err) => {
+      toast.error((err?.response?.data?.message as string | undefined) ?? 'Failed to delete announcement.');
+    },
+  });
+
+  const canManage = Boolean(announcement && user && (user.role === 'ADMIN' || announcement.authorId === user.userId));
+
+  const onDelete = () => {
+    if (window.confirm('Delete this announcement and its comments? This cannot be undone.')) remove(id);
+  };
+
+  const onTogglePin = () => {
+    if (announcement) void announcementService.pinAnnouncement(id, !announcement.pinned).then(invalidate);
+  };
+
+  const onToggleUrgent = () => {
+    if (announcement) void announcementService.setUrgent(id, !announcement.urgent).then(invalidate);
+  };
+
+  return {
+    announcement,
+    isLoading,
+    isError,
+    canManage,
+    onEdit: () => navigate(`/announcements/${id}/edit`),
+    onDelete,
+    isDeleting,
+    onTogglePin,
+    onToggleUrgent,
+  };
 };
 
 export default useAnnouncementDetail;

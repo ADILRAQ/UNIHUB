@@ -1,16 +1,16 @@
 /**
- * Announcement detail view — artboard design.
- * Renders server-sanitized bodyHtml safely and shows the comments thread.
- * For authors and admins also shows Pin and Urgent toggles.
+ * Announcement detail view.
+ * Renders server-sanitized bodyHtml and the comments thread. Authors and admins
+ * also get Pin / Urgent toggles (edit and delete live in the page header).
  */
-import { useQueryClient } from '@tanstack/react-query';
 import CommentsThread from './CommentsThread';
-import * as announcementService from '../services/announcementService';
 import type { AnnouncementDto } from '../types';
 
 interface Props {
   announcement: AnnouncementDto;
-  onBack: () => void;
+  canManage: boolean;
+  onTogglePin: () => void;
+  onToggleUrgent: () => void;
   currentUserId: number;
   currentUserRole: string;
 }
@@ -24,105 +24,46 @@ const formatDate = (iso: string): string =>
     hour: '2-digit', minute: '2-digit',
   });
 
-const AnnouncementDetail = ({ announcement, currentUserId, currentUserRole }: Props) => {
-  const queryClient = useQueryClient();
-  const isAdmin = currentUserRole === 'ADMIN';
-  const isAuthor = announcement.authorId === currentUserId;
-  const canToggle = isAdmin || (currentUserRole === 'TEACHER' && isAuthor);
+const AnnouncementDetail = ({ announcement, canManage, onTogglePin, onToggleUrgent, currentUserId, currentUserRole }: Props) => (
+  <>
+    <article className="card" style={{ padding: '32px 36px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12 }}>
+        <span className="badge badge--neutral">{announcement.classGroupName ?? 'Department'}</span>
+        {announcement.pinned && <span className="badge badge--warning">Pinned</span>}
+        {announcement.urgent && <span className="badge badge--danger">Urgent</span>}
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
+          <span style={{ width: 28, height: 28, borderRadius: 'var(--radius-full)', background: 'var(--orange-100)', color: 'var(--orange-700)', display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 600, flexShrink: 0 }}>
+            {getInitials(announcement.authorName)}
+          </span>
+          <span style={{ fontSize: 13, color: 'var(--ink-700)', fontWeight: 600 }}>{announcement.authorName}</span>
+          <span style={{ fontSize: 13, color: 'var(--ink-500)' }}>
+            · {formatDate(announcement.createdAt)}{announcement.editedAt && ' (edited)'}
+          </span>
+        </span>
+      </div>
 
-  const invalidate = () => {
-    void queryClient.invalidateQueries({ queryKey: ['announcements', announcement.id] });
-    void queryClient.invalidateQueries({ queryKey: ['announcements'] });
-  };
+      {/* Server-sanitized HTML from backend — safe per CLAUDE.md */}
+      <div className="prose" style={{ fontSize: 16 }} dangerouslySetInnerHTML={{ __html: announcement.bodyHtml }} />
 
-  return (
-    <>
-      {/* Article card */}
-      <article
-        style={{
-          background: '#FFFFFF',
-          border: '1px solid #EDEBF8',
-          borderRadius: 16,
-          padding: '40px 44px',
-          boxShadow: '0 1px 2px rgba(108,99,255,0.05), 0 8px 22px rgba(108,99,255,0.06)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 22,
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', height: 24, padding: '0 11px', borderRadius: 999, background: '#EEEDFF', color: '#4A41C9', fontSize: 12, fontWeight: 600 }}>
-              {announcement.classGroupName ?? 'All groups'}
-            </span>
-            {announcement.pinned && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', height: 24, padding: '0 11px', borderRadius: 999, background: '#FEF3C7', color: '#92400E', fontSize: 12, fontWeight: 600 }}>Pinned</span>
-            )}
-            {announcement.urgent && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', height: 24, padding: '0 11px', borderRadius: 999, background: '#FEE2E2', color: '#991B1B', fontSize: 12, fontWeight: 600 }}>Urgent</span>
-            )}
-          </div>
-
-          <h1 style={{ margin: 0, fontSize: 28, fontWeight: 700, color: '#1F1B33', letterSpacing: '-0.02em', lineHeight: 1.3 }}>
-            {announcement.title}
-          </h1>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 26, height: 26, borderRadius: '50%', background: '#EEEDFF', color: '#4A41C9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>
-              {getInitials(announcement.authorName)}
-            </div>
-            <span style={{ fontSize: 13.5, color: '#45435A', fontWeight: 600 }}>{announcement.authorName}</span>
-            <span style={{ fontSize: 13.5, color: '#8D8B9C' }}>·</span>
-            <span style={{ fontSize: 13.5, color: '#6B6B7B' }}>{formatDate(announcement.createdAt)}</span>
-            {announcement.editedAt && (
-              <span style={{ fontSize: 12.5, color: '#8D8B9C' }}>(edited)</span>
-            )}
-          </div>
+      {canManage && (
+        <div style={{ display: 'flex', gap: 8, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+          <button type="button" className={`btn btn--sm${announcement.pinned ? ' btn--active' : ''}`} aria-pressed={announcement.pinned} onClick={onTogglePin}>
+            {announcement.pinned ? 'Pinned' : 'Pin to top'}
+          </button>
+          <button type="button" className={`btn btn--sm${announcement.urgent ? ' btn--danger' : ''}`} aria-pressed={announcement.urgent} onClick={onToggleUrgent}>
+            {announcement.urgent ? 'Marked urgent' : 'Mark urgent'}
+          </button>
         </div>
+      )}
+    </article>
 
-        <div style={{ height: 1, background: '#F0EEFA' }} />
-
-        {/* Server-sanitized HTML from backend — safe per CLAUDE.md */}
-        <div
-          className="ann-prose"
-          style={{ fontSize: 15.5, lineHeight: 1.75, color: '#33314A' }}
-          dangerouslySetInnerHTML={{ __html: announcement.bodyHtml }}
-        />
-
-        {/* Pin / Urgent toggles */}
-        {canToggle && (
-          <div style={{ display: 'flex', gap: 8, paddingTop: 4 }}>
-            <button
-              type="button"
-              onClick={() => void announcementService.pinAnnouncement(announcement.id, !announcement.pinned).then(invalidate)}
-              style={{ height: 36, padding: '0 14px', border: '1px solid #E1DEF2', borderRadius: 9, background: announcement.pinned ? '#EEEDFF' : '#FFFFFF', color: announcement.pinned ? '#4A41C9' : '#45435A', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
-            >
-              {announcement.pinned ? 'Unpin' : 'Pin'}
-            </button>
-            <button
-              type="button"
-              onClick={() => void announcementService.setUrgent(announcement.id, !announcement.urgent).then(invalidate)}
-              style={{ height: 36, padding: '0 14px', border: '1px solid #E1DEF2', borderRadius: 9, background: announcement.urgent ? '#FEE2E2' : '#FFFFFF', color: announcement.urgent ? '#991B1B' : '#45435A', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
-            >
-              {announcement.urgent ? 'Not urgent' : 'Urgent'}
-            </button>
-          </div>
-        )}
-      </article>
-
-      {/* Comments section */}
-      <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#1F1B33' }}>
-          {announcement.commentCount} comment{announcement.commentCount !== 1 ? 's' : ''}
-        </h2>
-        <CommentsThread
-          announcementId={announcement.id}
-          currentUserId={currentUserId}
-          currentUserRole={currentUserRole}
-        />
-      </section>
-    </>
-  );
-};
+    <section style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <h2 className="section-title" style={{ fontSize: 16, lineHeight: '24px' }}>
+        {announcement.commentCount} comment{announcement.commentCount !== 1 ? 's' : ''}
+      </h2>
+      <CommentsThread announcementId={announcement.id} currentUserId={currentUserId} currentUserRole={currentUserRole} />
+    </section>
+  </>
+);
 
 export default AnnouncementDetail;

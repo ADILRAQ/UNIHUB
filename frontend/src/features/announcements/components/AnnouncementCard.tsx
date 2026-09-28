@@ -1,6 +1,6 @@
 /**
  * Announcement card — displayed in the feed list.
- * Unread items are visually accented; pinned/urgent badges are shown.
+ * Unread items get a peach wash and a "New" tag; pinned/urgent get status pills.
  */
 import type { AnnouncementDto } from '../types';
 
@@ -10,36 +10,37 @@ interface Props {
 }
 
 const formatDate = (iso: string): string =>
-  new Date(iso).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+// Plain-text preview of the (server-sanitized) body; rendered as text, never as HTML.
+const excerpt = (html: string, max = 200): string => {
+  const text = html.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+  return text.length > max ? `${text.slice(0, max)}…` : text;
+};
 
 const AnnouncementCard = ({ item, onClick }: Props) => {
-  const cardClasses = [
-    'ann-card',
-    !item.read ? 'ann-card--unread' : '',
-    item.pinned ? 'ann-card--pinned' : '',
-    item.urgent ? 'ann-card--urgent' : '',
-  ]
+  const cardClasses = ['ann-card', !item.read ? 'ann-card--unread' : '', item.pinned ? 'ann-card--pinned' : '']
     .filter(Boolean)
     .join(' ');
 
   return (
-    <article className={cardClasses} onClick={onClick} role="button" tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}>
+    <article
+      className={cardClasses}
+      onClick={onClick}
+      role="link"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
+    >
       <div className="ann-card__badges">
-        {item.pinned && <span className="ann-badge ann-badge--pinned">Pinned</span>}
-        {item.urgent && <span className="ann-badge ann-badge--urgent">Urgent</span>}
-        {!item.read && <span className="ann-badge ann-badge--unread">New</span>}
+        {!item.read && <span className="badge badge--new">New</span>}
+        <span className="badge badge--neutral">{item.classGroupName ?? 'Department'}</span>
+        {item.pinned && <span className="badge badge--warning">Pinned</span>}
+        {item.urgent && <span className="badge badge--danger">Urgent</span>}
       </div>
       <h3 className="ann-card__title">{item.title}</h3>
+      <p style={{ margin: '0 0 var(--space-3)', fontSize: 14, lineHeight: 1.6, color: 'var(--ink-600)' }}>{excerpt(item.bodyHtml)}</p>
       <p className="ann-card__meta">
-        {item.authorName} &middot;{' '}
-        {item.classGroupName ?? 'Department-wide'} &middot;{' '}
-        {formatDate(item.createdAt)} &middot;{' '}
-        {item.commentCount} comment{item.commentCount !== 1 ? 's' : ''}
+        {item.authorName} · {formatDate(item.createdAt)} · {item.commentCount} comment{item.commentCount !== 1 ? 's' : ''}
       </p>
     </article>
   );
