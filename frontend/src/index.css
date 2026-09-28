@@ -33,7 +33,7 @@
   border-radius: var(--radius-lg);
 }
 .admin-filters .admin-field { min-width: 150px; }
-.admin-filters .admin-field select, .admin-filters .admin-field input { background: var(--white); }
+.admin-filters .admin-field select, .admin-filters .admin-field input { background-color: var(--white); }
 .admin-search { display: flex; flex: 1; align-items: flex-end; gap: var(--space-2); min-width: 240px; }
 .admin-search .admin-field { flex: 1; }
 
@@ -361,7 +361,7 @@
 }
 .sched-form__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .sched-field { display: flex; flex: 1; flex-direction: column; gap: var(--space-1); }
-.sched-form .sched-field input, .sched-form .sched-field select, .sched-form .sched-field textarea { background: var(--white); }
+.sched-form .sched-field input, .sched-form .sched-field select, .sched-form .sched-field textarea { background-color: var(--white); }
 .sched-field-row { display: flex; flex-wrap: wrap; gap: var(--space-4); }
 .sched-check { display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-body); color: var(--ink-700); cursor: pointer; }
 .sched-check input { width: 16px; height: 16px; accent-color: var(--orange-500); }

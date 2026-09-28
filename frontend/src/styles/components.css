@@ -181,7 +181,7 @@
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  background: var(--cream-100);
+  background-color: var(--cream-100);
   color: var(--ink-900);
   font: var(--font-weight-normal) var(--fs-body) / var(--lh-body) var(--font-sans);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
@@ -197,9 +197,50 @@
   outline: none;
   border-color: var(--orange-500);
   box-shadow: var(--focus-ring);
-  background: var(--white);
+  background-color: var(--white);
 }
 .input--error { border-color: var(--danger-700); }
+
+/* Select chevron: custom arrow that darkens on hover and turns orange on focus.
+   Field rules above use background-color (not the shorthand) so they don't wipe this image. */
+select,
+.select,
+.admin-field select,
+.sched-field select,
+.res-form__field select,
+.admin-select,
+.admin-filters .admin-field select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: var(--white);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 36px;
+}
+select:hover,
+.select:hover,
+.admin-field select:hover,
+.sched-field select:hover,
+.res-form__field select:hover,
+.admin-select:hover,
+.admin-filters .admin-field select:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  border-color: var(--border-strong);
+}
+select:focus,
+.select:focus,
+.admin-field select:focus,
+.sched-field select:focus,
+.res-form__field select:focus,
+.admin-select:focus,
+.admin-filters .admin-field select:focus {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23e8530e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  /* hover sets border-strong; keep the orange focus border when focused and hovered */
+  border-color: var(--orange-500);
+}
 .textarea, textarea { resize: vertical; }
 
 .label,
