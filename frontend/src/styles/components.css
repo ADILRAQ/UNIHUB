@@ -220,15 +220,14 @@ select,
   background-size: 16px;
   padding-right: 36px;
 }
-select:hover,
-.select:hover,
-.admin-field select:hover,
-.sched-field select:hover,
-.res-form__field select:hover,
-.admin-select:hover,
-.admin-filters .admin-field select:hover {
+select:hover:not(:disabled),
+.select:hover:not(:disabled),
+.admin-field select:hover:not(:disabled),
+.sched-field select:hover:not(:disabled),
+.res-form__field select:hover:not(:disabled),
+.admin-select:hover:not(:disabled),
+.admin-filters .admin-field select:hover:not(:disabled) {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  border-color: var(--border-strong);
 }
 select:focus,
 .select:focus,
@@ -238,8 +237,13 @@ select:focus,
 .admin-select:focus,
 .admin-filters .admin-field select:focus {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23e8530e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  /* hover sets border-strong; keep the orange focus border when focused and hovered */
   border-color: var(--orange-500);
+}
+/* Disabled (e.g. while a form saves): faded, no hover reaction. */
+select:disabled,
+.select:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 .textarea, textarea { resize: vertical; }
 
