@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../../features/auth/AuthContext';
 import useGetData from '../../hooks/useGetData';
 import { getUnreadCount } from '../../features/announcements/services/announcementService';
@@ -60,12 +60,6 @@ const IconTeacher = () => (
   </svg>
 );
 
-const IconAdmin = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2.6 20 5.6v5.9c0 4.9-3.3 8.5-8 9.9-4.7-1.4-8-5-8-9.9V5.6l8-3Z"/>
-  </svg>
-);
-
 const IconLogout = () => (
   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M9.5 21h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -106,18 +100,22 @@ const Sidebar = () => {
     { to: '/courses',           label: 'Courses',       icon: <IconCourses /> },
     { to: '/payments',          label: 'Payments',      icon: <IconPayments /> },
     { to: '/timetable', roles: ['TEACHER','ADMIN'], label: 'Timetable', icon: <IconTimetable /> },
-    { to: '/teacher',   roles: ['TEACHER','ADMIN'], label: 'Teacher',   icon: <IconTeacher /> },
-    { to: '/admin',     roles: ['ADMIN'],           label: 'Admin',     icon: <IconAdmin /> },
+    { to: '/admin',     roles: ['TEACHER','ADMIN'], label: 'People',    icon: <IconTeacher /> },
   ];
 
   const visible = navItems.filter(i => !i.roles || i.roles.includes(role));
+  // ponytail: first five items are everyone's; the rest are staff tools.
+  const sections = [
+    { label: 'Menu', items: visible.filter(i => !i.roles) },
+    { label: 'Manage', items: visible.filter(i => i.roles) },
+  ].filter(s => s.items.length > 0);
 
   return (
     <aside className="app-sidebar" aria-label="Main navigation">
       {/* Logo */}
       <div className="sidebar-brand">
         <div className="sidebar-brand__icon">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 8.2 12 4l9 4.2-9 4.2-9-4.2Z"/>
             <path d="M7.2 10.6V15c0 1.5 2.2 2.6 4.8 2.6s4.8-1.1 4.8-2.6v-4.4"/>
           </svg>
@@ -127,27 +125,33 @@ const Sidebar = () => {
 
       {/* Nav */}
       <nav style={{ flex: 1 }}>
-        <ul className="sidebar-nav">
-          {visible.map(({ to, end, label, icon, badge }) => (
-            <li key={to}>
-              <NavLink
-                to={to}
-                end={end}
-                className={({ isActive }) =>
-                  `sidebar-link${isActive ? ' sidebar-link--active' : ''}`
-                }
-              >
-                <span className="sidebar-link__icon">{icon}</span>
-                <span className="sidebar-link__label">{label}</span>
-                {!!badge && badge > 0 && (
-                  <span className="sidebar-link__badge" aria-label={`${badge} unread`}>
-                    {badge}
-                  </span>
-                )}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
+        {sections.map(section => (
+          <div key={section.label}>
+            <div className="sidebar-section-label">{section.label}</div>
+            <ul className="sidebar-nav">
+              {section.items.map(({ to, end, label, icon, badge }) => (
+                <li key={to}>
+                  <NavLink
+                    to={to}
+                    end={end}
+                    title={label}
+                    className={({ isActive }) =>
+                      `sidebar-link${isActive ? ' sidebar-link--active' : ''}`
+                    }
+                  >
+                    <span className="sidebar-link__icon">{icon}</span>
+                    <span className="sidebar-link__label">{label}</span>
+                    {!!badge && badge > 0 && (
+                      <span className="count-badge sidebar-link__badge" aria-label={`${badge} unread`}>
+                        {badge > 99 ? '99+' : badge}
+                      </span>
+                    )}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </nav>
 
       {/* User */}
@@ -162,7 +166,13 @@ const Sidebar = () => {
               {user.role.charAt(0) + user.role.slice(1).toLowerCase()}
             </p>
           </div>
+          <Link to="/change-password" className="sidebar-user__logout" title="Change password" aria-label="Change password">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="8" cy="15" r="4" /><path d="m10.8 12.2 8.7-8.7M16 7l2.5 2.5M18.5 4.5 21 7" />
+            </svg>
+          </Link>
           <button
+            type="button"
             className="sidebar-user__logout"
             onClick={logout}
             title="Sign out"

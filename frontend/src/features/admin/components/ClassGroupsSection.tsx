@@ -29,17 +29,17 @@ const ClassGroupsSection = () => {
 
   return (
     <section className="admin-section">
-      <h2 className="admin-section__title">Class groups</h2>
 
       <form className="admin-inline-form" onSubmit={onCreate}>
         <input
           type="text"
-          placeholder="New class group name"
+          placeholder="New class group name, e.g. L3 Info A"
+          aria-label="New class group name"
           value={newName}
           onChange={(e) => onNewNameChange(e.target.value)}
           disabled={createPending}
         />
-        <button type="submit" className="admin-button admin-button--primary" disabled={createPending}>
+        <button type="submit" className="btn btn--primary" disabled={createPending}>
           {createPending ? 'Creating…' : 'Create'}
         </button>
       </form>
@@ -109,16 +109,16 @@ const GroupRow = ({
           onChange={(e) => onEditingNameChange(e.target.value)}
           disabled={busy}
         />
-        <button type="submit" className="admin-button admin-button--sm" disabled={busy}>Save</button>
-        <button type="button" className="admin-button admin-button--sm admin-button--ghost" onClick={onCancelRename} disabled={busy}>Cancel</button>
+        <button type="submit" className="btn btn--sm btn--primary" disabled={busy}>Save</button>
+        <button type="button" className="btn btn--sm btn--ghost" onClick={onCancelRename} disabled={busy}>Cancel</button>
       </form>
     ) : (
       <div className="admin-group__header">
         <span className="admin-group__name">{group.name}</span>
         <span className="admin-badge">{group.memberCount} member{group.memberCount === 1 ? '' : 's'}</span>
         <div className="admin-group__actions">
-          <button type="button" className="admin-button admin-button--sm" onClick={() => onStartRename(group)} disabled={busy}>Rename</button>
-          <button type="button" className="admin-button admin-button--sm" onClick={() => onDelete(group)} disabled={busy}>Delete</button>
+          <button type="button" className="btn btn--sm" onClick={() => onStartRename(group)} disabled={busy}>Rename</button>
+          <button type="button" className="btn btn--sm btn--danger" onClick={() => onDelete(group)} disabled={busy}>Delete</button>
         </div>
       </div>
     )}
@@ -136,7 +136,7 @@ const GroupRow = ({
           </div>
           <button
             type="button"
-            className="admin-button admin-button--sm admin-button--ghost"
+            className="btn btn--sm btn--ghost"
             onClick={() => onRevokeTeacher(group)}
             disabled={busy}
           >
@@ -164,7 +164,7 @@ const GroupRow = ({
           </select>
           <button
             type="button"
-            className="admin-button admin-button--sm admin-button--primary"
+            className="btn btn--sm btn--primary"
             onClick={() => onAssignTeacher(group.id)}
             disabled={busy || !selectedTeacherId}
           >

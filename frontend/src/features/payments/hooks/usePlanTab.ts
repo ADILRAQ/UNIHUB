@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { plannableYears } from '../academicYear';
+import { plannableYears } from '../../../utils/academicYear';
 import type { CreateYearPlanPayload, PaymentPeriodDto } from '../types';
 
 type PlanRow = { label: string; amount: string; dueDate: string };

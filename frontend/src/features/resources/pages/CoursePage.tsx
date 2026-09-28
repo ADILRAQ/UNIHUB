@@ -1,5 +1,5 @@
-import { useState, type CSSProperties } from 'react';
-import { useParams, useSearchParams, Link } from 'react-router-dom';
+import { useState } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import useCourses from '../hooks/useCourses';
 import useCourseResources from '../hooks/useCourseResources';
@@ -7,22 +7,12 @@ import useCourseAssignments from '../hooks/useCourseAssignments';
 import ModulePanel from '../components/ModulePanel';
 import AssignmentItem from '../components/AssignmentItem';
 import PastSessionsTab from '../../recaps/components/PastSessionsTab';
+import PageHeader from '../../../components/layout/PageHeader';
+import Tabs from '../../../components/ui/Tabs';
 
 type TabKey = 'resources' | 'assignments' | 'past-sessions';
 
-/* ── Shared tab button style helpers ─────────────────────────────────── */
-
-const tabStyle = (active: boolean): CSSProperties => ({
-  background: 'none',
-  border: 0,
-  cursor: 'pointer',
-  padding: '0 0 14px 0',
-  fontSize: 14.5,
-  fontWeight: 600,
-  color: active ? '#4A41C9' : '#6B6B7B',
-  borderBottom: `2px solid ${active ? '#4A41C9' : 'transparent'}`,
-  transition: 'color 0.15s, border-color 0.15s',
-});
+const muted = { margin: 0, fontSize: 13, color: 'var(--ink-500)' };
 
 /* ── Resources tab ───────────────────────────────────────────────────── */
 
@@ -68,31 +58,36 @@ const ResourcesTab = ({ courseId, canEdit }: { courseId: number; canEdit: boolea
         placeholder="Search resources…"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        style={{ height: 42, boxSizing: 'border-box', border: '1px solid #E1DEF2', borderRadius: 9, padding: '0 14px', fontSize: 14, color: '#1F1B33', background: '#FFFFFF', maxWidth: 360, outline: 'none', fontFamily: 'inherit' }}
+        aria-label="Search resources"
+        className="input"
+        style={{ maxWidth: 360, borderRadius: 'var(--radius-full)' }}
       />
 
       {searchQuery.length > 0 ? (
         <>
-          {isSearching && <p style={{ margin: 0, fontSize: 13.5, color: '#6B6B7B' }}>Searching…</p>}
+          {isSearching && <p style={muted}>Searching…</p>}
           {!isSearching && searchResults.length === 0 && (
-            <p style={{ margin: 0, fontSize: 13.5, color: '#6B6B7B' }}>No results for &ldquo;{searchQuery}&rdquo;</p>
+            <p style={muted}>No results for &ldquo;{searchQuery}&rdquo;</p>
           )}
           {searchResults.map((r) => (
-            <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid #F0EEFA' }}>
-              <span style={{ flexGrow: 1, fontSize: 13.5, color: '#33314A' }}>{r.name}</span>
-              <span style={{ fontSize: 12, color: '#8D8B9C' }}>{r.courseName} / {r.moduleName}</span>
-              <button type="button" onClick={() => downloadResource(r.id, r.name)} style={{ height: 32, padding: '0 12px', border: '1px solid #E1DEF2', borderRadius: 8, background: '#FFFFFF', color: '#45435A', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>Download</button>
+            <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
+              <span style={{ flexGrow: 1, fontSize: 13, color: 'var(--ink-700)' }}>{r.name}</span>
+              <span style={{ fontSize: 12, color: 'var(--ink-500)' }}>{r.courseName} / {r.moduleName}</span>
+              <button type="button" className="btn btn--sm" onClick={() => downloadResource(r.id, r.name)}>Download</button>
             </div>
           ))}
         </>
       ) : (
         <>
-          {isLoadingModules && <p style={{ margin: 0, fontSize: 13.5, color: '#6B6B7B' }}>Loading modules…</p>}
+          {isLoadingModules && <p style={muted}>Loading modules…</p>}
           {isErrorModules && (
-            <div role="alert" style={{ background: '#FEF2F2', border: '1px solid #F7A9A9', borderRadius: 10, padding: '12px 14px', fontSize: 13.5, color: '#B91C1C' }}>Failed to load modules.</div>
+            <div role="alert" className="alert">Failed to load modules.</div>
           )}
           {!isLoadingModules && modules.length === 0 && !isErrorModules && (
-            <p style={{ margin: 0, fontSize: 13.5, color: '#6B6B7B' }}>No modules yet.</p>
+            <div className="empty-state">
+              <h2 className="empty-state__title">No modules yet</h2>
+              <p className="empty-state__body">{canEdit ? 'Add a module to start sharing files and links.' : 'Your teacher has not published any resources yet.'}</p>
+            </div>
           )}
           {modules.map((mod) => (
             <ModulePanel
@@ -126,19 +121,16 @@ const ResourcesTab = ({ courseId, canEdit }: { courseId: number; canEdit: boolea
                       if (e.key === 'Escape') setShowNewModule(false);
                     }}
                     autoFocus
-                    style={{ height: 42, boxSizing: 'border-box', border: '1px solid #E1DEF2', borderRadius: 9, padding: '0 14px', fontSize: 14, color: '#1F1B33', background: '#FFFFFF', outline: 'none', fontFamily: 'inherit' }}
+                    aria-label="Module title"
+                    className="input"
                   />
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <button type="button" disabled={isCreatingModule} onClick={handleCreateModule} style={{ height: 38, padding: '0 14px', border: 0, borderRadius: 9, background: '#5A4FE0', color: '#FFFFFF', fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}>Add module</button>
-                    <button type="button" onClick={() => setShowNewModule(false)} style={{ height: 38, padding: '0 14px', border: '1px solid #E1DEF2', borderRadius: 9, background: '#FFFFFF', color: '#45435A', fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+                    <button type="button" className="btn btn--primary btn--sm" disabled={isCreatingModule || !newModuleTitle.trim()} onClick={handleCreateModule}>Add module</button>
+                    <button type="button" className="btn btn--ghost btn--sm" onClick={() => setShowNewModule(false)}>Cancel</button>
                   </div>
                 </div>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => setShowNewModule(true)}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 7, height: 40, padding: '0 16px', border: '1px dashed #C9C2F5', borderRadius: 10, background: '#FFFFFF', color: '#4A41C9', fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}
-                >
+                <button type="button" className="btn btn--soft" onClick={() => setShowNewModule(true)}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5.5v13M5.5 12h13"/></svg>
                   Add module
                 </button>
@@ -189,12 +181,17 @@ const AssignmentsTab = ({
     setShowNewAssignment(false);
   };
 
-  if (isLoading) return <p style={{ margin: 0, fontSize: 13.5, color: '#6B6B7B' }}>Loading assignments…</p>;
-  if (isError) return <div role="alert" style={{ background: '#FEF2F2', border: '1px solid #F7A9A9', borderRadius: 10, padding: '12px 14px', fontSize: 13.5, color: '#B91C1C' }}>Failed to load assignments.</div>;
+  if (isLoading) return <div className="skeleton" style={{ height: 140 }} />;
+  if (isError) return <div role="alert" className="alert">Failed to load assignments.</div>;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {assignments.length === 0 && <p style={{ margin: 0, fontSize: 13.5, color: '#6B6B7B' }}>No assignments yet.</p>}
+      {assignments.length === 0 && (
+        <div className="empty-state">
+          <h2 className="empty-state__title">No assignments yet</h2>
+          <p className="empty-state__body">Homework and due dates for this course will appear here.</p>
+        </div>
+      )}
       {assignments.map((a) => (
         <AssignmentItem
           key={a.id}
@@ -214,17 +211,23 @@ const AssignmentsTab = ({
       {(role === 'TEACHER' || role === 'ADMIN') && (
         <div>
           {showNewAssignment ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, background: '#FFFFFF', border: '1px solid #EDEBF8', borderRadius: 14, padding: '20px 22px' }}>
-              <input type="text" placeholder="Title" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} autoFocus style={{ height: 42, boxSizing: 'border-box', border: '1px solid #E1DEF2', borderRadius: 9, padding: '0 14px', fontSize: 14, color: '#1F1B33', background: '#FFFFFF', outline: 'none', fontFamily: 'inherit' }} />
-              <input type="text" placeholder="Description (optional)" value={newDescription} onChange={(e) => setNewDescription(e.target.value)} style={{ height: 42, boxSizing: 'border-box', border: '1px solid #E1DEF2', borderRadius: 9, padding: '0 14px', fontSize: 14, color: '#1F1B33', background: '#FFFFFF', outline: 'none', fontFamily: 'inherit' }} />
-              <input type="datetime-local" value={newDueAt} onChange={(e) => setNewDueAt(e.target.value)} style={{ height: 42, boxSizing: 'border-box', border: '1px solid #E1DEF2', borderRadius: 9, padding: '0 14px', fontSize: 14, color: '#1F1B33', background: '#FFFFFF', outline: 'none', fontFamily: 'inherit' }} />
+            <div className="sched-form res-assignment-form">
+              <label className="sched-field"><span>Title</span>
+                <input type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} autoFocus />
+              </label>
+              <label className="sched-field"><span>Description (optional)</span>
+                <input type="text" value={newDescription} onChange={(e) => setNewDescription(e.target.value)} />
+              </label>
+              <label className="sched-field"><span>Due</span>
+                <input type="datetime-local" value={newDueAt} onChange={(e) => setNewDueAt(e.target.value)} />
+              </label>
               <div style={{ display: 'flex', gap: 8 }}>
-                <button type="button" disabled={isCreating} onClick={handleCreate} style={{ height: 38, padding: '0 14px', border: 0, borderRadius: 9, background: '#5A4FE0', color: '#FFFFFF', fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}>Add assignment</button>
-                <button type="button" onClick={() => setShowNewAssignment(false)} style={{ height: 38, padding: '0 14px', border: '1px solid #E1DEF2', borderRadius: 9, background: '#FFFFFF', color: '#45435A', fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+                <button type="button" className="btn btn--primary btn--sm" disabled={isCreating || !newTitle.trim() || !newDueAt} onClick={handleCreate}>Add assignment</button>
+                <button type="button" className="btn btn--ghost btn--sm" onClick={() => setShowNewAssignment(false)}>Cancel</button>
               </div>
             </div>
           ) : (
-            <button type="button" onClick={() => setShowNewAssignment(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, height: 40, padding: '0 16px', border: '1px dashed #C9C2F5', borderRadius: 10, background: '#FFFFFF', color: '#4A41C9', fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}>
+            <button type="button" className="btn btn--soft" onClick={() => setShowNewAssignment(true)}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5.5v13M5.5 12h13"/></svg>
               Add assignment
             </button>
@@ -253,46 +256,36 @@ const CoursePage = () => {
 
   if (!courseId || isNaN(id)) {
     return (
-      <main style={{ padding: 32 }}>
-        <div role="alert" style={{ background: '#FEF2F2', border: '1px solid #F7A9A9', borderRadius: 10, padding: '12px 14px', fontSize: 13.5, color: '#B91C1C' }}>Invalid course ID.</div>
-      </main>
+      <div className="page-body">
+        <div role="alert" className="alert">Invalid course ID.</div>
+      </div>
     );
   }
 
   return (
     <>
-      {/* Custom header: breadcrumb + title + tabs */}
-      <header style={{ flexShrink: 0, boxSizing: 'border-box', background: '#FFFFFF', borderBottom: '1px solid #E8E6F5', padding: '22px 32px 0 32px', display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <Link to="/courses" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, color: '#6B6B7B', fontSize: 13, fontWeight: 600, textDecoration: 'none', width: 'fit-content' }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></svg>
-            Courses
-          </Link>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#1F1B33', letterSpacing: '-0.02em' }}>
-            {course?.name ?? 'Course'}
-          </h1>
-          {course && (
-            <span style={{ fontSize: 13, color: '#6B6B7B' }}>
-              {course.teacherName} · {course.classGroupName}
-            </span>
-          )}
-        </div>
-        <div style={{ display: 'flex', gap: 28 }}>
-          {(['resources', 'assignments', 'past-sessions'] as const).map((tab) => (
-            <button key={tab} type="button" onClick={() => setActiveTab(tab)} style={tabStyle(activeTab === tab)}>
-              {tab === 'resources' ? 'Resources' : tab === 'assignments' ? 'Assignments' : 'Past Sessions'}
-            </button>
-          ))}
-        </div>
-      </header>
+      <PageHeader
+        title={course?.name ?? 'Course'}
+        subtitle={course ? `${course.teacherName} · ${course.classGroupName}` : undefined}
+        breadcrumb="All courses"
+        breadcrumbTo="/courses"
+      />
 
-      <main style={{ flexGrow: 1, boxSizing: 'border-box', padding: '28px 32px 40px 32px', overflowY: 'auto', display: 'flex', justifyContent: 'center' }}>
-        <div style={{ width: '100%', maxWidth: 820, display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <div className="page-body" style={{ maxWidth: 884 }}>
+        <Tabs
+          tabs={[
+            { key: 'resources', label: 'Resources' },
+            { key: 'assignments', label: 'Assignments' },
+            { key: 'past-sessions', label: 'Past sessions' },
+          ]}
+          active={activeTab}
+          onSelect={setActiveTab}
+          label="Course sections"
+        />
           {activeTab === 'resources' && <ResourcesTab courseId={id} canEdit={canEdit} />}
           {activeTab === 'assignments' && <AssignmentsTab courseId={id} role={role as 'STUDENT' | 'TEACHER' | 'ADMIN'} />}
           {activeTab === 'past-sessions' && <PastSessionsTab courseId={id} />}
-        </div>
-      </main>
+      </div>
     </>
   );
 };

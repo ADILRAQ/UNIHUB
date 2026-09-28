@@ -35,7 +35,6 @@ const ImportSection = () => {
 
   return (
     <section className="admin-section admin-import-section">
-      <h2 className="admin-section__title">Bulk import (CSV)</h2>
 
       <p className="admin-note admin-import__intro">
         Upload a CSV with the header <code className="admin-code">name,email,role,classGroup</code>.
@@ -145,7 +144,7 @@ const ImportSection = () => {
       <div className="admin-import">
         <button
           type="button"
-          className="admin-button admin-button--primary admin-import__submit"
+          className="btn btn--primary admin-import__submit"
           onClick={onImport}
           disabled={isPending || status !== 'selected'}
         >
@@ -170,7 +169,7 @@ const ImportSection = () => {
           </p>
 
           {result.createdUsers.length > 0 && (
-            <button type="button" className="admin-button" onClick={onDownloadCredentials}>
+            <button type="button" className="btn" onClick={onDownloadCredentials}>
               Download credentials
             </button>
           )}

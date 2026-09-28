@@ -23,7 +23,7 @@ const TemplateManager = ({ courseId }: TemplateManagerProps) => {
       <div className="sched-panel__head">
         <h3 className="sched-panel__title">Weekly timetable</h3>
         {!t.formOpen && (
-          <button type="button" className="sched-btn sched-btn--primary" onClick={t.onOpenCreate}>
+          <button type="button" className="btn btn--soft btn--sm" onClick={t.onOpenCreate}>
             Add weekly slot
           </button>
         )}
@@ -109,10 +109,10 @@ const TemplateManager = ({ courseId }: TemplateManagerProps) => {
           </label>
           {t.error && <p className="sched-error">{t.error}</p>}
           <div className="sched-form__actions">
-            <button type="submit" className="sched-btn sched-btn--primary" disabled={t.isSaving}>
+            <button type="submit" className="btn btn--primary" disabled={t.isSaving}>
               {t.isSaving ? 'Saving…' : t.isEditing ? 'Save & regenerate' : 'Add & generate'}
             </button>
-            <button type="button" className="sched-btn" onClick={t.onCloseForm} disabled={t.isSaving}>
+            <button type="button" className="btn" onClick={t.onCloseForm} disabled={t.isSaving}>
               Cancel
             </button>
           </div>
@@ -139,19 +139,19 @@ const TemplateManager = ({ courseId }: TemplateManagerProps) => {
                 </span>
               </div>
               <div className="sched-tpl__actions">
-                <button type="button" className="sched-btn sched-btn--sm" onClick={() => t.onOpenEdit(tpl)}>
+                <button type="button" className="btn btn--sm" onClick={() => t.onOpenEdit(tpl)}>
                   Edit
                 </button>
                 <button
                   type="button"
-                  className="sched-btn sched-btn--sm"
+                  className="btn btn--sm"
                   onClick={() => t.onToggleActive(tpl)}
                 >
                   {tpl.active ? 'Deactivate' : 'Activate'}
                 </button>
                 <button
                   type="button"
-                  className="sched-btn sched-btn--sm sched-btn--danger"
+                  className="btn btn--sm btn--danger"
                   onClick={() => t.onDelete(tpl)}
                 >
                   Delete

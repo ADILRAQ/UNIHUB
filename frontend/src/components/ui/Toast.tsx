@@ -40,12 +40,18 @@ const ToastContext = createContext<ToastContextValue | null>(null);
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
-const ICONS: Record<ToastType, string> = {
-  success: '✅',
-  error:   '❌',
-  warning: '⚠️',
-  info:    'ℹ️',
+const iconPath: Record<ToastType, string> = {
+  success: 'M5 12.5l4.5 4.5L19 7.5',
+  error:   'M7 7l10 10M17 7L7 17',
+  warning: 'M12 8v5M12 16.5v.5',
+  info:    'M12 11v6M12 7.5v.5',
 };
+
+const ToastIcon = ({ type }: { type: ToastType }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d={iconPath[type]} />
+  </svg>
+);
 
 // ── Provider ───────────────────────────────────────────────────────────────
 
@@ -119,7 +125,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
             aria-live="polite"
           >
             <span className="toast__icon" aria-hidden="true">
-              {ICONS[toast.type]}
+              <ToastIcon type={toast.type} />
             </span>
             <span className="toast__message">{toast.message}</span>
             <button

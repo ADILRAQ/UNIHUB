@@ -71,7 +71,7 @@ const AssignmentItem = ({
   return (
     <div className="res-assignment">
       <div className="res-assignment__header">
-        <strong>{assignment.title}</strong>
+        <strong style={{ fontSize: 16, lineHeight: '24px', fontWeight: 600, color: 'var(--ink-900)' }}>{assignment.title}</strong>
         {isStudent && (
           <span
             className={`res-badge ${statusClass(assignment.mySubmissionStatus)}`}
@@ -83,14 +83,14 @@ const AssignmentItem = ({
           <span style={{ display: 'flex', gap: 'var(--space-1)', marginLeft: 'auto' }}>
             <button
               type="button"
-              className="res-btn res-btn--sm res-btn--ghost"
+              className="btn btn--sm btn--ghost"
               onClick={() => onToggleSubmissions(assignment.id)}
             >
               {isExpanded ? 'Hide submissions' : 'View submissions'}
             </button>
             <button
               type="button"
-              className="res-btn res-btn--sm res-btn--danger"
+              className="btn btn--sm btn--danger"
               onClick={() => {
                 if (window.confirm(`Delete assignment "${assignment.title}"?`)) {
                   onDelete(assignment.id);
@@ -105,10 +105,10 @@ const AssignmentItem = ({
 
       <p className="res-assignment__meta">
         Due:{' '}
-        <span style={{ color: isPast ? 'var(--color-danger-dark)' : 'inherit' }}>
+        <span style={{ color: isPast ? 'var(--danger-700)' : 'inherit' }}>
           {dueDate.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
         </span>
-        {isPast && <span style={{ marginLeft: 'var(--space-1)', color: 'var(--color-danger-dark)' }}>Overdue</span>}
+        {isPast && <span style={{ marginLeft: 'var(--space-1)', color: 'var(--danger-700)' }}>Overdue</span>}
       </p>
 
       {assignment.description && (
@@ -131,7 +131,7 @@ const AssignmentItem = ({
           />
           <button
             type="button"
-            className="res-btn res-btn--sm res-btn--primary"
+            className="btn btn--sm btn--primary"
             disabled={isSubmitting}
             onClick={() => fileInputRef.current?.click()}
           >
@@ -147,7 +147,7 @@ const AssignmentItem = ({
         <span style={{ display: 'inline-flex', gap: 'var(--space-1)', marginTop: 'var(--space-2)' }}>
           <button
             type="button"
-            className="res-btn res-btn--sm res-btn--ghost"
+            className="btn btn--sm btn--ghost"
             onClick={handleViewSubmission}
           >
             {showMySubmission ? 'Hide submission' : 'View submission'}
@@ -160,9 +160,9 @@ const AssignmentItem = ({
         <div
           style={{
             marginTop: 'var(--space-2)',
-            background: '#F8F7FF',
-            border: '1px solid #E1DEF2',
-            borderRadius: 10,
+            background: 'var(--white)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 'var(--space-3)',
             display: 'flex',
             flexDirection: 'column',
@@ -178,25 +178,25 @@ const AssignmentItem = ({
           {mySubmission && (
             <>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: '#6B6B7B', letterSpacing: '0.06em' }}>FILE</span>
-                <span style={{ fontSize: 13.5, color: '#1F1B33', fontWeight: 600 }}>{mySubmission.originalName}</span>
+                <span className="overline">File</span>
+                <span style={{ fontSize: 13, color: 'var(--ink-900)', fontWeight: 600 }}>{mySubmission.originalName}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: '#6B6B7B', letterSpacing: '0.06em' }}>SUBMITTED AT</span>
-                <span style={{ fontSize: 13.5, color: '#45435A' }}>
+                <span className="overline">Submitted at</span>
+                <span style={{ fontSize: 13, color: 'var(--ink-700)' }}>
                   {new Date(mySubmission.submittedAt).toLocaleString(undefined, {
                     year: 'numeric', month: 'short', day: 'numeric',
                     hour: '2-digit', minute: '2-digit',
                   })}
                   {mySubmission.late && (
-                    <span style={{ marginLeft: 6, color: '#EF4444', fontSize: 12, fontWeight: 600 }}>Late</span>
+                    <span style={{ marginLeft: 6, color: 'var(--danger-700)', fontSize: 12, fontWeight: 600 }}>Late</span>
                   )}
                 </span>
               </div>
               <div style={{ display: 'flex', gap: 'var(--space-1)', marginTop: 4 }}>
                 <button
                   type="button"
-                  className="res-btn res-btn--sm res-btn--ghost"
+                  className="btn btn--sm btn--ghost"
                   onClick={() => onDownloadSubmission(mySubmission.id, mySubmission.originalName)}
                 >
                   Download
@@ -218,7 +218,7 @@ const AssignmentItem = ({
                 />
                 <button
                   type="button"
-                  className="res-btn res-btn--sm res-btn--primary"
+                  className="btn btn--sm btn--primary"
                   disabled={isSubmitting}
                   onClick={() => resubmitInputRef.current?.click()}
                 >

@@ -28,7 +28,7 @@ const CancelRescheduleDialog = ({ session, onClose }: CancelRescheduleDialogProp
         <header className="sched-dialog__header">
           <div>
             <h2 className="sched-dialog__title">{session.title}</h2>
-            <p style={{ margin: '0', fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>
+            <p style={{ margin: 0, fontSize: 13, color: 'var(--ink-500)' }}>
               {formatDateLong(parseISODate(session.date))} &middot;{' '}
               {formatTimeRange(session.startTime, session.endTime)}
             </p>
@@ -45,17 +45,17 @@ const CancelRescheduleDialog = ({ session, onClose }: CancelRescheduleDialogProp
 
         <form onSubmit={onSubmit}>
           <div className="sched-dialog__body">
-            <div className="sched-tabs">
+            <div className="tabs">
               <button
                 type="button"
-                className={`sched-tab${mode === 'cancel' ? ' sched-tab--active' : ''}`}
+                className={`tab${mode === 'cancel' ? ' tab--active' : ''}`}
                 onClick={() => onSelectMode('cancel')}
               >
                 Cancel session
               </button>
               <button
                 type="button"
-                className={`sched-tab${mode === 'reschedule' ? ' sched-tab--active' : ''}`}
+                className={`tab${mode === 'reschedule' ? ' tab--active' : ''}`}
                 onClick={() => onSelectMode('reschedule')}
               >
                 Reschedule
@@ -122,12 +122,12 @@ const CancelRescheduleDialog = ({ session, onClose }: CancelRescheduleDialogProp
           </div>
 
           <footer className="sched-dialog__footer">
-            <button type="button" className="sched-btn" onClick={onClose} disabled={isPending}>
+            <button type="button" className="btn" onClick={onClose} disabled={isPending}>
               Close
             </button>
             <button
               type="submit"
-              className={`sched-btn sched-btn--primary${mode === 'cancel' ? ' sched-btn--danger' : ''}`}
+              className={`btn ${mode === 'cancel' ? 'btn--danger' : 'btn--primary'}`}
               disabled={isPending}
             >
               {isPending

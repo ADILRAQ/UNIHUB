@@ -4,6 +4,10 @@ import useGetData from '../../../hooks/useGetData';
 import apiClient from '../../../api/client';
 import { getQueue } from '../../payments/services/paymentService';
 import type { PendingProofItemDto } from '../../payments/types';
+import { getPage } from '../../announcements/services/announcementService';
+import type { AnnouncementDto } from '../../announcements/types';
+import useDashboardKpis from './useDashboardKpis';
+import type { KpiDef } from '../types';
 
 export interface NextSessionDto {
   sessionId: string;
@@ -22,6 +26,9 @@ export interface UseDashboardPage {
   isTeacher: boolean;
   nextSession: NextSessionDto | null | undefined;
   pendingProofCount: number;
+  latestAnnouncements: AnnouncementDto[];
+  announcementsLoading: boolean;
+  kpis: KpiDef[];
 }
 
 /**
@@ -54,12 +61,23 @@ const useDashboardPage = (): UseDashboardPage => {
     enabled: isAdminOrTeacher,
   });
 
+  const { data: latestAnnouncements, isLoading: announcementsLoading } = useGetData({
+    queryKey: ['announcements', 'latest'],
+    queryFn: () => getPage({ page: 0, size: 4 }),
+    transformFn: (d) => d.content,
+  });
+
+  const kpis = useDashboardKpis(isStudent);
+
   return {
     user,
     isAdmin: user?.role === 'ADMIN',
     isTeacher: user?.role === 'TEACHER',
     nextSession: isStudent ? (nextSession ?? null) : null,
     pendingProofCount: pendingQueue?.length ?? 0,
+    latestAnnouncements: latestAnnouncements ?? [],
+    announcementsLoading,
+    kpis,
   };
 };
 

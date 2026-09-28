@@ -1,6 +1,7 @@
 import { formatTime } from '../calendar';
 import { itemVisual } from '../itemStyle';
 import type { ScheduleItem } from '../types';
+import { courseColorVars } from '../../../utils/courseColor';
 
 interface ScheduleItemChipProps {
   item: ScheduleItem;
@@ -19,6 +20,7 @@ interface ScheduleItemChipProps {
 const ScheduleItemChip = ({ item, canManage, onManage, layout }: ScheduleItemChipProps) => {
   const visual = itemVisual(item);
   const time = formatTime(item.startTime);
+  const courseStyle = courseColorVars(item.courseId);
   const interactive =
     canManage && visual.isSession && item.status !== 'CANCELLED' && Boolean(onManage);
 
@@ -36,9 +38,9 @@ const ScheduleItemChip = ({ item, canManage, onManage, layout }: ScheduleItemChi
       </>
     );
     return interactive ? (
-      <button type="button" className={cls} onClick={() => onManage?.(item)}>{content}</button>
+      <button type="button" className={cls} style={courseStyle} onClick={() => onManage?.(item)}>{content}</button>
     ) : (
-      <div className={cls}>{content}</div>
+      <div className={cls} style={courseStyle}>{content}</div>
     );
   }
 
@@ -52,6 +54,7 @@ const ScheduleItemChip = ({ item, canManage, onManage, layout }: ScheduleItemChi
       <button
         type="button"
         className={`${className} sched-chip--button`}
+        style={courseStyle}
         title={`${label} — cancel / reschedule`}
         onClick={() => onManage?.(item)}
       >
@@ -61,7 +64,7 @@ const ScheduleItemChip = ({ item, canManage, onManage, layout }: ScheduleItemChi
   }
 
   return (
-    <span className={className} title={label}>
+    <span className={className} style={courseStyle} title={label}>
       {label}
     </span>
   );

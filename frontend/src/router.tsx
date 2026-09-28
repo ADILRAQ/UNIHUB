@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import BaseLayout from './components/layout/BaseLayout';
 import { AuthProvider } from './features/auth/AuthContext';
 import RequireAuth from './features/auth/components/RequireAuth';
@@ -15,7 +15,6 @@ import ComposerPage from './features/announcements/pages/ComposerPage';
 import CoursesPage from './features/resources/pages/CoursesPage';
 import CoursePage from './features/resources/pages/CoursePage';
 import PaymentsPage from './features/payments/pages/PaymentsPage';
-import TeacherPage from './features/teacher/pages/TeacherPage';
 import SessionRecapPage from './features/recaps/pages/SessionRecapPage';
 import TeacherRecapEditorPage from './features/recaps/pages/TeacherRecapEditorPage';
 
@@ -61,14 +60,12 @@ const router = createBrowserRouter([
                 ],
               },
               {
-                element: <RequireRole allowed={['ADMIN', 'TEACHER']} />,
-                children: [{ path: 'admin', element: <AdminPage /> }],
-              },
-              {
                 element: <RequireRole allowed={['TEACHER', 'ADMIN']} />,
                 children: [
+                  { path: 'admin', element: <AdminPage /> },
                   { path: 'timetable', element: <TimetablePage /> },
-                  { path: 'teacher', element: <TeacherPage /> },
+                  // The old teacher workspace merged into People (/admin) and Timetable.
+                  { path: 'teacher', element: <Navigate to="/admin" replace /> },
                 ],
               },
             ],

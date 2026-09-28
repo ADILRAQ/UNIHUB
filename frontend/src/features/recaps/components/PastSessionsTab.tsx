@@ -14,15 +14,20 @@ const PastSessionsTab = ({ courseId }: PastSessionsTabProps) => {
   const { sessions, isLoading, isError } = usePastSessionsTab(courseId);
 
   if (isLoading) {
-    return <p className="res-resource__meta">Loading past sessions&hellip;</p>;
+    return <div className="skeleton" style={{ height: 120 }} />;
   }
 
   if (isError) {
-    return <div className="alert alert--danger">Failed to load past sessions.</div>;
+    return <div className="alert" role="alert">Failed to load past sessions.</div>;
   }
 
   if (sessions.length === 0) {
-    return <p className="res-resource__meta">No past sessions yet.</p>;
+    return (
+      <div className="empty-state">
+        <h2 className="empty-state__title">No past sessions yet</h2>
+        <p className="empty-state__body">Once a class has taken place, its recording, notes and resources show up here.</p>
+      </div>
+    );
   }
 
   return (
@@ -36,15 +41,14 @@ const PastSessionsTab = ({ courseId }: PastSessionsTabProps) => {
             justifyContent: 'space-between',
             gap: 'var(--space-3)',
             padding: 'var(--space-3) var(--space-4)',
-            borderRadius: 'var(--radius-md)',
-            background: 'var(--surface-2)',
+            borderRadius: 'var(--radius-lg)',
+            background: 'var(--cream-100)',
           }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-1)', flex: 1, minWidth: 0 }}>
-            <span style={{ fontWeight: 500 }}>{session.courseName}</span>
-            <span className="res-resource__meta">
+            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink-900)' }}>
               {new Date(session.sessionDate).toLocaleDateString(undefined, {
-                weekday: 'short',
+                weekday: 'long',
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric',
@@ -54,38 +58,20 @@ const PastSessionsTab = ({ courseId }: PastSessionsTabProps) => {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', flexShrink: 0 }}>
             {session.hasRecap ? (
-              <span
-                style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  padding: '2px 8px',
-                  borderRadius: '999px',
-                  background: 'var(--color-success, #22c55e)',
-                  color: '#fff',
-                }}
-              >
+              <span className="badge badge--success">
                 Has recap
               </span>
             ) : (
-              <span
-                style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  padding: '2px 8px',
-                  borderRadius: '999px',
-                  background: 'var(--surface-3, #e5e7eb)',
-                  color: 'var(--text-muted)',
-                }}
-              >
+              <span className="badge badge--neutral">
                 No recap
               </span>
             )}
 
             <Link
               to={`/sessions/${session.id}/recap?courseId=${courseId}`}
-              className="res-btn res-btn--sm res-btn--ghost"
+              className="btn btn--sm"
             >
-              View
+              Open recap
             </Link>
           </div>
         </li>

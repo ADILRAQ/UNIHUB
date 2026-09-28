@@ -13,7 +13,8 @@ export interface SessionSummary {
 export interface RecapResource {
   id: number;
   name: string;
-  contentType: string;
+  /** null for link resources (no uploaded file). */
+  contentType: string | null;
 }
 
 /** An assignment linked to a recap. */

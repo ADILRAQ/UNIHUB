@@ -30,6 +30,8 @@ interface UseCommentsReturn {
   isLoading: boolean;
   isError: boolean;
   canDelete: (comment: CommentDto) => boolean;
+  /** Comments playing their exit animation while the delete request runs. */
+  leavingIds: Set<number>;
 }
 
 const useComments = ({
@@ -39,6 +41,7 @@ const useComments = ({
 }: UseCommentsOptions): UseCommentsReturn => {
   const [page, setPage] = useState(0);
   const [newComment, setNewComment] = useState('');
+  const [leavingIds, setLeavingIds] = useState<Set<number>>(new Set());
   const queryClient = useQueryClient();
 
   const commentsKey = ['comments', announcementId, page] as const;
@@ -105,7 +108,12 @@ const useComments = ({
   };
 
   const onDelete = (commentId: number) => {
-    doDelete({ announcementId, commentId });
+    setLeavingIds((prev) => new Set(prev).add(commentId));
+    doDelete(
+      { announcementId, commentId },
+      // Failed delete: bring the comment back.
+      { onError: () => setLeavingIds((prev) => { const next = new Set(prev); next.delete(commentId); return next; }) },
+    );
   };
 
   const canDelete = (comment: CommentDto): boolean =>
@@ -125,6 +133,7 @@ const useComments = ({
     isLoading,
     isError,
     canDelete,
+    leavingIds,
   };
 };
 

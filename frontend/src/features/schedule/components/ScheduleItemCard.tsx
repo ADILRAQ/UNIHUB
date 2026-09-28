@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { formatTimeRange, parseISODate, formatDateLong } from '../calendar';
 import { itemVisual } from '../itemStyle';
 import type { ScheduleItem } from '../types';
+import { courseColorVars } from '../../../utils/courseColor';
 
 interface ScheduleItemCardProps {
   item: ScheduleItem;
@@ -35,7 +36,7 @@ const ScheduleItemCard = ({ item, canManage, onManage }: ScheduleItemCardProps) 
   const canJoin = visual.isSession && !visual.isCancelled && !hasEnded && Boolean(item.meetLink);
 
   return (
-    <article className={`sched-item sched-item--${visual.variant}`}>
+    <article className={`sched-item sched-item--${visual.variant}`} style={courseColorVars(item.courseId)}>
       <div className="sched-item__row">
         <div className="sched-item__time-col">
           <span className="sched-item__time">{formatTimeRange(item.startTime, item.endTime)}</span>
@@ -43,6 +44,7 @@ const ScheduleItemCard = ({ item, canManage, onManage }: ScheduleItemCardProps) 
 
         <div className="sched-item__body">
           <h3 className={`sched-item__title${visual.isCancelled ? ' sched-item__title--cancelled' : ''}`}>
+            {visual.isSession && <span className="sched-item__course-dot" aria-hidden="true" />}
             {item.title}
           </h3>
 
@@ -78,7 +80,7 @@ const ScheduleItemCard = ({ item, canManage, onManage }: ScheduleItemCardProps) 
         <div className="sched-item__actions">
           {canJoin && (
             <a
-              className="sched-btn sched-btn--join"
+              className="btn btn--soft"
               href={item.meetLink ?? undefined}
               target="_blank"
               rel="noopener noreferrer"
@@ -88,16 +90,16 @@ const ScheduleItemCard = ({ item, canManage, onManage }: ScheduleItemCardProps) 
           )}
           {isPastSession && (
             <Link
-              className="sched-btn"
+              className="btn"
               to={`/sessions/${item.id}/recap${item.courseId ? `?courseId=${item.courseId}` : ''}`}
             >
-              View Recap
+              View recap
             </Link>
           )}
           {canManageThis && (
             <button
               type="button"
-              className="sched-btn"
+              className="btn"
               onClick={() => onManage?.(item)}
             >
               Cancel / reschedule

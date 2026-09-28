@@ -1,15 +1,27 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation, useNavigationType } from 'react-router-dom';
 import Sidebar from './Sidebar';
 
-const BaseLayout = () => (
-  <div className="app-shell">
-    <div className="app-body">
-      <Sidebar />
-      <main className="main-content page-enter">
-        <Outlet />
-      </main>
+/** True when the navigation should read as "going back" (browser back, or a back-link). */
+// location.key is 'default' on the first entry (initial load/refresh), which is also a POP.
+const isBackNavigation = (state: unknown, navType: string, key: string) =>
+  (navType === 'POP' && key !== 'default') || Boolean((state as { back?: boolean } | null)?.back);
+
+const BaseLayout = () => {
+  const location = useLocation();
+  const navType = useNavigationType();
+  const back = isBackNavigation(location.state, navType, location.key);
+
+  return (
+    <div className="app-shell">
+      <div className="app-body">
+        <Sidebar />
+        {/* Keyed by path so every route change replays the enter motion (slides in from the side you came from). */}
+        <main key={location.pathname} className={`main-content ${back ? 'page-enter--back' : 'page-enter'}`}>
+          <Outlet />
+        </main>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default BaseLayout;

@@ -24,7 +24,6 @@ export interface UseComposerReturn {
   pinned: boolean;
   urgent: boolean;
   isSaving: boolean;
-  isDeleting: boolean;
   error: string | null;
   /** Whether we are editing an existing announcement */
   isEditing: boolean;
@@ -38,7 +37,6 @@ export interface UseComposerReturn {
   onUrgentChange: (urgent: boolean) => void;
   /** bodyHtml is passed in by the RichTextEditor at submit time */
   onSubmit: (bodyHtml: string) => void;
-  onDelete: () => void;
 }
 
 const useComposer = ({ initialAnnouncement }: UseComposerOptions): UseComposerReturn => {
@@ -118,25 +116,6 @@ const useComposer = ({ initialAnnouncement }: UseComposerOptions): UseComposerRe
     },
   });
 
-  const { mutate: destroy, isPending: isDeleting } = usePostData<
-    string,
-    number,
-    void
-  >({
-    keys: ['announcements', 'delete'],
-    serviceFn: (id) => announcementService.deleteAnnouncement(id),
-    onSuccessFn: () => {
-      toast.success('Announcement deleted.');
-      void queryClient.invalidateQueries({ queryKey: ['announcements'] });
-      navigate('/announcements');
-    },
-    onErrorFn: (err) => {
-      const msg: string = (err?.response?.data?.message as string | undefined) ?? 'Failed to delete announcement.';
-      setError(msg);
-      toast.error(msg);
-    },
-  });
-
   const onSubmit = (bodyHtml: string) => {
     setError(null);
     if (!title.trim()) {
@@ -155,19 +134,12 @@ const useComposer = ({ initialAnnouncement }: UseComposerOptions): UseComposerRe
     }
   };
 
-  const onDelete = () => {
-    if (!initialAnnouncement) return;
-    if (!window.confirm('Delete this announcement? This cannot be undone.')) return;
-    destroy(initialAnnouncement.id);
-  };
-
   return {
     title,
     classGroupId,
     pinned,
     urgent,
     isSaving: isCreating || isUpdating,
-    isDeleting,
     error,
     isEditing,
     availableGroups: availableGroups ?? [],
@@ -177,7 +149,6 @@ const useComposer = ({ initialAnnouncement }: UseComposerOptions): UseComposerRe
     onPinnedChange: setPinned,
     onUrgentChange: setUrgent,
     onSubmit,
-    onDelete,
   };
 };
 

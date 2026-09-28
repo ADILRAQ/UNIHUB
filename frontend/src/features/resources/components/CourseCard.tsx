@@ -1,55 +1,41 @@
 import { Link } from 'react-router-dom';
 import type { Course } from '../../schedule/types';
+import { courseColorVars } from '../../../utils/courseColor';
 
 interface CourseCardProps {
   course: Course;
   showTeacher?: boolean;
-  index?: number;
 }
 
-const PALETTE = [
-  { bg: '#EEEDFF', color: '#4A41C9' },
-  { bg: '#EAFBF3', color: '#0F8F5F' },
-  { bg: '#FEF3E2', color: '#B8650A' },
-  { bg: '#FFE8E8', color: '#B02F2F' },
-  { bg: '#E8F1FF', color: '#1D5FC2' },
-  { bg: '#F3E8FF', color: '#7C3AED' },
-];
-
-const CourseCard = ({ course, showTeacher = false, index = 0 }: CourseCardProps) => {
-  const { bg, color } = PALETTE[index % PALETTE.length];
-  return (
-    <Link
-      to={`/courses/${course.id}`}
-      style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: 16, background: '#FFFFFF', border: '1px solid #EDEBF8', borderRadius: 16, padding: 22, boxShadow: '0 1px 2px rgba(108,99,255,0.05), 0 8px 22px rgba(108,99,255,0.06)' }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ width: 46, height: 46, borderRadius: 12, background: bg, color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/>
-          </svg>
-        </span>
-        <span style={{ display: 'inline-flex', alignItems: 'center', height: 24, padding: '0 10px', borderRadius: 999, background: '#EEEDFF', color: '#4A41C9', fontSize: 11.5, fontWeight: 600 }}>
-          {course.classGroupName}
-        </span>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-        <span style={{ fontSize: 16.5, fontWeight: 700, color: '#1F1B33', letterSpacing: '-0.01em', lineHeight: 1.35 }}>{course.name}</span>
-        {showTeacher && (
-          <span style={{ fontSize: 13, color: '#6B6B7B' }}>{course.teacherName}</span>
-        )}
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 12, borderTop: '1px solid #F0EEFA' }}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8D8B9C" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M4.5 6.5h15M4.5 12h15M4.5 17.5h9"/>
+/** Design-system CourseCard: cream panel, white icon tile, overline category, link row. */
+const CourseCard = ({ course, showTeacher = false }: CourseCardProps) => (
+  <Link
+    to={`/courses/${course.id}`}
+    className="course-card"
+    style={{ ...courseColorVars(course.id), textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: 12, background: 'var(--cream-100)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-4)' }}
+  >
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <span style={{ width: 44, height: 44, flexShrink: 0, borderRadius: 'var(--radius-md)', background: 'var(--course-bg)', color: 'var(--course-fg)', display: 'grid', placeItems: 'center' }}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M3 5.5c3-1.3 6-1.3 9 .5 3-1.8 6-1.8 9-.5v13c-3-1.3-6-1.3-9 .5-3-1.8-6-1.8-9-.5z" /><path d="M12 6v13" />
         </svg>
-        <span style={{ fontSize: 12.5, color: '#8D8B9C' }}>
-          {course.moduleCount === 1 ? '1 module' : `${course.moduleCount ?? 0} modules`}
-        </span>
-      </div>
-    </Link>
-  );
-};
+      </span>
+      <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        <span style={{ fontSize: 16, lineHeight: '24px', fontWeight: 600, color: 'var(--ink-900)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{course.name}</span>
+        <span className="overline">{course.classGroupName}</span>
+      </span>
+    </div>
+    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 12, color: 'var(--ink-500)' }}>
+      <span>{course.moduleCount === 1 ? '1 module' : `${course.moduleCount ?? 0} modules`}</span>
+      {showTeacher && <span>{course.teacherName}</span>}
+    </div>
+    <span className="btn btn--link" style={{ alignSelf: 'flex-start' }}>
+      Open course
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" /><path d="M9 12h6M12.5 9l3 3-3 3" />
+      </svg>
+    </span>
+  </Link>
+);
 
 export default CourseCard;

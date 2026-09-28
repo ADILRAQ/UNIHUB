@@ -32,7 +32,7 @@ const TempPasswordPanel = ({
       )}
       <div className="temp-password__row">
         <code className="temp-password__value">{password}</code>
-        <button type="button" className="admin-button" onClick={onCopy}>
+        <button type="button" className="btn" onClick={onCopy}>
           {copied ? 'Copied!' : 'Copy'}
         </button>
       </div>

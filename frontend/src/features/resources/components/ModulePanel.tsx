@@ -60,7 +60,7 @@ const ModulePanel = ({
       <div className="res-module__header">
         <button
           type="button"
-          className="res-btn res-btn--ghost"
+          className="btn btn--ghost"
           onClick={() => onToggle(module.id)}
           aria-expanded={isExpanded}
         >
@@ -90,14 +90,14 @@ const ModulePanel = ({
           <span style={{ display: 'flex', gap: 'var(--space-1)', marginLeft: 'auto' }}>
             <button
               type="button"
-              className="res-btn res-btn--sm res-btn--ghost"
+              className="btn btn--sm btn--ghost"
               onClick={() => setEditing(true)}
             >
               Rename
             </button>
             <button
               type="button"
-              className="res-btn res-btn--sm res-btn--danger"
+              className="btn btn--sm btn--danger"
               onClick={() => {
                 if (window.confirm(`Delete module "${module.title}"?`)) {
                   onDelete(module.id);
@@ -108,7 +108,7 @@ const ModulePanel = ({
             </button>
             <button
               type="button"
-              className="res-btn res-btn--sm res-btn--ghost"
+              className="btn btn--sm btn--ghost"
               onClick={() => setShowLinkForm((v) => !v)}
               disabled={isAddingLink}
               title="Add external link"
@@ -130,9 +130,8 @@ const ModulePanel = ({
           style={{
             marginTop: 'var(--space-2)',
             padding: 'var(--space-3)',
-            background: '#F8F7FF',
-            border: '1px solid #E1DEF2',
-            borderRadius: 10,
+            background: 'var(--cream-100)',
+            borderRadius: 'var(--radius-md)',
             display: 'flex',
             flexDirection: 'column',
             gap: 'var(--space-2)',
@@ -145,20 +144,8 @@ const ModulePanel = ({
               value={linkTitle}
               onChange={(e) => setLinkTitle(e.target.value)}
               disabled={isAddingLink}
-              style={{
-                flexGrow: 1,
-                minWidth: 160,
-                height: 38,
-                boxSizing: 'border-box',
-                border: '1px solid #E1DEF2',
-                borderRadius: 8,
-                padding: '0 12px',
-                fontSize: 13.5,
-                color: '#1F1B33',
-                background: '#FFFFFF',
-                outline: 'none',
-                fontFamily: 'inherit',
-              }}
+              className="input"
+              style={{ flexGrow: 1, flexBasis: 0, width: 'auto', minWidth: 160, background: 'var(--white)' }}
             />
             <input
               type="url"
@@ -170,26 +157,14 @@ const ModulePanel = ({
                 if (e.key === 'Enter') handleAddLink();
                 if (e.key === 'Escape') setShowLinkForm(false);
               }}
-              style={{
-                flexGrow: 2,
-                minWidth: 200,
-                height: 38,
-                boxSizing: 'border-box',
-                border: '1px solid #E1DEF2',
-                borderRadius: 8,
-                padding: '0 12px',
-                fontSize: 13.5,
-                color: '#1F1B33',
-                background: '#FFFFFF',
-                outline: 'none',
-                fontFamily: 'inherit',
-              }}
+              className="input"
+              style={{ flexGrow: 2, flexBasis: 0, width: 'auto', minWidth: 200, background: 'var(--white)' }}
             />
           </div>
           <div style={{ display: 'flex', gap: 'var(--space-1)' }}>
             <button
               type="button"
-              className="res-btn res-btn--sm res-btn--primary"
+              className="btn btn--sm btn--primary"
               disabled={isAddingLink || !linkTitle.trim() || !linkUrl.trim()}
               onClick={handleAddLink}
             >
@@ -197,7 +172,7 @@ const ModulePanel = ({
             </button>
             <button
               type="button"
-              className="res-btn res-btn--sm res-btn--ghost"
+              className="btn btn--sm btn--ghost"
               onClick={() => setShowLinkForm(false)}
               disabled={isAddingLink}
             >

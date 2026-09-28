@@ -24,7 +24,6 @@ const AddUserSection = () => {
 
   return (
     <section className="admin-section">
-      <h2 className="admin-section__title">Add a user</h2>
 
       {createdUser && (
         <TempPasswordPanel
@@ -91,11 +90,11 @@ const AddUserSection = () => {
         {serverError && <p className="admin-error">{serverError}</p>}
 
         <div className="admin-form__actions">
-          <button type="submit" className="admin-button admin-button--primary" disabled={isPending}>
+          <button type="submit" className="btn btn--primary" disabled={isPending}>
             {isPending ? 'Creating…' : 'Create user'}
           </button>
           {createdUser && (
-            <button type="button" className="admin-button" onClick={onReset}>
+            <button type="button" className="btn" onClick={onReset}>
               Add another
             </button>
           )}

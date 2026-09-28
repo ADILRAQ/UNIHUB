@@ -1,9 +1,10 @@
 import useLoginPage from '../hooks/useLoginPage';
+import { academicYearOf } from '../../../utils/academicYear';
 
 const FEATURES = [
   {
     icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--white)" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="5" width="18" height="16" rx="2.5"/>
         <path d="M3 10h18M8 3v4M16 3v4"/>
       </svg>
@@ -12,7 +13,7 @@ const FEATURES = [
   },
   {
     icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--white)" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/>
       </svg>
@@ -21,7 +22,7 @@ const FEATURES = [
   },
   {
     icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--white)" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2.5" y="5" width="19" height="14" rx="2.5"/>
         <path d="M2.5 10h19"/>
       </svg>
@@ -47,11 +48,12 @@ const LoginPage = () => {
   const hasError = !!(fieldError || serverError);
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#F8F7FF' }}>
-      {/* ── Left hero panel ── */}
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--cream-100)' }}>
+      {/* ── Left hero panel (hidden on narrow screens) ── */}
       <div
+        className="auth-hero"
         style={{
-          width: 620,
+          width: 'min(620px, 45vw)',
           flexShrink: 0,
           position: 'relative',
           overflow: 'hidden',
@@ -60,40 +62,40 @@ const LoginPage = () => {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          background: 'linear-gradient(155deg, #3B33AE 0%, #4A41C9 48%, #6156E6 100%)',
+          background: 'var(--orange-900)',
         }}
       >
         {/* Decorative blobs */}
-        <div style={{ position: 'absolute', top: -170, right: -170, width: 520, height: 520, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0) 68%)' }} />
-        <div style={{ position: 'absolute', bottom: -150, left: -120, width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,107,107,0.30) 0%, rgba(255,107,107,0) 70%)' }} />
+        <div style={{ position: 'absolute', top: -170, right: -170, width: 520, height: 520, borderRadius: 'var(--radius-full)', background: 'radial-gradient(circle, rgba(255, 107, 31, 0.55) 0%, rgba(255, 107, 31, 0) 70%)' }} aria-hidden="true" />
+        <div style={{ position: 'absolute', bottom: -150, left: -120, width: 420, height: 420, borderRadius: 'var(--radius-full)', background: 'radial-gradient(circle, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 68%)' }} aria-hidden="true" />
 
         {/* Logo */}
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.30)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+          <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.30)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="var(--white)" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 8.2 12 4l9 4.2-9 4.2-9-4.2Z"/>
               <path d="M7.2 10.6V15c0 1.5 2.2 2.6 4.8 2.6s4.8-1.1 4.8-2.6v-4.4"/>
               <path d="M21 8.2v5.6"/>
             </svg>
           </div>
-          <span style={{ fontSize: 21, fontWeight: 700, color: '#FFFFFF', letterSpacing: '-0.02em' }}>UniHub</span>
+          <span style={{ fontSize: 20, fontWeight: 700, color: 'var(--white)', letterSpacing: '-0.02em' }}>UniHub</span>
         </div>
 
         {/* Headline + features */}
         <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 26, maxWidth: 480 }}>
-          <h1 style={{ margin: 0, fontSize: 42, lineHeight: 1.14, fontWeight: 700, color: '#FFFFFF', letterSpacing: '-0.03em' }}>
+          <h1 style={{ margin: 0, fontSize: 40, lineHeight: 1.15, fontWeight: 600, color: 'var(--white)', letterSpacing: '-0.02em' }}>
             Everything the department runs on, in one place.
           </h1>
-          <p style={{ margin: 0, fontSize: 17, lineHeight: 1.6, color: 'rgba(255,255,255,0.9)' }}>
+          <p style={{ margin: 0, fontSize: 16, lineHeight: 1.6, color: 'rgba(255,255,255,0.9)' }}>
             Schedule, course modules, assignments, session recaps and tuition — for every class group, every day of the year.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {FEATURES.map(({ icon, text }) => (
               <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ width: 32, height: 32, flexShrink: 0, borderRadius: 10, background: 'rgba(255,255,255,0.16)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: 32, height: 32, flexShrink: 0, borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.16)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {icon}
                 </span>
-                <span style={{ fontSize: 15, color: '#FFFFFF' }}>{text}</span>
+                <span style={{ fontSize: 16, color: 'var(--white)' }}>{text}</span>
               </div>
             ))}
           </div>
@@ -101,30 +103,30 @@ const LoginPage = () => {
 
         {/* Badge */}
         <div style={{ position: 'relative' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', height: 28, padding: '0 12px', borderRadius: 999, background: 'rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.28)', color: '#FFFFFF', fontSize: 12.5, fontWeight: 600 }}>
-            Academic year 2026–2027
+          <span style={{ display: 'inline-flex', alignItems: 'center', height: 28, padding: '0 12px', borderRadius: 'var(--radius-full)', background: 'rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.28)', color: 'var(--white)', fontSize: 12, fontWeight: 600 }}>
+            Academic year {academicYearOf(new Date())}
           </span>
         </div>
       </div>
 
       {/* ── Right form panel ── */}
-      <div style={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', padding: 56 }}>
-        <div style={{ width: 440, display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <div style={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', padding: 'var(--space-6)' }}>
+        <div style={{ width: '100%', maxWidth: 440, display: 'flex', flexDirection: 'column', gap: 18 }}>
           {/* Card */}
-          <div style={{ background: '#FFFFFF', border: '1px solid #EDEBF8', borderRadius: 20, padding: 36, boxShadow: '0 1px 2px rgba(108,99,255,0.06), 0 18px 44px rgba(108,99,255,0.12)', display: 'flex', flexDirection: 'column', gap: 22 }}>
+          <div style={{ background: 'var(--white)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: 'clamp(24px, 5vw, 36px)', boxShadow: 'var(--shadow-float)', display: 'flex', flexDirection: 'column', gap: 22 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <h2 style={{ margin: 0, fontSize: 26, fontWeight: 700, color: '#1F1B33', letterSpacing: '-0.02em' }}>Sign in</h2>
-              <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.5, color: '#6B6B7B' }}>Use the university email your department issued you.</p>
+              <h2 style={{ margin: 0, fontSize: 24, lineHeight: '32px', fontWeight: 600, color: 'var(--ink-900)', letterSpacing: '-0.01em' }}>Sign in</h2>
+              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: 'var(--ink-500)' }}>Use the university email your department issued you.</p>
             </div>
 
             {/* Error alert */}
             {hasError && (
-              <div role="alert" style={{ display: 'flex', alignItems: 'flex-start', gap: 10, background: '#FEF2F2', border: '1px solid #F7A9A9', borderRadius: 10, padding: '12px 14px' }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+              <div role="alert" className="alert" style={{ margin: 0 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger-700)" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
                   <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>
                   <path d="M12 9.2v4.1M12 17h.01"/>
                 </svg>
-                <span style={{ fontSize: 13.5, lineHeight: 1.5, color: '#B91C1C' }}>
+                <span style={{ fontSize: 13, lineHeight: 1.5, color: 'var(--danger-700)' }}>
                   {fieldError ?? serverError}
                 </span>
               </div>
@@ -133,7 +135,7 @@ const LoginPage = () => {
             <form onSubmit={onSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
               {/* Email */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                <label htmlFor="login-email" style={{ fontSize: 13, fontWeight: 600, color: '#45435A' }}>University email</label>
+                <label htmlFor="login-email" className="label" style={{ margin: 0 }}>University email</label>
                 <input
                   id="login-email"
                   type="email"
@@ -142,13 +144,14 @@ const LoginPage = () => {
                   value={email}
                   onChange={e => onEmailChange(e.target.value)}
                   disabled={isPending}
-                  style={{ height: 48, boxSizing: 'border-box', border: '1px solid #E1DEF2', borderRadius: 10, background: '#FFFFFF', padding: '0 14px', fontSize: 15, color: '#1F1B33', outline: 'none', width: '100%' }}
+                  className="input"
+                  style={{ height: 48, fontSize: 16 }}
                 />
               </div>
 
               {/* Password */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                <label htmlFor="login-password" style={{ fontSize: 13, fontWeight: 600, color: '#45435A' }}>Password</label>
+                <label htmlFor="login-password" className="label" style={{ margin: 0 }}>Password</label>
                 <div style={{ position: 'relative', display: 'flex' }}>
                   <input
                     id="login-password"
@@ -158,13 +161,14 @@ const LoginPage = () => {
                     value={password}
                     onChange={e => onPasswordChange(e.target.value)}
                     disabled={isPending}
-                    style={{ height: 48, width: '100%', boxSizing: 'border-box', border: '1px solid #E1DEF2', borderRadius: 10, background: '#FFFFFF', padding: '0 52px 0 14px', fontSize: 15, color: '#1F1B33', outline: 'none' }}
+                    className="input"
+                    style={{ height: 48, fontSize: 16, paddingRight: 52 }}
                   />
                   <button
                     type="button"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                     onClick={toggleShowPassword}
-                    style={{ position: 'absolute', right: 2, top: 2, width: 44, height: 44, border: 0, background: 'transparent', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6B6B7B' }}
+                    style={{ position: 'absolute', right: 2, top: 2, width: 44, height: 44, border: 0, background: 'transparent', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--ink-500)' }}
                   >
                     {showPassword ? (
                       <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -184,18 +188,19 @@ const LoginPage = () => {
               <button
                 type="submit"
                 disabled={isPending}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 50, borderRadius: 10, background: isPending ? '#8A84E8' : '#5A4FE0', color: '#FFFFFF', fontSize: 15.5, fontWeight: 600, border: 'none', cursor: isPending ? 'not-allowed' : 'pointer', boxShadow: '0 6px 16px rgba(108,99,255,0.28)', marginTop: 4 }}
+                className="btn btn--primary"
+                style={{ height: 48, fontSize: 16, marginTop: 4 }}
               >
                 {isPending ? 'Signing in…' : 'Sign in'}
               </button>
 
-              <p style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: '#6B6B7B' }}>
+              <p style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: 'var(--ink-500)' }}>
                 Signing in for the first time? You&apos;ll be asked to replace your temporary password before anything else opens.
               </p>
             </form>
           </div>
 
-          <p style={{ margin: 0, textAlign: 'center', fontSize: 13, lineHeight: 1.55, color: '#6B6B7B' }}>
+          <p style={{ margin: 0, textAlign: 'center', fontSize: 13, lineHeight: 1.55, color: 'var(--ink-500)' }}>
             Locked out? Only the department office can reset a password.
           </p>
         </div>
