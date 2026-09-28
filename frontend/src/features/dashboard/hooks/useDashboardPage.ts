@@ -6,6 +6,8 @@ import { getQueue } from '../../payments/services/paymentService';
 import type { PendingProofItemDto } from '../../payments/types';
 import { getPage } from '../../announcements/services/announcementService';
 import type { AnnouncementDto } from '../../announcements/types';
+import useDashboardKpis from './useDashboardKpis';
+import type { KpiDef } from '../types';
 
 export interface NextSessionDto {
   sessionId: string;
@@ -26,6 +28,7 @@ export interface UseDashboardPage {
   pendingProofCount: number;
   latestAnnouncements: AnnouncementDto[];
   announcementsLoading: boolean;
+  kpis: KpiDef[];
 }
 
 /**
@@ -64,6 +67,8 @@ const useDashboardPage = (): UseDashboardPage => {
     transformFn: (d) => d.content,
   });
 
+  const kpis = useDashboardKpis(isStudent);
+
   return {
     user,
     isAdmin: user?.role === 'ADMIN',
@@ -72,6 +77,7 @@ const useDashboardPage = (): UseDashboardPage => {
     pendingProofCount: pendingQueue?.length ?? 0,
     latestAnnouncements: latestAnnouncements ?? [],
     announcementsLoading,
+    kpis,
   };
 };
 

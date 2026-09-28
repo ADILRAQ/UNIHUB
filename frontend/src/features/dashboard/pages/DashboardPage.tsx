@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import useDashboardPage from '../hooks/useDashboardPage';
+import KpiStrip from '../components/KpiStrip';
 import useStudentPayments from '../../payments/hooks/useStudentPayments';
 import { academicYearOf } from '../../../utils/academicYear';
 import type { InstallmentDto, InstallmentStatus } from '../../payments/types';
@@ -155,7 +156,7 @@ const getGreeting = () => {
 };
 
 const DashboardPage = () => {
-  const { user, isAdmin, isTeacher, nextSession, pendingProofCount, latestAnnouncements, announcementsLoading } = useDashboardPage();
+  const { user, isAdmin, isTeacher, nextSession, pendingProofCount, latestAnnouncements, announcementsLoading, kpis } = useDashboardPage();
   const isStudent = !isAdmin && !isTeacher;
   const firstName = user?.fullName?.split(' ')[0] ?? 'there';
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -237,6 +238,8 @@ const DashboardPage = () => {
                 )}
               </div>
             </section>
+
+            <KpiStrip kpis={kpis} />
 
             <LatestAnnouncements items={latestAnnouncements} isLoading={announcementsLoading} />
           </div>

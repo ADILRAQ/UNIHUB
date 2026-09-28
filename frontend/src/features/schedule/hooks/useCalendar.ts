@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import useSchedule from './useSchedule';
 import {
@@ -84,7 +85,12 @@ const groupByDate = (items: ScheduleItem[]): Map<string, ScheduleItem[]> => {
  */
 const useCalendar = (): UseCalendar => {
   const { user } = useAuth();
-  const [view, setView] = useState<CalendarView>('today');
+  const [searchParams] = useSearchParams();
+  const viewParam = searchParams.get('view');
+  // Deep links (e.g. dashboard KPIs) can open a view with ?view=week.
+  const [view, setView] = useState<CalendarView>(
+    viewParam === 'week' || viewParam === 'month' ? viewParam : 'today',
+  );
   const [anchor, setAnchor] = useState<Date>(today);
   const [dialogSession, setDialogSession] = useState<ScheduleItem | null>(null);
 

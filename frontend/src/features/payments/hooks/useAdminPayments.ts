@@ -3,6 +3,7 @@
  * Owns queue, approval/rejection mutations, overdue list, and year-plan form.
  */
 import { useState, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import useGetData from '../../../hooks/useGetData';
 import usePostData from '../../../hooks/usePostData';
@@ -18,6 +19,7 @@ import type {
 import type { ClassGroupDto } from '../../../api/types';
 
 export type AdminPaymentsTab = 'queue' | 'overdue' | 'plan';
+const TABS: AdminPaymentsTab[] = ['queue', 'overdue', 'plan'];
 
 const QUEUE_KEY = ['payments', 'queue'] as const;
 const OVERDUE_KEY = ['payments', 'overdue'] as const;
@@ -57,7 +59,10 @@ interface UseAdminPaymentsReturn {
 
 const useAdminPayments = (): UseAdminPaymentsReturn => {
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<AdminPaymentsTab>('queue');
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab') as AdminPaymentsTab | null;
+  // Deep links (e.g. dashboard KPIs) can open a tab with ?tab=overdue.
+  const [activeTab, setActiveTab] = useState<AdminPaymentsTab>(tabParam && TABS.includes(tabParam) ? tabParam : 'queue');
   const [approvingId, setApprovingId] = useState<number | null>(null);
   const [rejectTargetId, setRejectTargetId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState('');

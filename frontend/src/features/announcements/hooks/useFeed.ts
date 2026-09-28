@@ -3,6 +3,7 @@
  * Handles pagination, filters, and unread-count badge.
  */
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import useGetData from '../../../hooks/useGetData';
 import * as announcementService from '../services/announcementService';
 import type { AnnouncementDto, AnnouncementFilters } from '../types';
@@ -23,7 +24,12 @@ interface UseFeedReturn {
 
 const useFeed = (): UseFeedReturn => {
   const [page, setPage] = useState(0);
-  const [filters, setFilters] = useState<AnnouncementFilters>({});
+  const [searchParams] = useSearchParams();
+  const filterParam = searchParams.get('filter');
+  // Deep links (e.g. dashboard KPIs) can open a filter with ?filter=unread.
+  const [filters, setFilters] = useState<AnnouncementFilters>(
+    filterParam === 'unread' ? { unread: true } : filterParam === 'urgent' ? { urgent: true } : {},
+  );
 
   const { data, isLoading, isError } = useGetData<
     PagedResponse<AnnouncementDto>,
