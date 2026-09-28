@@ -18,7 +18,7 @@ const TimetablePage = () => {
       <div style={{ flexGrow: 1, display: 'flex', minHeight: 0 }}>
         {/* Course list */}
         <nav aria-label="Courses" style={{ width: 280, flexShrink: 0, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-          <div className="sidebar-section-label" style={{ paddingLeft: 24 }}>Courses</div>
+          <div className="overline" style={{ padding: '16px 24px 8px' }}>Courses</div>
 
           {cm.isLoading && <div className="skeleton" style={{ height: 160, margin: '0 16px' }} />}
           {cm.isError && <p className="alert" style={{ margin: '0 16px' }}>Couldn&apos;t load courses.</p>}

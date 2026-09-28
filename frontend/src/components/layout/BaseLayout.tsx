@@ -2,13 +2,14 @@ import { Outlet, useLocation, useNavigationType } from 'react-router-dom';
 import Sidebar from './Sidebar';
 
 /** True when the navigation should read as "going back" (browser back, or a back-link). */
-const isBackNavigation = (state: unknown, navType: string) =>
-  navType === 'POP' || Boolean((state as { back?: boolean } | null)?.back);
+// location.key is 'default' on the first entry (initial load/refresh), which is also a POP.
+const isBackNavigation = (state: unknown, navType: string, key: string) =>
+  (navType === 'POP' && key !== 'default') || Boolean((state as { back?: boolean } | null)?.back);
 
 const BaseLayout = () => {
   const location = useLocation();
   const navType = useNavigationType();
-  const back = isBackNavigation(location.state, navType);
+  const back = isBackNavigation(location.state, navType, location.key);
 
   return (
     <div className="app-shell">

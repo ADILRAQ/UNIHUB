@@ -27,6 +27,8 @@ const useTabIndicator = (activeKey: string) => {
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(list);
+    // Tabs grow when counts load or the webfont swaps in without resizing the list itself.
+    list.querySelectorAll('[role="tab"]').forEach((tab) => observer.observe(tab));
     return () => observer.disconnect();
   }, [activeKey]);
 

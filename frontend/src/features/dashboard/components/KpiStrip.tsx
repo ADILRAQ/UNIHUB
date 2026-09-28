@@ -18,7 +18,13 @@ const KpiStrip = ({ kpis }: { kpis: KpiDef[] }) => (
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             {ICON_PATHS[kpi.icon].map((d) => <path key={d} d={d} />)}
           </svg>
-          {kpi.value === null ? <span className="kpi__placeholder skeleton" aria-label="Loading" /> : kpi.value}
+          {kpi.value === null ? (
+            <span className="kpi__placeholder skeleton" aria-label="Loading" />
+          ) : kpi.value === 'error' ? (
+            <span title="Couldn't load this number" aria-label="Unavailable">—</span>
+          ) : (
+            kpi.value
+          )}
         </span>
         <span className="kpi__label">{kpi.label}</span>
       </Link>

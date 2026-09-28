@@ -266,12 +266,17 @@ type PreviewState = { url: string; type: string; item: PendingProofItemDto };
 const QueueTab = ({ queue, isLoading, isError, approvingId, rejectingId, rejectTargetId, rejectReason, setRejectReason, onApprove, onOpenReject, onCancelReject, onConfirmReject }: QueueTabProps) => {
   const [preview, setPreview] = useState<PreviewState | null>(null);
   const [loadingProofId, setLoadingProofId] = useState<number | null>(null);
+  const [previewError, setPreviewError] = useState<{ id: number; name: string } | null>(null);
 
   const openPreview = async (item: PendingProofItemDto) => {
     setLoadingProofId(item.installmentId);
+    setPreviewError(null);
     try {
       const result = await getProofBlobUrl(item.installmentId);
       setPreview({ ...result, item });
+    } catch {
+      // Approve/reject live in the preview, so a proof that can't load must not dead-end the review.
+      setPreviewError({ id: item.installmentId, name: item.studentName });
     } finally {
       setLoadingProofId(null);
     }
@@ -289,7 +294,8 @@ const QueueTab = ({ queue, isLoading, isError, approvingId, rejectingId, rejectT
   // Close the preview once its proof has been approved/rejected and left the queue.
   useEffect(() => {
     if (preview && !queue.some((q) => q.installmentId === preview.item.installmentId)) setPreview(null);
-  }, [preview, queue]);
+    if (previewError && !queue.some((q) => q.installmentId === previewError.id)) setPreviewError(null);
+  }, [preview, previewError, queue]);
 
   if (isLoading) return <div className="skeleton" style={{ height: 160 }} />;
   if (isError) return <p className="alert" role="alert">Failed to load the proof queue. Please try again.</p>;
@@ -361,6 +367,23 @@ const QueueTab = ({ queue, isLoading, isError, approvingId, rejectingId, rejectT
               )}
             </div>
           </div>
+        </div>
+      )}
+      {previewError && (
+        <div role="alert" className="alert" style={{ alignItems: 'center', marginBottom: 16 }}>
+          <span style={{ flex: 1 }}>Couldn&apos;t load the proof from {previewError.name}. It may be missing or unreadable.</span>
+          {rejectTargetId === previewError.id ? (
+            <>
+              <input type="text" placeholder="Rejection reason…" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} autoFocus className="input" aria-label="Rejection reason" style={{ maxWidth: 260, background: 'var(--white)' }} />
+              <button type="button" className="btn btn--danger btn--sm" disabled={!rejectReason.trim() || rejectingId != null} onClick={onConfirmReject}>Confirm reject</button>
+              <button type="button" className="btn btn--ghost btn--sm" onClick={onCancelReject}>Cancel</button>
+            </>
+          ) : (
+            <>
+              <button type="button" className="btn btn--sm" onClick={() => onOpenReject(previewError.id)}>Reject as unreadable</button>
+              <button type="button" className="btn btn--ghost btn--sm" onClick={() => setPreviewError(null)}>Dismiss</button>
+            </>
+          )}
         </div>
       )}
       <div className="table-card">

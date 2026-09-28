@@ -9,6 +9,7 @@ import type { AnnouncementDto } from '../types';
 interface Props {
   announcement: AnnouncementDto;
   canManage: boolean;
+  canPin: boolean;
   onTogglePin: () => void;
   onToggleUrgent: () => void;
   currentUserId: number;
@@ -24,7 +25,7 @@ const formatDate = (iso: string): string =>
     hour: '2-digit', minute: '2-digit',
   });
 
-const AnnouncementDetail = ({ announcement, canManage, onTogglePin, onToggleUrgent, currentUserId, currentUserRole }: Props) => (
+const AnnouncementDetail = ({ announcement, canManage, canPin, onTogglePin, onToggleUrgent, currentUserId, currentUserRole }: Props) => (
   <>
     <article className="card" style={{ padding: '32px 36px', display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12 }}>
@@ -47,9 +48,11 @@ const AnnouncementDetail = ({ announcement, canManage, onTogglePin, onToggleUrge
 
       {canManage && (
         <div style={{ display: 'flex', gap: 8, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
-          <button type="button" className={`btn btn--sm${announcement.pinned ? ' btn--active' : ''}`} aria-pressed={announcement.pinned} onClick={onTogglePin}>
-            {announcement.pinned ? 'Pinned' : 'Pin to top'}
-          </button>
+          {canPin && (
+            <button type="button" className={`btn btn--sm${announcement.pinned ? ' btn--active' : ''}`} aria-pressed={announcement.pinned} onClick={onTogglePin}>
+              {announcement.pinned ? 'Pinned' : 'Pin to top'}
+            </button>
+          )}
           <button type="button" className={`btn btn--sm${announcement.urgent ? ' btn--danger' : ''}`} aria-pressed={announcement.urgent} onClick={onToggleUrgent}>
             {announcement.urgent ? 'Marked urgent' : 'Mark urgent'}
           </button>

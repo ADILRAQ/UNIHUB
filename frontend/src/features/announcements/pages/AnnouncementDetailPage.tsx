@@ -48,6 +48,7 @@ const AnnouncementDetailPage = () => {
           <AnnouncementDetail
             announcement={d.announcement}
             canManage={d.canManage}
+            canPin={d.canPin}
             onTogglePin={d.onTogglePin}
             onToggleUrgent={d.onToggleUrgent}
             currentUserId={user?.userId ?? 0}

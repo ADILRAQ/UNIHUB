@@ -16,8 +16,10 @@ interface UseAnnouncementDetailReturn {
   announcement: AnnouncementDto | undefined;
   isLoading: boolean;
   isError: boolean;
-  /** Author or admin: may edit, delete, pin and flag urgent. */
+  /** Author or admin: may edit, delete and flag urgent. */
   canManage: boolean;
+  /** Pinning is admin-only on the backend. */
+  canPin: boolean;
   onEdit: () => void;
   onDelete: () => void;
   isDeleting: boolean;
@@ -83,12 +85,29 @@ const useAnnouncementDetail = (id: number): UseAnnouncementDetailReturn => {
     if (window.confirm('Delete this announcement and its comments? This cannot be undone.')) remove(id);
   };
 
+  const toggleError = (fallback: string) => (err: { response?: { data?: { message?: string } } }) =>
+    toast.error(err?.response?.data?.message ?? fallback);
+
+  const { mutate: pin } = usePostData<string | number, boolean, AnnouncementDto>({
+    keys: ['announcements', id, 'pin'],
+    serviceFn: (pinned) => announcementService.pinAnnouncement(id, pinned),
+    onSuccessFn: invalidate,
+    onErrorFn: toggleError('Could not update the pin.'),
+  });
+
+  const { mutate: flagUrgent } = usePostData<string | number, boolean, AnnouncementDto>({
+    keys: ['announcements', id, 'urgent'],
+    serviceFn: (urgent) => announcementService.setUrgent(id, urgent),
+    onSuccessFn: invalidate,
+    onErrorFn: toggleError('Could not update urgency.'),
+  });
+
   const onTogglePin = () => {
-    if (announcement) void announcementService.pinAnnouncement(id, !announcement.pinned).then(invalidate);
+    if (announcement) pin(!announcement.pinned);
   };
 
   const onToggleUrgent = () => {
-    if (announcement) void announcementService.setUrgent(id, !announcement.urgent).then(invalidate);
+    if (announcement) flagUrgent(!announcement.urgent);
   };
 
   return {
@@ -96,6 +115,7 @@ const useAnnouncementDetail = (id: number): UseAnnouncementDetailReturn => {
     isLoading,
     isError,
     canManage,
+    canPin: user?.role === 'ADMIN',
     onEdit: () => navigate(`/announcements/${id}/edit`),
     onDelete,
     isDeleting,

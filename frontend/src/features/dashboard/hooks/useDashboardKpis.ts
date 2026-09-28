@@ -15,7 +15,9 @@ const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 // ponytail: one request per course; move to a single /api/dashboard endpoint if course counts grow.
 const countDueSoon = async (): Promise<number> => {
   const courses = await listCourses();
-  const perCourse = await Promise.all(courses.map((c) => getAssignments(c.id)));
+  // allSettled: one course failing shouldn't hide the whole count.
+  const settled = await Promise.allSettled(courses.map((c) => getAssignments(c.id)));
+  const perCourse = settled.flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []));
   const now = Date.now();
   return perCourse
     .flat()
@@ -68,9 +70,9 @@ const useDashboardKpis = (isStudent: boolean): KpiDef[] => {
     enabled: !isStudent,
   });
 
-  // null while loading or on error: the tile shows a placeholder instead of a wrong 0.
-  const value = (q: { data?: number; isLoading: boolean; isError: boolean }) =>
-    q.isLoading || q.isError ? null : q.data ?? 0;
+  // Loading → placeholder; error → dash. Never a misleading 0.
+  const value = (q: { data?: number; isLoading: boolean; isError: boolean }): KpiDef['value'] =>
+    q.isError ? 'error' : q.isLoading ? null : q.data ?? 0;
 
   const classesTile: KpiDef = {
     key: 'classes', icon: 'calendar', label: 'Classes this week', value: value(classes),
