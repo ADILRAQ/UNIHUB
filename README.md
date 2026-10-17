@@ -1,8 +1,16 @@
 # UniHub
 
+[![CI](https://github.com/ADILRAQ/UNIHUB/actions/workflows/ci.yml/badge.svg)](https://github.com/ADILRAQ/UNIHUB/actions/workflows/ci.yml)
+![Java 21](https://img.shields.io/badge/Java-21-orange)
+![Spring Boot 3](https://img.shields.io/badge/Spring_Boot-3-6DB33F)
+![React 18](https://img.shields.io/badge/React-18-61DAFB)
+![Docker](https://img.shields.io/badge/Docker-ready-2496ED)
+
 University hub centralising academic life: announcements, class calendar with Google Meet
 links, course resources & homework submissions, session recaps for missed classes, and
 tuition payment tracking (3 installments with proof-image validation).
+
+**Live demo:** https://adaptable-luck-production-f94c.up.railway.app/login
 
 Tracked in Jira project **UNIH**: https://raqiouiadil852.atlassian.net/browse/UNIH
 
@@ -45,8 +53,23 @@ flowchart LR
 ```bash
 git clone https://github.com/ADILRAQ/UNIHUB.git
 cd UNIHUB
-# Create .env at the project root — see "Environment variables" below for the full list.
-# Defaults in that table work for local dev with docker compose.
+cat > .env <<'EOF'
+POSTGRES_USER=unihub
+POSTGRES_PASSWORD=unihub
+POSTGRES_DB=unihub
+MINIO_ROOT_USER=minioadmin
+MINIO_ROOT_PASSWORD=minioadmin
+JWT_SECRET=local-dev-secret-change-me-at-least-32-chars
+ADMIN_EMAIL=admin@unihub.local
+ADMIN_PASSWORD=changeme-admin
+ADMIN_FULL_NAME=Admin
+TEACHER_EMAIL=teacher@unihub.local
+TEACHER_PASSWORD=changeme-teacher
+TEACHER_FULL_NAME=Alice Martin
+STUDENT_EMAIL=student@unihub.local
+STUDENT_PASSWORD=changeme-student
+STUDENT_FULL_NAME=Bob Dupont
+EOF
 docker compose up --build     # starts api + postgres + minio + frontend
 ```
 
@@ -118,6 +141,14 @@ Optional, with defaults in `application.yml`:
 | `MINIO_ENDPOINT` / `MINIO_BUCKET` | `http://localhost:9000` / `unihub` | Object storage location and bucket (created on startup) |
 | `FRONTEND_URL` | — | **prod only:** allowed CORS origin (the deployed frontend URL) |
 | `VITE_API_URL` | `http://localhost:8080` | Frontend build-time API base URL |
+
+## Roles
+
+| Role | Can do |
+|------|--------|
+| Student | Read announcements, view calendar & recaps, download resources, submit homework, upload payment proofs |
+| Teacher | Everything an admin can, except deleting ADMIN accounts |
+| Admin | Full management: users, class groups, courses, announcements, payment validation |
 
 ## Features
 
