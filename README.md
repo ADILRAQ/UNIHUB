@@ -12,8 +12,6 @@ tuition payment tracking (3 installments with proof-image validation).
 
 **Live demo:** https://adaptable-luck-production-f94c.up.railway.app/login
 
-Tracked in Jira project **UNIH**: https://raqiouiadil852.atlassian.net/browse/UNIH
-
 ## Tech stack
 
 | Layer | Technology |
